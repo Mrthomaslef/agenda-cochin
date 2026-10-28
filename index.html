@@ -2312,11 +2312,11 @@
         return "";
       }
       if (ev.badgeLabel === "CS Anesth") return "";
-      if (lLow.includes("achard") || lLow.includes("tdm 1") || lLow.includes("scanner")) return "TDM 1";
-      if (lLow.includes("écho") || lLow.includes("echo")) return "Écho";
-      if (lLow.includes("geste") || lLow.includes("scopie")) return "Salle Gestes";
-      if (lLow.includes("irm")) return "IRM";
+      if (lLow.includes("irm") || tLow.includes("irm")) return "IRM";
+      if (lLow.includes("écho") || lLow.includes("echo") || tLow.includes("écho") || tLow.includes("echo")) return "Écho";
+      if (lLow.includes("geste") || lLow.includes("scopie") || tLow.includes("arthroscanner")) return "Salle Gestes";
       if (lLow.includes("allura")) return "Allura";
+      if (lLow.includes("achard") || lLow.includes("tdm 1") || lLow.includes("scanner")) return "TDM 1";
       if (lLow.includes("visio") || lLow.includes("distance") || lLow.includes("ollier / cs") || lLow.includes("albarran")) return "";
       return l;
     }
