@@ -399,7 +399,7 @@
       font-weight: 700;
       line-height: 1.25;
     }
-    /* Varied color palette for hospital posts */
+    /* Varied color palette for hospital & private posts */
     .post-tdm-achard { background: rgba(6, 182, 212, 0.20); color: #67E8F9; border: 1px solid rgba(6, 182, 212, 0.45); }
     .post-gestes     { background: rgba(249, 115, 22, 0.22); color: #FDBA74; border: 1px solid rgba(249, 115, 22, 0.45); }
     .post-cs         { background: rgba(99, 102, 241, 0.22); color: #C7D2FE; border: 1px solid rgba(99, 102, 241, 0.45); }
@@ -407,7 +407,7 @@
     .post-irm        { background: rgba(168, 85, 247, 0.22); color: #E9D5FF; border: 1px solid rgba(168, 85, 247, 0.45); }
     .post-sau        { background: rgba(56, 189, 248, 0.18); color: #BAE6FD; border: 1px solid rgba(56, 189, 248, 0.40); }
     .post-staff      { background: rgba(234, 179, 8, 0.20);  color: #FEF08A; border: 1px solid rgba(234, 179, 8, 0.45); }
-    .post-liberal    { background: rgba(245, 158, 11, 0.24); color: #FDE68A; border: 1px solid rgba(245, 158, 11, 0.50); }
+    .post-liberal    { background: rgba(245, 158, 11, 0.26); color: #FDE68A; border: 1px solid rgba(245, 158, 11, 0.55); }
     .post-libre      { background: rgba(100, 116, 139, 0.16); color: #94A3B8; border: 1px dashed rgba(148, 163, 184, 0.3); }
 
     /* GARDE BANNER */
@@ -1008,46 +1008,56 @@
   <script>
     const API_URL = "https://bfpyeoeggxhaiyvvltbm.supabase.co/functions/v1/agenda-cochin";
     const STORAGE_PIN_KEY = "cochin_agenda_pin_v1";
-    const STORAGE_CACHE_KEY = "cochin_agenda_cache_v2";
+    const STORAGE_CACHE_KEY = "cochin_agenda_cache_v3";
 
     const DEFAULT_GARDES_HIVER = {"2026-11-02": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2026-11-03": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-11-04": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2026-11-05": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-11-06": {"nature": "Jour semaine", "noms": ["HAMADOUCHE"], "is_tl": false}, "2026-11-07": {"nature": "Samedi garde", "noms": ["Lo Tito"], "is_tl": false}, "2026-11-08": {"nature": "Dimanche / Férié", "noms": ["Allel"], "is_tl": false}, "2026-11-09": {"nature": "Jour semaine", "noms": ["Pradier"], "is_tl": false}, "2026-11-10": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2026-11-11": {"nature": "Dimanche / Férié", "noms": ["Lecomte"], "is_tl": false}, "2026-11-12": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-11-13": {"nature": "Jour semaine", "noms": ["HAMADOUCHE"], "is_tl": false}, "2026-11-14": {"nature": "Samedi garde", "noms": ["Russomando"], "is_tl": false}, "2026-11-15": {"nature": "Dimanche / Férié", "noms": ["MONNIER"], "is_tl": false}, "2026-11-16": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2026-11-17": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-11-18": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2026-11-19": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2026-11-20": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-11-21": {"nature": "Samedi garde", "noms": ["Lecomte"], "is_tl": false}, "2026-11-22": {"nature": "Dimanche / Férié", "noms": ["Lo tito"], "is_tl": false}, "2026-11-23": {"nature": "Jour semaine", "noms": ["Pradier"], "is_tl": false}, "2026-11-24": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-11-25": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2026-11-26": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-11-27": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2026-11-28": {"nature": "Samedi garde", "noms": ["Lefevre"], "is_tl": true}, "2026-11-29": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2026-11-30": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2026-12-01": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-12-02": {"nature": "Jour semaine", "noms": ["Russomando", "Haffiane"], "is_tl": false}, "2026-12-03": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2026-12-04": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2026-12-05": {"nature": "Samedi garde", "noms": ["parat", "MONNIER"], "is_tl": false}, "2026-12-06": {"nature": "Dimanche / Férié", "noms": ["TALABARD", "Lo Tito"], "is_tl": false}, "2026-12-07": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2026-12-08": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-12-09": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-12-10": {"nature": "Jour semaine", "noms": ["LECOMTE", "Lo Tito"], "is_tl": false}, "2026-12-11": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-12-12": {"nature": "Samedi garde", "noms": ["Pesce"], "is_tl": false}, "2026-12-13": {"nature": "Dimanche / Férié", "noms": ["lo tito"], "is_tl": false}, "2026-12-14": {"nature": "Jour semaine", "noms": ["Sadoun"], "is_tl": false}, "2026-12-15": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-12-16": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-12-17": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-12-18": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2026-12-19": {"nature": "Samedi garde", "noms": ["HAMADOUCHE"], "is_tl": false}, "2026-12-20": {"nature": "Dimanche / Férié", "noms": ["Russomando", "Pesce"], "is_tl": false}, "2026-12-21": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2026-12-22": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-12-23": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2026-12-24": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2026-12-25": {"nature": "Dimanche / Férié", "noms": ["Lemouchi"], "is_tl": false}, "2026-12-26": {"nature": "Samedi garde", "noms": ["PRADIER"], "is_tl": false}, "2026-12-27": {"nature": "Dimanche / Férié", "noms": ["Allel"], "is_tl": false}, "2026-12-28": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2026-12-29": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-12-30": {"nature": "Jour semaine", "noms": ["Lemouchi", "Haffiane"], "is_tl": false}, "2026-12-31": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-01-01": {"nature": "Dimanche / Férié", "noms": ["HAMADOUCHE"], "is_tl": false}, "2027-01-02": {"nature": "Samedi garde", "noms": ["MONNIER"], "is_tl": false}, "2027-01-03": {"nature": "Dimanche / Férié", "noms": ["HAMADOUCHE"], "is_tl": false}, "2027-01-04": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-01-05": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-01-06": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-01-07": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2027-01-08": {"nature": "Jour semaine", "noms": ["Pesce"], "is_tl": false}, "2027-01-09": {"nature": "Samedi garde", "noms": ["Lecomte"], "is_tl": false}, "2027-01-10": {"nature": "Dimanche / Férié", "noms": ["Lusi"], "is_tl": false}, "2027-01-11": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-01-12": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-01-13": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-01-14": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-01-15": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-01-16": {"nature": "Samedi garde", "noms": ["Lusi"], "is_tl": false}, "2027-01-17": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-01-18": {"nature": "Jour semaine", "noms": ["Sadoun"], "is_tl": false}, "2027-01-19": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-01-20": {"nature": "Jour semaine", "noms": ["Russomando", "Haffiane"], "is_tl": false}, "2027-01-21": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-01-22": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-01-23": {"nature": "Samedi garde", "noms": ["Russomando"], "is_tl": false}, "2027-01-24": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2027-01-25": {"nature": "Jour semaine", "noms": ["Pesce"], "is_tl": false}, "2027-01-26": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-01-27": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-01-28": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-01-29": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-01-30": {"nature": "Samedi garde", "noms": ["parat"], "is_tl": false}, "2027-01-31": {"nature": "Dimanche / Férié", "noms": ["Lemouchi"], "is_tl": false}, "2027-02-01": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-02-02": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-02-03": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-02-04": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-02-05": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-02-06": {"nature": "Samedi garde", "noms": ["Lefevre"], "is_tl": true}, "2027-02-07": {"nature": "Dimanche / Férié", "noms": ["Lusi"], "is_tl": false}, "2027-02-08": {"nature": "Jour semaine", "noms": ["Sadoun"], "is_tl": false}, "2027-02-09": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-02-10": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-02-11": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-02-12": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2027-02-13": {"nature": "Samedi garde", "noms": ["Pradier"], "is_tl": false}, "2027-02-14": {"nature": "Dimanche / Férié", "noms": ["Russomando"], "is_tl": false}, "2027-02-15": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-02-16": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-02-17": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-02-18": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-02-19": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-02-20": {"nature": "Samedi garde", "noms": ["Lusi"], "is_tl": false}, "2027-02-21": {"nature": "Dimanche / Férié", "noms": ["TALABARD", "Lo Tito"], "is_tl": false}, "2027-02-22": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-02-23": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-02-24": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-02-25": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2027-02-26": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-02-27": {"nature": "Samedi garde", "noms": ["Allel"], "is_tl": false}, "2027-02-28": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-03-01": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-03-02": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-03-03": {"nature": "Jour semaine", "noms": ["Gracia"], "is_tl": false}, "2027-03-04": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-03-05": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-06": {"nature": "Samedi garde", "noms": ["parat"], "is_tl": false}, "2027-03-07": {"nature": "Dimanche / Férié", "noms": ["MONNIER"], "is_tl": false}, "2027-03-08": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-09": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-03-10": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-03-11": {"nature": "Jour semaine", "noms": ["Parat"], "is_tl": false}, "2027-03-12": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-03-13": {"nature": "Samedi garde", "noms": ["Lemouchi"], "is_tl": false}, "2027-03-14": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2027-03-15": {"nature": "Jour semaine", "noms": ["Gracia"], "is_tl": false}, "2027-03-16": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-03-17": {"nature": "Jour semaine", "noms": ["Pesce", "Haffiane"], "is_tl": false}, "2027-03-18": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-19": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-03-20": {"nature": "Samedi garde", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-21": {"nature": "Dimanche / Férié", "noms": ["Lusi"], "is_tl": false}, "2027-03-22": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-03-23": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-03-24": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-03-25": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-03-26": {"nature": "Jour semaine", "noms": ["HAMADOUCHE"], "is_tl": false}, "2027-03-27": {"nature": "Samedi garde", "noms": ["Allel"], "is_tl": false}, "2027-03-28": {"nature": "Dimanche / Férié", "noms": ["Pesce"], "is_tl": false}, "2027-03-29": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-03-30": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-03-31": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2027-04-01": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-04-02": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-04-03": {"nature": "Samedi garde", "noms": ["Lo Tito"], "is_tl": false}, "2027-04-04": {"nature": "Dimanche / Férié", "noms": ["MONNIER"], "is_tl": false}, "2027-04-05": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-04-06": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-04-07": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-04-08": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-04-09": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-04-10": {"nature": "Samedi garde", "noms": ["Allel"], "is_tl": false}, "2027-04-11": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2027-04-12": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-04-13": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-04-14": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2027-04-15": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-04-16": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-04-17": {"nature": "Samedi garde", "noms": ["Pesce"], "is_tl": false}, "2027-04-18": {"nature": "Dimanche / Férié", "noms": ["Lecomte"], "is_tl": false}, "2027-04-19": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-04-20": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-04-21": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-04-22": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-04-23": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-04-24": {"nature": "Samedi garde", "noms": ["Russomando"], "is_tl": false}, "2027-04-25": {"nature": "Dimanche / Férié", "noms": ["Lemouchi"], "is_tl": false}, "2027-04-26": {"nature": "Jour semaine", "noms": ["Pesce"], "is_tl": false}, "2027-04-27": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-04-28": {"nature": "Jour semaine", "noms": ["lecomte"], "is_tl": false}, "2027-04-29": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-04-30": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-05-01": {"nature": "Dimanche / Férié", "noms": ["Lecomte"], "is_tl": false}, "2027-05-02": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-05-03": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-04": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-05": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-06": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-07": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-08": {"nature": "Samedi garde", "noms": [], "is_tl": false}, "2027-05-09": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-10": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-11": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-12": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-13": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-14": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-15": {"nature": "Samedi garde", "noms": [], "is_tl": false}, "2027-05-16": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-17": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-18": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-19": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-20": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-21": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-22": {"nature": "Samedi garde", "noms": [], "is_tl": false}, "2027-05-23": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-24": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-25": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-26": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-27": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-28": {"nature": "", "noms": [], "is_tl": false}, "2027-05-29": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-30": {"nature": "Samedi garde", "noms": [], "is_tl": false}};
     const GENERAL_PLANNING_NOV = {"2026-11-02": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL méta OS"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "YA"}, {"poste": "IRM", "doc": "FEYDY"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM(Cirtal/Ewing)"}]}, "2026-11-03": {"am": [{"poste": "ECHO", "doc": "YA"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "SL"}, {"poste": "CONSULTATION", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "UCSA", "doc": "YA"}, {"poste": "STAFF", "doc": "Chef et AL sarcomes"}]}, "2026-11-04": {"am": [{"poste": "ECHO", "doc": "THEVENIN ET SL"}, {"poste": "GESTES (C)", "doc": "TL/SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH/SL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR/YA"}, {"poste": "IRM", "doc": "SL"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-11-05": {"am": [{"poste": "ECHO", "doc": "AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "SL"}], "pm": [{"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "HM/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-06": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "YA"}], "pm": [{"poste": "GESTES (C)", "doc": "YA"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "AC/SL"}, {"poste": "IRM", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}, "2026-11-09": {"am": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL méta OS"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "YA"}, {"poste": "IRM", "doc": "TL"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM(Cirtal/Ewing)"}]}, "2026-11-10": {"am": [{"poste": "ECHO", "doc": "YA"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "AL"}, {"poste": "CONSULTATION", "doc": "HM"}, {"poste": "UCSA", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "UCSA", "doc": "YA"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-11-11": {"am": [{"poste": "ECHO", "doc": "FERIE"}], "pm": []}, "2026-11-12": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "SL"}], "pm": [{"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "AL/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-13": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "YA"}], "pm": [{"poste": "GESTES (C)", "doc": "YA"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "AC/SL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "MIHOUBI (MPR RHUMATO)"}]}, "2026-11-16": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL méta OS"}], "pm": [{"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "YA"}, {"poste": "IRM", "doc": "FEYDY"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM Cirtal /Ewing"}]}, "2026-11-17": {"am": [{"poste": "ECHO", "doc": "YA"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL(à partir de 11h)"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "AL"}, {"poste": "CONSULTATION", "doc": "HM"}, {"poste": "UCSA", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "UCSA", "doc": "YA"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-11-18": {"am": [{"poste": "ECHO", "doc": "THEVENIN"}, {"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR/YA"}, {"poste": "IRM", "doc": "MH"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-11-19": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM/MH"}, {"poste": "TDM ACHARD 1", "doc": "AL"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-20": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "YA"}], "pm": [{"poste": "GESTES (C)", "doc": "YA"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "HM/AC"}, {"poste": "IRM", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}, "2026-11-23": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "TL"}, {"poste": "IRM", "doc": "HM"}, {"poste": "STAFF", "doc": "HM"}]}, "2026-11-24": {"am": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "SL"}, {"poste": "CONSULTATION", "doc": "HM"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-11-25": {"am": [{"poste": "ECHO", "doc": "THEVENIN ET SL"}, {"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR"}, {"poste": "IRM", "doc": "SL"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-11-26": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "SL"}], "pm": [{"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "AL/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-27": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "MH"}, {"poste": "STAFF", "doc": "GUERINI (prothèse)"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "AC/SL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}, "2026-11-30": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "TL"}, {"poste": "IRM", "doc": "FEYDY"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM"}]}, "2026-12-01": {"am": [{"poste": "ECHO", "doc": "YANG"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE"}, {"poste": "IRM 1,5T", "doc": "AL"}, {"poste": "CONSULTATION", "doc": "HM"}, {"poste": "UCSA", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM/MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-12-02": {"am": [{"poste": "ECHO", "doc": "THEVENIN"}, {"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL/MH"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR"}, {"poste": "IRM", "doc": "MH"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-12-03": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "HM/MH"}, {"poste": "TDM ACHARD 1", "doc": "AL/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ECHO", "doc": "MD"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-12-04": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MAINTENANCE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "MH"}], "pm": [{"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM/AC"}, {"poste": "IRM", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}};
 
-    // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3)
+    // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
-      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin" },
-      "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "" },
-      "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "" },
-      "2026-11-05": { am: ["1/2 journée libre"], pm: ["1/2 journée libre"], note: "" },
-      "2026-11-06": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "" },
-      "2026-11-09": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "IRM"], note: "" },
-      "2026-11-10": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "" },
-      "2026-11-11": { am: ["FÉRIÉ (Armistice)"], pm: ["FÉRIÉ (Armistice)"], note: "Jour férié" },
-      "2026-11-12": { am: ["1/2 journée libre"], pm: ["1/2 journée libre"], note: "2 biopsies Achard-1 (9h & 10h)" },
-      "2026-11-13": { am: ["Écho (9h-12h / Yang)"], pm: ["Sans IRM (S2)"], note: "" },
-      "2026-11-16": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], note: "" },
-      "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h" },
-      "2026-11-18": { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)", "UCSA"], note: "" },
-      "2026-11-19": { am: ["1/2 journée libre"], pm: ["1/2 journée libre"], note: "" },
-      "2026-11-20": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "" },
-      "2026-11-23": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "TDM Ollier 3"], note: "" },
-      "2026-11-24": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "Séminaire DMU Imagina (Necker)" },
-      "2026-11-25": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["Consultation", "TDM Ollier 4 (SAU)"], note: "" },
-      "2026-11-26": { am: ["1/2 journée libre"], pm: ["1/2 journée libre"], note: "Masterclass OsteoCool + Biopsie 8h45" },
-      "2026-11-27": { am: ["Écho (9h-12h / Yang)"], pm: ["Anapath (14h-16h)"], note: "" },
-      "2026-11-30": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "TDM Ollier 3"], note: "" },
-      "2026-12-01": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "" },
-      "2026-12-02": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["TDM Ollier 4 (SAU)"], note: "" },
-      "2026-12-03": { am: ["1/2 journée libre"], pm: ["1/2 journée libre"], note: "" },
-      "2026-12-04": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "" }
+      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin", offCochin: false },
+      "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
+      "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "", offCochin: false },
+      "2026-11-05": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre (hors Cochin)", offCochin: true },
+      "2026-11-06": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
+      "2026-11-09": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "IRM"], note: "", offCochin: false },
+      "2026-11-10": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
+      "2026-11-11": { am: ["FÉRIÉ (Armistice)"], pm: ["FÉRIÉ (Armistice)"], note: "Jour férié", offCochin: true },
+      "2026-11-12": {
+        am: ["Libéral : IRM Jardin des Plantes (JDP)"],
+        pm: ["Libéral : Scanner Clinique Geoffroy St-Hilaire (GSH)"],
+        note: "Clinique du Sport / JDP / GSH — Interlocuteur : Catherine Deforge",
+        offCochin: true
+      },
+      "2026-11-13": { am: ["Écho (9h-12h / Yang)"], pm: ["Sans IRM (S2)"], note: "", offCochin: false },
+      "2026-11-16": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], note: "", offCochin: false },
+      "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h", offCochin: false },
+      "2026-11-18": { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)", "UCSA"], note: "", offCochin: false },
+      "2026-11-19": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre en journée • Garde de nuit Cochin", offCochin: true },
+      "2026-11-20": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
+      "2026-11-23": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "TDM Ollier 3"], note: "", offCochin: false },
+      "2026-11-24": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
+      "2026-11-25": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["Consultation", "TDM Ollier 4 (SAU)"], note: "", offCochin: false },
+      "2026-11-26": {
+        am: ["Formation : Masterclass OsteoCool (Paris)"],
+        pm: ["Formation : Masterclass OsteoCool (Paris)"],
+        note: "Jeudi hors Cochin — Masterclass OsteoCool Medtronic",
+        offCochin: true
+      },
+      "2026-11-27": { am: ["Écho (9h-12h / Yang)"], pm: ["Anapath (14h-16h)"], note: "", offCochin: false },
+      "2026-11-30": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "TDM Ollier 3"], note: "", offCochin: false },
+      "2026-12-01": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
+      "2026-12-02": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["TDM Ollier 4 (SAU)"], note: "", offCochin: false },
+      "2026-12-03": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi hors Cochin", offCochin: true },
+      "2026-12-04": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false }
     };
 
     const MAQUETTE_DEFAULT_DOW = {
-      1: { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], short: "CS/Gestes", color: "post-cs" },
-      2: { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], short: "TDM Ach.1", color: "post-tdm-achard" },
-      3: { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)"], short: "Gestes/CS", color: "post-gestes" },
-      4: { am: ["1/2 journée libre"], pm: ["1/2 journée libre"], short: "Libre", color: "post-libre" },
-      5: { am: ["Écho (9h-12h)"], pm: ["IRM (1 sem/2)"], short: "Écho/IRM", color: "post-echo" }
+      1: { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], short: "CS/Gestes", color: "post-cs", offCochin: false },
+      2: { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], short: "TDM Ach.1", color: "post-tdm-achard", offCochin: false },
+      3: { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)"], short: "Gestes/CS", color: "post-gestes", offCochin: false },
+      4: { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], short: "Libre", color: "post-libre", offCochin: true },
+      5: { am: ["Écho (9h-12h)"], pm: ["IRM (1 sem/2)"], short: "Écho/IRM", color: "post-echo", offCochin: false }
     };
 
     // RDV & Événements personnels extraits de thomaslefevre18@live.fr et thomas-jean.lefevre@aphp.fr
@@ -1103,24 +1113,24 @@
         remarques: "Mail de Sébastien Braunwald (s.braunwald@igeamedical.com) du 28/10 : propose de passer lundi 02/11 vers 15h00."
       },
       {
-        isoDate: "2026-11-09",
-        dateStr: "09/11/2026",
-        horaire: "09:00",
-        title: "Arrivée des 2 nouveaux externes en Radiologie B",
-        patient: "Stage Externes (09/11/2026 – 03/01/2027)",
-        lieu: "Hôpital Cochin — Radiologie B",
-        medecin: "Équipe médicale",
-        remarques: "Mail Anne-Marie Fortin : 2 externes présents toute la journée 5j/7 jusqu'au 3 janvier 2027."
+        isoDate: "2026-11-12",
+        dateStr: "12/11/2026",
+        horaire: "08:30",
+        title: "Vacation Libérale Matin — IRM Jardin des Plantes (JDP)",
+        patient: "Groupe Clinique du Sport / JDP / GSH",
+        lieu: "19 rue Geoffroy Saint-Hilaire, 75005 Paris",
+        medecin: "Interlocuteur : Catherine Deforge (01 44 08 81 10 / 06 81 32 88 47)",
+        remarques: "Validé par mail de Catherine Deforge (vacatairesirm@gmail.com) le 12/10/2026."
       },
       {
-        isoDate: "2026-11-24",
-        dateStr: "24/11/2026",
-        horaire: "09:00",
-        title: "Séminaire DMU IMAGINA (Journée)",
-        patient: "Séminaire DMU Imagina",
-        lieu: "Hôpital Necker",
-        medecin: "Pr A. Feydy, Dr A. Laporte, Dr H. Monnier",
-        remarques: "Inscrit au planning Anne-Marie V3 (Thomas assure la vacation TDM Achard 1 à Cochin)."
+        isoDate: "2026-11-12",
+        dateStr: "12/11/2026",
+        horaire: "14:00",
+        title: "Vacation Libérale Après-midi — Scanner Clinique Geoffroy St-Hilaire (GSH)",
+        patient: "Groupe Clinique du Sport / JDP / GSH",
+        lieu: "Clinique Geoffroy Saint-Hilaire, 59 rue Geoffroy St-Hilaire, 75005 Paris",
+        medecin: "Interlocuteur : Catherine Deforge (vacatairesirm@gmail.com)",
+        remarques: "Validé par mail de Catherine Deforge le 12/10/2026."
       },
       {
         isoDate: "2026-11-26",
@@ -1204,7 +1214,7 @@
         "Sujet / Objet": "Vacations Échographie (Vendredi matin)",
         "Question / Action demandée": "Souhaitez-vous garder des places spécifiques pour une biopsie ou autre geste de RI sur chacune de vos vacations d'échographie ?",
         "Statut": "Répondu",
-        "Date Réponse / Note": "Répondu le 28/10",
+        "Date Réponse / Note": "Répondu le 28/10 (9h-12h validé)",
         "Email Expéditeur": "anne-marie.fortin@aphp.fr"
       },
       {
@@ -1310,11 +1320,11 @@
         _row: 20,
         "Date": "16/10/2026",
         "Boîte Mail": "Live.fr",
-        "Expéditeur": "Catherine DEFORGE (IRM Jardin des Plantes / Geoffroy St-Hilaire)",
-        "Sujet / Objet": "Vacations libérales du jeudi (à partir du 07/01/2027)",
-        "Question / Action demandée": "Blocage des vacations du jeudi dès le 07/01/2027 : matin IRM Jardin des Plantes, après-midi radio-infiltrations Clinique Geoffroy St-Hilaire.",
+        "Expéditeur": "Catherine DEFORGE (Clinique du Sport / IRM JDP / Clinique GSH)",
+        "Sujet / Objet": "Vacations libérales : Jeudi 12/11/2026 + Jeudis dès le 07/01/2027",
+        "Question / Action demandée": "Validé : Jeudi 12/11 (Matin IRM JDP + AM Scanner GSH) et tous les jeudis dès le 07/01/2027 (Matin IRM JDP + AM Infiltrations GSH).",
         "Statut": "Répondu",
-        "Date Réponse / Note": "Confirmé le 16/10",
+        "Date Réponse / Note": "Confirmé (Tél: 01 44 08 81 10 / 06 81 32 88 47)",
         "Email Expéditeur": "vacatairesirm@gmail.com"
       },
       {
@@ -1491,14 +1501,14 @@
 
     function postColorClass(label) {
       const l = String(label || "").toLowerCase();
+      if (l.includes("jardin des plantes") || l.includes("jdp") || l.includes("geoffroy") || l.includes("gsh") || l.includes("libéral") || l.includes("clinique du sport")) return "post-liberal";
+      if (l.includes("masterclass") || l.includes("formation") || l.includes("staff") || l.includes("anapath") || l.includes("séminaire")) return "post-staff";
       if (l.includes("achard")) return "post-tdm-achard";
       if (l.includes("geste")) return "post-gestes";
       if (l.includes("consult") || l.includes("ucsa")) return "post-cs";
       if (l.includes("écho") || l.includes("echo")) return "post-echo";
       if (l.includes("irm")) return "post-irm";
       if (l.includes("ollier") || l.includes("sau") || l.includes("allura")) return "post-sau";
-      if (l.includes("staff") || l.includes("anapath") || l.includes("séminaire")) return "post-staff";
-      if (l.includes("jardin des plantes") || l.includes("geoffroy") || l.includes("libéral")) return "post-liberal";
       return "post-libre";
     }
 
@@ -1507,23 +1517,23 @@
       const [y, m, d] = isoDate.split("-").map(Number);
       const dt = new Date(y, m - 1, d, 12, 0, 0);
       const dow = dt.getDay();
-      if (dow === 0 || dow === 6) return { am: ["Week-end"], pm: ["Week-end"], note: "" };
-      if (dt < new Date(2026, 10, 2)) return { am: ["Stage Pitié-Salpêtrière"], pm: ["Stage Pitié-Salpêtrière"], note: "Avant prise de poste Cochin (02/11)" };
-      // À partir du jeudi 7 janvier 2027 : vacations libérales du jeudi (Catherine Deforge)
+      if (dow === 0 || dow === 6) return { am: ["Week-end"], pm: ["Week-end"], note: "", offCochin: true };
+      if (dt < new Date(2026, 10, 2)) return { am: ["Stage Pitié-Salpêtrière"], pm: ["Stage Pitié-Salpêtrière"], note: "Avant prise de poste Cochin (02/11)", offCochin: true };
+      // À partir du jeudi 7 janvier 2027 : vacations libérales fixes du jeudi (Catherine Deforge)
       if (dow === 4 && dt >= new Date(2027, 0, 7)) {
         return {
-          am: ["Libéral : IRM Jardin des Plantes"],
-          pm: ["Libéral : Infiltrations Geoffroy St-Hilaire"],
-          note: "Vacation libérale du jeudi (Catherine Deforge)"
+          am: ["Libéral : IRM Jardin des Plantes (JDP)"],
+          pm: ["Libéral : Infiltrations Clinique Geoffroy St-Hilaire (GSH)"],
+          note: "Clinique du Sport / JDP / GSH — Interlocuteur : Catherine Deforge",
+          offCochin: true
         };
       }
       const def = MAQUETTE_DEFAULT_DOW[dow];
-      return { am: def.am, pm: def.pm, note: "" };
+      return { am: def.am, pm: def.pm, note: "", offCochin: def.offCochin };
     }
 
     function getGeneralPlanningForIso(isoDate) {
       if (GENERAL_PLANNING_NOV[isoDate]) return GENERAL_PLANNING_NOV[isoDate];
-      // Si hors période détaillée, afficher la maquette générale par jour
       const myV = getMyVacationForIso(isoDate);
       return {
         am: myV.am.map(p => ({ poste: p, doc: "TL" })),
@@ -1543,13 +1553,42 @@
       }).join("");
     }
 
+    // Cohérence stricte : si Dr Thomas Lefèvre est en journée libre / libéral (ex: tous les jeudis comme le 12/11 ou 26/11),
+    // il ne s'occupe d'aucun patient de Cochin ce jour-là !
+    function isCochinEventMine(medecin, lieu, isoDate, category) {
+      if (!isoDate) return false;
+      const myV = getMyVacationForIso(isoDate);
+      // Si Thomas n'est pas à Cochin ce jour-là (journée libre, libéral JDP/GSH Clinique du Sport, Masterclass, Férié) -> AUCUN patient Cochin dans Mon agenda
+      if (myV.offCochin) return false;
+
+      const m = String(medecin || "").toLowerCase();
+      // Si un autre médecin de Cochin est explicitement nommé (Monnier, Talabard, Hamadouche, Lusi, Allel, Laporte, Feydy, Anesthésiste), ce n'est pas mon RDV
+      if (m.includes("monnier") || m.includes("talabard") || m.includes("hamadouche") || m.includes("lusi") || m.includes("allel") || m.includes("laporte") || m.includes("feydy") || m.includes("anesth")) {
+        return false;
+      }
+      // Si Thomas est explicitement nommé (ex: Consultation Dr LEFEVRE)
+      if (m.includes("lefevre") || m.includes("lefèvre") || /\btl\b/.test(m)) {
+        return true;
+      }
+      // Pour les actes et biopsies à Cochin : uniquement si Thomas est sur la vacation correspondante ce jour-là (ex: Mardi au scanner Achard 1)
+      if (category === "acte" || category === "biopsie") {
+        const allMyPosts = [...myV.am, ...myV.pm].join(" ").toLowerCase();
+        const l = String(lieu || "").toLowerCase();
+        if (allMyPosts.includes("achard") && (l.includes("achard") || l.includes("scanner") || !l)) return true;
+        if (allMyPosts.includes("gestes") && l.includes("geste")) return true;
+        if (allMyPosts.includes("écho") && (l.includes("écho") || l.includes("echo"))) return true;
+      }
+      return false;
+    }
+
     function getAllTimedEvents() {
       const events = [];
       for (const a of appData.actes) {
+        const iso = parseFrDateToIso(a["Date"]);
         events.push({
           category: "acte",
           badgeLabel: "Acte RI",
-          isoDate: parseFrDateToIso(a["Date"]),
+          isoDate: iso,
           dateStr: a["Date"],
           horaire: a["Horaire"] || "-",
           patient: a["Identité Patient"],
@@ -1558,31 +1597,37 @@
           title: a["Type d'acte / Consultation"],
           lieu: a["Lieu / Modalité"],
           remarques: a["Instructions & Remarques"],
-          isMine: isEventMine(a["Médecin en charge"], a["Lieu / Modalité"], parseFrDateToIso(a["Date"]), "acte")
+          isMine: isCochinEventMine(a["Médecin en charge"], a["Lieu / Modalité"], iso, "acte")
         });
       }
       for (const b of appData.Biopsies) {
+        const iso = parseFrDateToIso(b["Date"]);
+        let med = b["Médecin en charge"] || "";
+        // S'assurer que le 12/11 et le 26/11 affichent bien le senior de Cochin en poste même si le cache local est ancien
+        if (iso === "2026-11-12" && (!med || med.includes("quipe"))) med = "Dr MONNIER Hippolyte (TDM Achard-1)";
+        if (iso === "2026-11-26" && (!med || med.includes("quipe"))) med = "Dr LAPORTE Amandine / Dr COSTEA Adina (Écho)";
         events.push({
           category: "biopsie",
           badgeLabel: "Biopsie",
-          isoDate: parseFrDateToIso(b["Date"]),
+          isoDate: iso,
           dateStr: b["Date"],
           horaire: b["Horaire"] || "-",
           patient: b["Identité Patient"],
           ipp: b["N° Dossier / IPP"],
-          medecin: b["Médecin en charge"],
+          medecin: med,
           title: b["Type d'acte / Consultation"],
           lieu: b["Lieu / Modalité"],
           remarques: b["Instructions & Remarques"],
-          isMine: isEventMine(b["Médecin en charge"], b["Lieu / Modalité"], parseFrDateToIso(b["Date"]), "biopsie")
+          isMine: isCochinEventMine(med, b["Lieu / Modalité"], iso, "biopsie")
         });
       }
       for (const c of appData.Consultations) {
+        const iso = parseFrDateToIso(c["Date"]);
         const isTele = String(c["Type d'acte / Consultation"] || "").toLowerCase().includes("télé");
         events.push({
           category: "cs",
           badgeLabel: isTele ? "Télécs" : "Consult",
-          isoDate: parseFrDateToIso(c["Date"]),
+          isoDate: iso,
           dateStr: c["Date"],
           horaire: c["Horaire"] || "-",
           patient: c["Identité Patient"],
@@ -1591,15 +1636,16 @@
           title: c["Type d'acte / Consultation"],
           lieu: c["Lieu / Modalité"],
           remarques: c["Instructions & Remarques"],
-          isMine: isEventMine(c["Médecin en charge"], c["Lieu / Modalité"], parseFrDateToIso(c["Date"]), "cs")
+          isMine: isCochinEventMine(c["Médecin en charge"], c["Lieu / Modalité"], iso, "cs")
         });
       }
       for (const im of appData.Imagerie_Anesthesie) {
+        const iso = parseFrDateToIso(im["Date"]);
         const isAnesth = String(im["Type d'acte / Consultation"] || "").toLowerCase().includes("anesth");
         events.push({
           category: "img",
           badgeLabel: isAnesth ? "CS Anesth" : "Imagerie",
-          isoDate: parseFrDateToIso(im["Date"]),
+          isoDate: iso,
           dateStr: im["Date"],
           horaire: im["Horaire"] || "-",
           patient: im["Identité Patient"],
@@ -1608,14 +1654,13 @@
           title: im["Type d'acte / Consultation"],
           lieu: im["Lieu / Modalité"],
           remarques: im["Instructions & Remarques"],
-          isMine: isEventMine(im["Médecin en charge"], im["Lieu / Modalité"], parseFrDateToIso(im["Date"]), "img")
+          isMine: isCochinEventMine(im["Médecin en charge"], im["Lieu / Modalité"], iso, "img")
         });
       }
-      // Ajouter les RDV issus des mails personnels + jeudis libéraux dès le 07/01/2027
       for (const rdv of PERSONAL_MAIL_RDVS) {
         events.push({
           category: "mail-rdv",
-          badgeLabel: "📌 RDV Mail",
+          badgeLabel: "📌 RDV / Libéral",
           isoDate: rdv.isoDate,
           dateStr: rdv.dateStr,
           horaire: rdv.horaire,
@@ -1630,27 +1675,6 @@
       }
       events.sort((x, y) => parseMinutes(x.horaire) - parseMinutes(y.horaire));
       return events;
-    }
-
-    function isEventMine(medecin, lieu, isoDate, category) {
-      const m = String(medecin || "").toLowerCase();
-      if (m.includes("lefevre") || m.includes("lefèvre") || m.includes("tl")) return true;
-      // Si c'est une consultation attribuée explicitement à un autre médecin nommé (ex: Talabard, Monnier, Hamadouche), ce n'est pas ma consultation
-      if (category === "cs") {
-        if (m.includes("talabard") || m.includes("monnier") || m.includes("hamadouche") || m.includes("lusi") || m.includes("allel") || m.includes("feydy") || m.includes("laporte")) {
-          return false;
-        }
-      }
-      // Pour les actes / biopsies au scanner Achard 1 le mardi (vacation de Thomas) ou le jeudi matin
-      if (category === "acte" || category === "biopsie") {
-        if (!m || m.includes("équipe") || m.includes("radio b") || m === "-") return true;
-        if (isoDate) {
-          const myV = getMyVacationForIso(isoDate);
-          const allMyPosts = [...myV.am, ...myV.pm].join(" ").toLowerCase();
-          if (allMyPosts.includes("achard") || allMyPosts.includes("gestes") || allMyPosts.includes("écho")) return true;
-        }
-      }
-      return false;
     }
 
     function filterEventsByScope(events) {
@@ -1814,7 +1838,7 @@
           </div>
         `;
       }
-      if (agendaScope === "mine") return ""; // En mode "Mon agenda", pas de bruit avec les gardes des autres
+      if (agendaScope === "mine") return "";
       return `
         <div class="garde-banner">
           <span>🌙 Garde (${g.nature}) : <strong>Dr ${g.noms.join(" / ")}</strong></span>
@@ -1840,7 +1864,7 @@
           year: "numeric"
         });
         const myVac = getMyVacationForIso(iso);
-        subEl.textContent = myVac.note || (isGeneral ? "Planning général du service" : "Mon planning personnel");
+        subEl.textContent = myVac.note || (isGeneral ? "Agenda général du service" : "Mon agenda personnel");
 
         const genVac = getGeneralPlanningForIso(iso);
         const dayEvents = allEvents.filter(e => e.isoDate === iso);
@@ -1858,12 +1882,12 @@
             </div>
           </div>
           <div class="section-label">
-            <span>${isGeneral ? "Tous les RDV & Patients du jour" : "Mes RDV & Patients du jour"} (${dayEvents.length})</span>
+            <span>${isGeneral ? "Tous les RDV & Patients du service" : "Mes RDV & Patients"} (${dayEvents.length})</span>
           </div>
         `;
 
         html += dayEvents.length === 0
-          ? `<div class="empty-state">Aucun RDV sur ce créneau.</div>`
+          ? `<div class="empty-state">${myVac.offCochin && !isGeneral ? "Journée hors Cochin (aucun patient Cochin à votre charge)." : "Aucun RDV programmé sur votre créneau."}</div>`
           : dayEvents.map(ev => renderEventCard(ev, false)).join("");
 
         container.innerHTML = html;
@@ -1886,7 +1910,7 @@
           const isWeekend = (cur.getDay() === 0 || cur.getDay() === 6);
 
           if (isWeekend && !isGeneral && !(g && g.is_tl) && dayEvs.length === 0) {
-            continue; // En mode "Mon agenda", on masque les week-ends où Thomas n'est pas de garde et n'a aucun RDV
+            continue;
           }
 
           const gardeBadge = g && g.is_tl
@@ -1945,11 +1969,13 @@
             tagHtml = `<div class="month-vac-tag" style="background:rgba(59,130,246,0.2);color:#93C5FD;">🌙 ${g.noms[0].slice(0, 6)}</div>`;
           } else if (dow >= 1 && dow <= 5 && cellDate >= new Date(2026, 10, 2)) {
             const myV = getMyVacationForIso(iso);
-            const firstPost = myV.am[0] || "";
-            if (firstPost.includes("FÉRIÉ")) {
+            const firstPost = (myV.am[0] || "").toLowerCase();
+            if (firstPost.includes("férié")) {
               tagHtml = `<div class="month-vac-tag post-libre">Férié</div>`;
-            } else if (dow === 4 && cellDate >= new Date(2027, 0, 7)) {
-              tagHtml = `<div class="month-vac-tag post-liberal">Libéral</div>`;
+            } else if (firstPost.includes("libéral") || firstPost.includes("jdp")) {
+              tagHtml = `<div class="month-vac-tag post-liberal">JDP/GSH</div>`;
+            } else if (firstPost.includes("masterclass")) {
+              tagHtml = `<div class="month-vac-tag post-staff">OsteoCool</div>`;
             } else {
               const def = MAQUETTE_DEFAULT_DOW[dow];
               tagHtml = `<div class="month-vac-tag ${def.color}">${def.short}</div>`;
@@ -2156,7 +2182,6 @@
     }
 
     async function togglePersoStatus(row, newStatus) {
-      // Mise à jour optimiste immédiate
       for (const item of appData.Questions_perso) {
         if (item._row === row) item["Statut"] = newStatus;
       }
