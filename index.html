@@ -671,7 +671,89 @@
       border-color: var(--primary);
     }
 
-    /* BOTTOM NAV (6 TABS) */
+    /* INTERACTIVE WEEKLY STRIP & WEEK SUMMARY */
+    .week-strip-bar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .ws-day {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 5px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ws-day.active {
+      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.14);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .ws-day.is-garde {
+      border-color: #EF4444;
+      background: rgba(239, 68, 68, 0.14);
+    }
+    .ws-dow {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .ws-num {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .ws-vac {
+      font-size: 8px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 4px;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ws-cnt {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .week-summary-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      border-radius: 12px;
+      padding: 9px 12px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+    }
+    .week-group-header {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      border-radius: 9px;
+      padding: 6px 11px;
+      margin: 12px 0 7px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #E2E8F0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* BOTTOM NAV (5 TABS) */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -681,8 +763,8 @@
       backdrop-filter: blur(16px);
       border-top: 1px solid var(--border);
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      padding: 5px 2px calc(5px + var(--safe-bottom));
+      grid-template-columns: repeat(5, 1fr);
+      padding: 5px 4px calc(5px + var(--safe-bottom));
       z-index: 200;
     }
     .nav-item {
@@ -852,15 +934,15 @@
 
   <!-- KPI STRIP -->
   <div class="kpi-strip">
-    <div class="kpi-box" onclick="switchTab('actes'); setActesFilter('acte')">
+    <div class="kpi-box" onclick="openActiviteView('actes', 'acte')">
       <div class="kpi-val" style="color:var(--acte)" id="kpi-actes">-</div>
       <div class="kpi-lbl">Actes</div>
     </div>
-    <div class="kpi-box" onclick="switchTab('actes'); setActesFilter('biopsie')">
+    <div class="kpi-box" onclick="openActiviteView('actes', 'biopsie')">
       <div class="kpi-val" style="color:var(--biopsie)" id="kpi-biopsies">-</div>
       <div class="kpi-lbl">Biopsies</div>
     </div>
-    <div class="kpi-box" onclick="switchTab('cs')">
+    <div class="kpi-box" onclick="openActiviteView('cs', 'all')">
       <div class="kpi-val" style="color:var(--cs)" id="kpi-cs">-</div>
       <div class="kpi-lbl">Consult.</div>
     </div>
@@ -876,12 +958,12 @@
 
   <main class="main-content">
 
-    <!-- TAB 1 : AGENDA -->
+    <!-- TAB 1 : AGENDA & ORGANISATION DE LA SEMAINE -->
     <section id="tab-agenda">
       <div class="agenda-controls">
         <!-- Sélecteur Mon agenda vs Agenda général -->
         <div class="segmented">
-          <button class="seg-btn scope-active" id="scope-btn-mine" onclick="setAgendaScope('mine')">👤 Mon agenda</button>
+          <button class="seg-btn scope-active" id="scope-btn-mine" onclick="setAgendaScope('mine')">👤 Mon agenda (TL)</button>
           <button class="seg-btn" id="scope-btn-all" onclick="setAgendaScope('all')">🏥 Agenda général</button>
         </div>
         <!-- Sélecteur Jour / Semaine / Mois -->
@@ -901,34 +983,39 @@
         <button class="nav-arrow" onclick="navigatePeriod(1)">›</button>
       </div>
 
+      <!-- Bandeau interactif de la semaine (Lun -> Dim) pour s'organiser d'un coup d'œil -->
+      <div id="week-strip-container"></div>
+
       <div class="garde-strip" id="my-gardes-strip"></div>
 
       <div id="calendar-container"></div>
     </section>
 
-    <!-- TAB 2 : ACTES & BIOPSIES -->
-    <section id="tab-actes" style="display:none;">
-      <div class="chips-row">
-        <button class="chip active" id="flt-actes-all" onclick="setActesFilter('all')">Tous</button>
-        <button class="chip" id="flt-actes-ther" onclick="setActesFilter('acte')">🔴 Actes RI</button>
-        <button class="chip" id="flt-actes-bio" onclick="setActesFilter('biopsie')">🟣 Biopsies</button>
-        <button class="chip" id="flt-actes-todo" onclick="setActesFilter('todo')">⏳ À planifier</button>
+    <!-- TAB 2 : ACTIVITÉ FUSIONNÉE (ACTES & CONSULTATIONS DE TL OU DU SERVICE) -->
+    <section id="tab-activite" style="display:none;">
+      <div class="agenda-controls">
+        <!-- Sélecteur Mes patients (TL) vs Tout le service -->
+        <div class="segmented">
+          <button class="seg-btn scope-active" id="act-scope-mine" onclick="setActiviteScope('mine')">👤 Mes prises en charge (TL)</button>
+          <button class="seg-btn" id="act-scope-all" onclick="setActiviteScope('all')">🏥 Tout le service</button>
+        </div>
+        <!-- Choix : Actes & Biopsies | Consultations & Imagerie | Les deux | À planifier -->
+        <div class="segmented">
+          <button class="seg-btn active" id="act-mode-actes" onclick="setActiviteMode('actes')">⚡ Actes/Bio</button>
+          <button class="seg-btn" id="act-mode-cs" onclick="setActiviteMode('cs')">🩺 CS/IRM</button>
+          <button class="seg-btn" id="act-mode-both" onclick="setActiviteMode('both')">📋 Les deux</button>
+          <button class="seg-btn" id="act-mode-todo" onclick="setActiviteMode('todo')">⏳ À planif.</button>
+        </div>
       </div>
-      <div id="actes-list-container"></div>
+
+      <!-- Sous-filtres dynamiques selon le mode choisi -->
+      <div class="chips-row" id="activite-subchips"></div>
+
+      <!-- Liste organisée semaine par semaine -->
+      <div id="activite-list-container"></div>
     </section>
 
-    <!-- TAB 3 : CS & IMAGERIE -->
-    <section id="tab-cs" style="display:none;">
-      <div class="chips-row">
-        <button class="chip active" id="flt-cs-all" onclick="setCsFilter('all')">Tout</button>
-        <button class="chip" id="flt-cs-tl" onclick="setCsFilter('lef')">👨‍⚕️ Mes CS</button>
-        <button class="chip" id="flt-cs-only" onclick="setCsFilter('cs')">🔵 Consultations</button>
-        <button class="chip" id="flt-cs-img" onclick="setCsFilter('img')">🟢 IRM / TDM / Anesth</button>
-      </div>
-      <div id="cs-list-container"></div>
-    </section>
-
-    <!-- TAB 4 : DEMANDES D'AVIS (SERVICE) -->
+    <!-- TAB 3 : DEMANDES D'AVIS (SERVICE) -->
     <section id="tab-avis" style="display:none;">
       <div class="chips-row">
         <button class="chip active" id="flt-avis-all" onclick="setAvisFilter('all')">Tous les avis</button>
@@ -938,7 +1025,7 @@
       <div id="avis-list-container"></div>
     </section>
 
-    <!-- TAB 5 : QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP) -->
+    <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP — 100% PRIVÉ DANS L'APP) -->
     <section id="tab-perso" style="display:none;">
       <div class="chips-row">
         <button class="chip active" id="flt-perso-all" onclick="setPersoFilter('all')">Tous</button>
@@ -950,7 +1037,7 @@
       <div id="perso-list-container"></div>
     </section>
 
-    <!-- TAB 6 : PATIENTS -->
+    <!-- TAB 5 : PATIENTS -->
     <section id="tab-patients" style="display:none;">
       <div class="search-box">
         <span class="search-icon">🔍</span>
@@ -975,19 +1062,15 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAV (6 TABS) -->
+  <!-- BOTTOM NAV (5 TABS OPTIMISÉS) -->
   <nav class="bottom-nav">
     <button class="nav-item active" id="nav-agenda" onclick="switchTab('agenda')">
       <span class="nav-icon">📅</span>
-      <span>Agenda</span>
+      <span>Ma Semaine</span>
     </button>
-    <button class="nav-item" id="nav-actes" onclick="switchTab('actes')">
-      <span class="nav-icon">⚡</span>
-      <span>Actes/Bio</span>
-    </button>
-    <button class="nav-item" id="nav-cs" onclick="switchTab('cs')">
+    <button class="nav-item" id="nav-activite" onclick="switchTab('activite')">
       <span class="nav-icon">🩺</span>
-      <span>CS/IRM</span>
+      <span>Actes & CS</span>
     </button>
     <button class="nav-item" id="nav-avis" onclick="switchTab('avis')">
       <span class="nav-icon">💬</span>
@@ -1001,7 +1084,7 @@
     </button>
     <button class="nav-item" id="nav-patients" onclick="switchTab('patients')">
       <span class="nav-icon">👥</span>
-      <span>Patients</span>
+      <span>Dossiers</span>
     </button>
   </nav>
 
@@ -1860,6 +1943,56 @@
       `;
     }
 
+    function getShortVacTagForDay(iso, dt) {
+      const g = getGardeForIso(iso);
+      if (g && g.is_tl) return { lbl: "🚨Garde", cls: "post-liberal" };
+      const dow = dt.getDay();
+      if (dow === 0 || dow === 6) return { lbl: "WE", cls: "post-libre" };
+      const myV = getMyVacationForIso(iso);
+      const firstPost = (myV.am[0] || "").toLowerCase();
+      if (firstPost.includes("férié")) return { lbl: "Férié", cls: "post-libre" };
+      if (firstPost.includes("libéral") || firstPost.includes("jdp")) return { lbl: "JDP/GSH", cls: "post-liberal" };
+      if (firstPost.includes("masterclass")) return { lbl: "Master.", cls: "post-staff" };
+      if (firstPost.includes("libre")) return { lbl: "Libre", cls: "post-libre" };
+      const def = MAQUETTE_DEFAULT_DOW[dow] || { short: "Cochin", color: "post-cs" };
+      return { lbl: def.short, cls: def.color };
+    }
+
+    function renderWeekStripBar(allEvents) {
+      const stripContainer = document.getElementById("week-strip-container");
+      if (!stripContainer) return;
+      if (calendarView === "month") {
+        stripContainer.innerHTML = "";
+        return;
+      }
+      const mon = getMondayOf(selectedDate);
+      const selIso = dateToIso(selectedDate);
+      const dows = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+      let cellsHtml = "";
+      for (let i = 0; i < 7; i++) {
+        const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
+        const iso = dateToIso(cur);
+        const g = getGardeForIso(iso);
+        const evCnt = allEvents.filter(e => e.isoDate === iso).length;
+        const tag = getShortVacTagForDay(iso, cur);
+        cellsHtml += `
+          <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" onclick="selectDayFromWeekStrip('${iso}')">
+            <span class="ws-dow">${dows[i]}</span>
+            <span class="ws-num">${cur.getDate()}</span>
+            <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
+            <span class="ws-cnt">${evCnt > 0 ? evCnt + " RDV" : "·"}</span>
+          </div>
+        `;
+      }
+      stripContainer.innerHTML = `<div class="week-strip-bar">${cellsHtml}</div>`;
+    }
+
+    function selectDayFromWeekStrip(iso) {
+      const [y, m, d] = iso.split("-").map(Number);
+      selectedDate = new Date(y, m - 1, d, 12, 0, 0);
+      renderCalendar();
+    }
+
     function renderCalendar() {
       renderMyGardesStrip();
       const container = document.getElementById("calendar-container");
@@ -1867,6 +2000,8 @@
       const subEl = document.getElementById("period-sub");
       const allEvents = filterEventsByScope(getAllTimedEvents());
       const isGeneral = (agendaScope === "all");
+
+      renderWeekStripBar(allEvents);
 
       if (calendarView === "day") {
         const iso = dateToIso(selectedDate);
@@ -1877,7 +2012,7 @@
           year: "numeric"
         });
         const myVac = getMyVacationForIso(iso);
-        subEl.textContent = myVac.note || (isGeneral ? "Agenda général du service" : "Mon agenda personnel");
+        subEl.textContent = myVac.note || (isGeneral ? "Agenda général du service" : "Mon agenda personnel (Dr T. Lefèvre)");
 
         const genVac = getGeneralPlanningForIso(iso);
         const dayEvents = allEvents.filter(e => e.isoDate === iso);
@@ -1896,6 +2031,7 @@
           </div>
           <div class="section-label">
             <span>${isGeneral ? "Tous les RDV & Patients du service" : "Mes RDV & Patients"} (${dayEvents.length})</span>
+            <span style="color:var(--primary); cursor:pointer;" onclick="setCalendarView('week')">Vue Semaine ›</span>
           </div>
         `;
 
@@ -1908,10 +2044,35 @@
       } else if (calendarView === "week") {
         const mon = getMondayOf(selectedDate);
         const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 12, 0, 0);
-        titleEl.textContent = `Lun ${mon.getDate()}/${mon.getMonth() + 1} – Dim ${sun.getDate()}/${sun.getMonth() + 1}/${sun.getFullYear()}`;
-        subEl.textContent = isGeneral ? "Semaine complète — Équipe Radio B" : "Ma semaine — Dr T. Lefèvre";
+        titleEl.textContent = `Semaine du ${mon.getDate()}/${mon.getMonth() + 1} au ${sun.getDate()}/${sun.getMonth() + 1}/${sun.getFullYear()}`;
+        subEl.textContent = isGeneral ? "Semaine complète — Équipe Radio B" : "Organisation de ma semaine — Dr T. Lefèvre";
 
-        let html = "";
+        const weekIsos = [];
+        let hasMyGarde = false;
+        for (let i = 0; i < 7; i++) {
+          const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
+          const iso = dateToIso(cur);
+          weekIsos.push(iso);
+          const g = getGardeForIso(iso);
+          if (g && g.is_tl) hasMyGarde = true;
+        }
+        const weekEvents = allEvents.filter(e => weekIsos.includes(e.isoDate));
+        const nbActes = weekEvents.filter(e => e.category === "acte" || e.category === "biopsie").length;
+        const nbCs = weekEvents.filter(e => e.category === "cs" || e.category === "img").length;
+        const nbPerso = weekEvents.filter(e => e.category === "mail-rdv").length;
+
+        let html = `
+          <div class="week-summary-card">
+            <span>📊 <strong>Bilan semaine :</strong> ${weekEvents.length} événements</span>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              <span class="pill pill-acte">${nbActes} Geste${nbActes > 1 ? "s" : ""}</span>
+              <span class="pill pill-cs">${nbCs} CS/Exam</span>
+              ${nbPerso > 0 ? `<span class="pill pill-mail-rdv">${nbPerso} RDV/Libéral</span>` : ""}
+              ${hasMyGarde ? `<span class="pill pill-danger">🚨 1 Garde</span>` : ""}
+            </div>
+          </div>
+        `;
+
         for (let i = 0; i < 7; i++) {
           const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
           const iso = dateToIso(cur);
@@ -2039,30 +2200,140 @@
       renderCalendar();
     }
 
-    // ACTES & BIOPSIES
-    function setActesFilter(flt) {
-      actesFilter = flt;
-      document.getElementById("flt-actes-all").classList.toggle("active", flt === "all");
-      document.getElementById("flt-actes-ther").classList.toggle("active", flt === "acte");
-      document.getElementById("flt-actes-bio").classList.toggle("active", flt === "biopsie");
-      document.getElementById("flt-actes-todo").classList.toggle("active", flt === "todo");
-      renderActesTab();
+    // ONGLET FUSIONNÉ : ACTIVITÉ (ACTES/BIOPSIES & CONSULTATIONS/IMAGERIE DE TL OU DU SERVICE)
+    let activiteScope = "mine"; // 'mine' (Mes prises en charge TL) | 'all' (Tout le service)
+    let activiteMode = "actes"; // 'actes' | 'cs' | 'both' | 'todo'
+    let activiteSub = "all";    // sous-filtre ('all' | 'acte' | 'biopsie' | 'cs' | 'img')
+
+    function openActiviteView(mode, sub) {
+      activiteMode = mode;
+      activiteSub = sub || "all";
+      switchTab("activite");
+      syncActiviteControls();
+      renderActiviteTab();
     }
 
-    function renderActesTab() {
-      const container = document.getElementById("actes-list-container");
-      const allEvs = getAllTimedEvents().filter(e => e.category === "acte" || e.category === "biopsie");
-      let filtered = allEvs;
-      if (actesFilter === "acte") filtered = allEvs.filter(e => e.category === "acte");
-      else if (actesFilter === "biopsie") filtered = allEvs.filter(e => e.category === "biopsie");
-      else if (actesFilter === "todo") {
-        const todoPatients = appData.Data.filter(p => String(p["Statut"] || "").toLowerCase().includes("planifier"));
-        container.innerHTML = todoPatients.map(p => renderMasterPatientCard(p)).join("");
+    function setActiviteScope(sc) {
+      activiteScope = sc;
+      syncActiviteControls();
+      renderActiviteTab();
+    }
+
+    function setActiviteMode(mode) {
+      activiteMode = mode;
+      activiteSub = "all";
+      syncActiviteControls();
+      renderActiviteTab();
+    }
+
+    function setActiviteSub(sub) {
+      activiteSub = sub;
+      renderActiviteTab();
+    }
+
+    function syncActiviteControls() {
+      const btnMine = document.getElementById("act-scope-mine");
+      const btnAll = document.getElementById("act-scope-all");
+      if (btnMine) btnMine.classList.toggle("scope-active", activiteScope === "mine");
+      if (btnAll) btnAll.classList.toggle("scope-active", activiteScope === "all");
+
+      ["actes", "cs", "both", "todo"].forEach(m => {
+        const el = document.getElementById("act-mode-" + m);
+        if (el) el.classList.toggle("active", activiteMode === m);
+      });
+    }
+
+    function getWeekLabelForIso(isoDate) {
+      if (!isoDate) return "Date à définir";
+      const [y, m, d] = isoDate.split("-").map(Number);
+      const dt = new Date(y, m - 1, d, 12, 0, 0);
+      const mon = getMondayOf(dt);
+      const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 12, 0, 0);
+      const mStr = mon.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+      const sStr = sun.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+      return `Semaine du Lun ${mStr} au Dim ${sStr}`;
+    }
+
+    function renderActiviteTab() {
+      syncActiviteControls();
+      const subEl = document.getElementById("activite-subchips");
+      const container = document.getElementById("activite-list-container");
+
+      // Sous-filtres contextuels selon si l'on regarde Actes/Bio ou CS/IRM
+      if (activiteMode === "actes") {
+        subEl.style.display = "flex";
+        subEl.innerHTML = `
+          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tous les gestes</button>
+          <button class="chip ${activiteSub === "acte" ? "active" : ""}" onclick="setActiviteSub('acte')">🔴 Actes thérapeutiques</button>
+          <button class="chip ${activiteSub === "biopsie" ? "active" : ""}" onclick="setActiviteSub('biopsie')">🟣 Biopsies</button>
+        `;
+      } else if (activiteMode === "cs") {
+        subEl.style.display = "flex";
+        subEl.innerHTML = `
+          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tout (CS + Examens)</button>
+          <button class="chip ${activiteSub === "cs" ? "active" : ""}" onclick="setActiviteSub('cs')">🔵 Consultations</button>
+          <button class="chip ${activiteSub === "img" ? "active" : ""}" onclick="setActiviteSub('img')">🟢 IRM / TDM / Anesth</button>
+        `;
+      } else {
+        subEl.style.display = "none";
+        subEl.innerHTML = "";
+      }
+
+      if (activiteMode === "todo") {
+        let todoPatients = (appData.Data || []).filter(p => String(p["Statut"] || "").toLowerCase().includes("planifier") || String(p["Statut"] || "").toLowerCase().includes("irm"));
+        if (activiteScope === "mine") {
+          todoPatients = todoPatients.filter(p => {
+            const ref = String(p["Médecin Référent"] || "").toLowerCase();
+            return !ref.includes("monnier") && !ref.includes("talabard") && !ref.includes("hamadouche") && !ref.includes("lusi");
+          });
+        }
+        container.innerHTML = todoPatients.length
+          ? todoPatients.map(p => renderMasterPatientCard(p)).join("")
+          : `<div class="empty-state">Aucun dossier en attente de planification.</div>`;
         return;
       }
-      container.innerHTML = filtered.length
-        ? filtered.map(ev => renderEventCard(ev, true)).join("")
-        : `<div class="empty-state">Aucun geste dans cette catégorie.</div>`;
+
+      let evs = getAllTimedEvents().filter(e => e.category !== "mail-rdv");
+      if (activiteScope === "mine") {
+        evs = evs.filter(e => e.isMine);
+      }
+
+      if (activiteMode === "actes") {
+        evs = evs.filter(e => e.category === "acte" || e.category === "biopsie");
+        if (activiteSub === "acte") evs = evs.filter(e => e.category === "acte");
+        else if (activiteSub === "biopsie") evs = evs.filter(e => e.category === "biopsie");
+      } else if (activiteMode === "cs") {
+        evs = evs.filter(e => e.category === "cs" || e.category === "img");
+        if (activiteSub === "cs") evs = evs.filter(e => e.category === "cs");
+        else if (activiteSub === "img") evs = evs.filter(e => e.category === "img");
+      }
+
+      if (evs.length === 0) {
+        container.innerHTML = `<div class="empty-state">${activiteScope === "mine" ? "Aucun patient sur vos vacations dans cette catégorie (passez sur '🏥 Tout le service' pour voir ceux de vos collègues)." : "Aucun élément dans cette catégorie."}</div>`;
+        return;
+      }
+
+      // Regroupement par semaine pour organiser ses semaines facilement
+      const groups = [];
+      let currentLabel = null;
+      let currentBucket = null;
+      for (const ev of evs) {
+        const lbl = getWeekLabelForIso(ev.isoDate);
+        if (lbl !== currentLabel) {
+          currentLabel = lbl;
+          currentBucket = { label: lbl, items: [] };
+          groups.push(currentBucket);
+        }
+        currentBucket.items.push(ev);
+      }
+
+      container.innerHTML = groups.map(g => `
+        <div class="week-group-header">
+          <span>📅 ${g.label}</span>
+          <span class="pill pill-cs">${g.items.length} patient${g.items.length > 1 ? "s" : ""}</span>
+        </div>
+        ${g.items.map(ev => renderEventCard(ev, true)).join("")}
+      `).join("");
     }
 
     // DEMANDES D'AVIS (SERVICE)
@@ -2372,17 +2643,18 @@
 
     function switchTab(tab) {
       currentTab = tab;
-      ["agenda", "actes", "cs", "avis", "perso", "patients"].forEach(t => {
-        document.getElementById("tab-" + t).style.display = t === tab ? "block" : "none";
-        document.getElementById("nav-" + t).classList.toggle("active", t === tab);
+      ["agenda", "activite", "avis", "perso", "patients"].forEach(t => {
+        const sec = document.getElementById("tab-" + t);
+        const nav = document.getElementById("nav-" + t);
+        if (sec) sec.style.display = t === tab ? "block" : "none";
+        if (nav) nav.classList.toggle("active", t === tab);
       });
       renderCurrentTab();
     }
 
     function renderCurrentTab() {
       if (currentTab === "agenda") renderCalendar();
-      else if (currentTab === "actes") renderActesTab();
-      else if (currentTab === "cs") renderCsTab();
+      else if (currentTab === "activite") renderActiviteTab();
       else if (currentTab === "avis") renderAvisTab();
       else if (currentTab === "perso") renderPersoTab();
       else if (currentTab === "patients") renderPatientsTab();
