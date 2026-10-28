@@ -1448,11 +1448,24 @@
       }
     }
 
+    const STORAGE_PERSO_KEY = "cochin_ri_perso_status_v3";
+
+    function loadPersoWithLocalStatus() {
+      let savedMap = {};
+      try {
+        savedMap = JSON.parse(localStorage.getItem(STORAGE_PERSO_KEY) || "{}");
+      } catch (e) {}
+      return DEFAULT_QUESTIONS_PERSO.map(item => ({
+        ...item,
+        "Statut": savedMap[item._row] || item["Statut"]
+      }));
+    }
+
     function applySheetData(data, syncedAt) {
       appData = {
         Data: data.Data || [],
         Demandes_avis: data.Demandes_avis || [],
-        Questions_perso: (data.Questions_perso && data.Questions_perso.length > 0) ? data.Questions_perso : DEFAULT_QUESTIONS_PERSO,
+        Questions_perso: loadPersoWithLocalStatus(),
         Consultations: data.Consultations || [],
         Imagerie_Anesthesie: data.Imagerie_Anesthesie || [],
         Biopsies: data.Biopsies || [],
@@ -2181,24 +2194,18 @@
       }).join("");
     }
 
-    async function togglePersoStatus(row, newStatus) {
+    function togglePersoStatus(row, newStatus) {
+      let savedMap = {};
+      try {
+        savedMap = JSON.parse(localStorage.getItem(STORAGE_PERSO_KEY) || "{}");
+      } catch (e) {}
+      savedMap[row] = newStatus;
+      localStorage.setItem(STORAGE_PERSO_KEY, JSON.stringify(savedMap));
       for (const item of appData.Questions_perso) {
         if (item._row === row) item["Statut"] = newStatus;
       }
       updateKpis();
       renderPersoTab();
-
-      const savedPin = localStorage.getItem(STORAGE_PIN_KEY);
-      if (!savedPin) return;
-      document.getElementById("sync-dot").classList.add("loading");
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-agenda-pin": savedPin },
-          body: JSON.stringify({ pin: savedPin, action: "toggle_perso", row, status: newStatus })
-        });
-        await syncFromCloud(true);
-      } catch (e) {}
     }
 
     // CS & IMAGERIE
@@ -2382,6 +2389,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", () => {
+      appData.Questions_perso = loadPersoWithLocalStatus();
       updateKpis();
       renderCurrentTab();
       const savedPin = localStorage.getItem(STORAGE_PIN_KEY);
