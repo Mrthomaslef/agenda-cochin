@@ -2275,8 +2275,55 @@
       return null;
     }
 
+    function formatShortDoc(medStr) {
+      const s = String(medStr || "");
+      if (!s) return "";
+      const codes = [];
+      if (/lefevre|lefèvre|tl/i.test(s)) codes.push("TL");
+      if (/talabard|mp|mpt/i.test(s)) codes.push("MP");
+      if (/monnier|hm/i.test(s)) codes.push("HM");
+      if (/hamadouche|mh/i.test(s)) codes.push("MH");
+      if (/laporte|al/i.test(s)) codes.push("AL");
+      if (/costea|ac/i.test(s)) codes.push("AC");
+      if (/lusi|sl/i.test(s)) codes.push("SL");
+      if (/allel|ya/i.test(s)) codes.push("YA");
+      if (/feydy/i.test(s)) codes.push("Feydy");
+      if (/drap[eé]/i.test(s)) codes.push("Drapé");
+      if (/yang/i.test(s)) codes.push("Yang");
+      if (/moutounet/i.test(s)) codes.push("Moutounet");
+      if (/mihoubi|md/i.test(s)) codes.push("Mihoubi");
+      if (/seror/i.test(s)) codes.push("Seror");
+      if (/rubini/i.test(s)) codes.push("Rubini");
+      if (/th[eé]venin/i.test(s)) codes.push("Thévenin");
+      if (/hammoud/i.test(s)) codes.push("Hammoud");
+      if (/internes/i.test(s)) codes.push("Internes");
+      if (/anesth/i.test(s)) codes.push("Anesth");
+      if (codes.length > 0) return codes.join(" / ");
+      return s.replace(/\(.*?\)/g, "").replace(/(Dr|Pr)\s+/gi, "").trim();
+    }
+
+    function formatShortLieu(ev) {
+      const l = String(ev.lieu || "").trim();
+      const lLow = l.toLowerCase();
+      const tLow = String(ev.title || "").toLowerCase();
+      // Pour les consultations : toujours au même endroit (ou en visio déjà indiqué par le badge Télécs), donc pas de répétition
+      if (ev.category === "cs") {
+        if (lLow.includes("écho") || lLow.includes("echo") || tLow.includes("écho") || tLow.includes("echo")) return "Écho";
+        return "";
+      }
+      if (ev.badgeLabel === "CS Anesth") return "";
+      if (lLow.includes("achard") || lLow.includes("tdm 1") || lLow.includes("scanner")) return "TDM 1";
+      if (lLow.includes("écho") || lLow.includes("echo")) return "Écho";
+      if (lLow.includes("geste") || lLow.includes("scopie")) return "Salle Gestes";
+      if (lLow.includes("irm")) return "IRM";
+      if (lLow.includes("allura")) return "Allura";
+      if (lLow.includes("visio") || lLow.includes("distance") || lLow.includes("ollier / cs") || lLow.includes("albarran")) return "";
+      return l;
+    }
+
     function renderEventCard(ev, showDate = false) {
       if (ev.category === "mail-rdv") {
+        const shortDocRdv = formatShortDoc(ev.medecin);
         return `
           <div class="event-card type-mail-rdv">
             <div class="event-top">
@@ -2285,10 +2332,7 @@
             </div>
             <div class="event-patient"><span>${ev.title}</span></div>
             <div class="event-title">${ev.patient}</div>
-            <div class="event-meta">
-              <span class="doc-tag">${ev.medecin || "-"}</span>
-              <span>${ev.lieu || "-"}</span>
-            </div>
+            ${ev.lieu ? `<div class="event-meta"><span>${ev.lieu}</span>${shortDocRdv ? `<span class="doc-tag">${shortDocRdv}</span>` : ""}</div>` : ""}
             ${ev.remarques ? `<div style="font-size:11px; color:#FDE68A; margin-top:4px;">${ev.remarques}</div>` : ""}
           </div>
         `;
@@ -2303,24 +2347,31 @@
         ev.category === "cs" ? "pill-cs" : "pill-img";
 
       const safePatientAttr = encodeURIComponent(JSON.stringify({ name: ev.patient, ipp: ev.ipp }));
-      const isTlDoc = /lefevre|lefèvre|\btl\b/i.test(ev.medecin || "");
+      const shortDoc = formatShortDoc(ev.medecin);
+      const isTlDoc = /TL/.test(shortDoc);
+      const shortLieu = formatShortLieu(ev);
+
+      // Pour les consultations : éviter de répéter "Consultation spécialisée" ou "Téléconsultation de suivi" puisque le badge indique déjà CS ou Télécs
+      const isGenericCsTitle = ev.category === "cs" && /^(télé)?consultation\s*(spécialisée|de suivi|pré-interventionnelle|\/\s*cs)?$/i.test(String(ev.title || "").trim());
+      const mainLine = isGenericCsTitle ? (ev.remarques || ev.title) : ev.title;
+      const subLine = isGenericCsTitle ? "" : (ev.remarques || "");
 
       return `
         <div class="event-card type-${ev.category}" onclick="openPatientModal('${safePatientAttr}')">
           <div class="event-top">
-            <span class="event-time-badge">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
-            <span class="pill ${pillClass}">${ev.badgeLabel}</span>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="event-time-badge">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+              ${shortDoc ? `<span class="doc-tag ${isTlDoc ? "is-tl" : ""}">${shortDoc}</span>` : ""}
+              ${shortLieu ? `<span style="font-size:10.5px; color:var(--text-muted); font-weight:600;">${shortLieu}</span>` : ""}
+            </div>
+            <span class="pill ${pillClass}">${ev.badgeLabel === "Consult" ? "CS" : ev.badgeLabel}</span>
           </div>
           <div class="event-patient">
             <span>${ev.patient}</span>
             ${ev.ipp && ev.ipp !== "Non spécifié" ? `<span class="event-ipp">${ev.ipp}</span>` : ""}
           </div>
-          <div class="event-title">${ev.title}</div>
-          <div class="event-meta">
-            <span class="doc-tag ${isTlDoc ? "is-tl" : ""}">${ev.medecin || "-"}</span>
-            <span>${ev.lieu || "-"}</span>
-          </div>
-          ${ev.remarques ? `<div style="font-size:11px; color:#94A3B8; margin-top:4px;">${ev.remarques}</div>` : ""}
+          ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
+          ${subLine ? `<div style="font-size:11px; color:#94A3B8; margin-top:3px;">${subLine}</div>` : ""}
           ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
         </div>
       `;
@@ -2389,8 +2440,8 @@
       if (g.is_tl) {
         return `
           <div class="garde-banner is-me">
-            <span><strong>VOUS ÊTES DE GARDE</strong> (${g.nature})</span>
-            <span class="pill pill-danger">Dr LEFEVRE</span>
+            <span><strong>DE GARDE</strong> (${g.nature})</span>
+            <span class="pill pill-danger">TL</span>
           </div>
         `;
       }
@@ -2915,7 +2966,7 @@
               ${a["Motif de l'avis / Question clinique"] || ""}
             </div>
             <div style="font-size:11.5px; color:#86EFAC; margin-top:4px;" onclick="openPatientModal('${safePatientAttr}')">
-              <strong>${a["Médecin Répondant (Radio B)"] || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
+              <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
             </div>
             <div style="margin-top:8px; display:flex; justify-content:flex-end;">
               <button class="btn-icon" onclick="toggleAvisStatus(${a._row}, '${nextStatus}')">
@@ -3112,15 +3163,20 @@
       const anticoag = detectAnticoagAlert(`${coord} ${remarques}`);
 
       const rdvTimelineHtml = allEvs.length > 0
-        ? allEvs.map(ev => `
+        ? allEvs.map(ev => {
+            const sDoc = formatShortDoc(ev.medecin);
+            const sLieu = formatShortLieu(ev);
+            const metaParts = [sDoc, sLieu].filter(Boolean).join(" · ");
+            return `
             <div style="padding:7px 10px; border-radius:9px; background:var(--bg-elevated); margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <div style="font-size:12px; font-weight:700;">${ev.dateStr} à ${ev.horaire} — ${ev.title}</div>
-                <div style="font-size:10.5px; color:var(--text-muted);">${ev.lieu || "-"} • ${ev.medecin || "-"}</div>
+                ${metaParts ? `<div style="font-size:10.5px; color:var(--text-muted);">${metaParts}</div>` : ""}
               </div>
-              <span class="pill pill-${ev.category}">${ev.badgeLabel}</span>
+              <span class="pill pill-${ev.category}">${ev.badgeLabel === "Consult" ? "CS" : ev.badgeLabel}</span>
             </div>
-          `).join("")
+          `;
+          }).join("")
         : `<div style="font-size:12px; color:var(--text-muted);">${echeance}</div>`;
 
       document.getElementById("modal-body").innerHTML = `
@@ -3162,7 +3218,7 @@
         </div>
         <div class="detail-block">
           <div class="detail-label">Correspondant & Référent</div>
-          <div class="detail-value">Demandeur : ${corresp}<br>Référent : ${refDoc}</div>
+          <div class="detail-value">Demandeur : ${corresp}<br>Référent : ${formatShortDoc(refDoc) || refDoc}</div>
         </div>
       `;
       document.getElementById("patient-modal").classList.add("open");
