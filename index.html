@@ -36,15 +36,17 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    body {
+    html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding-bottom: calc(78px + var(--safe-bottom));
-      overflow-x: hidden;
+      padding-bottom: calc(84px + var(--safe-bottom));
     }
 
     /* LOCK SCREEN */
@@ -66,15 +68,18 @@
       text-align: center;
     }
     .lock-logo {
-      width: 60px;
-      height: 60px;
-      border-radius: 18px;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
       background: linear-gradient(135deg, #0284C7, #6366F1);
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 14px;
-      font-size: 26px;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
       box-shadow: 0 10px 25px rgba(2, 132, 199, 0.35);
     }
     .lock-title {
@@ -138,52 +143,58 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(11, 17, 32, 0.90);
-      backdrop-filter: blur(14px);
+      background: rgba(11, 17, 32, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: calc(8px + var(--safe-top)) 14px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      width: 100%;
     }
     .brand {
       display: flex;
       align-items: center;
       gap: 9px;
+      min-width: 0;
     }
     .brand-badge {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
       background: linear-gradient(135deg, #0284C7, #6366F1);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 13px;
+      font-size: 12px;
+      flex-shrink: 0;
     }
     .brand-text h1 {
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       margin: 0;
+      letter-spacing: -0.2px;
     }
     .brand-text p {
-      font-size: 10.5px;
+      font-size: 10px;
       color: var(--text-muted);
-      margin: 1px 0 0;
+      margin: 0;
     }
     .header-actions {
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
     .btn-icon {
       border: 1px solid var(--border);
-      background: var(--bg-card);
+      background: rgba(30, 41, 59, 0.7);
       color: var(--text);
-      border-radius: 9px;
-      padding: 6px 9px;
+      border-radius: 8px;
+      padding: 5px 9px;
       font-size: 11.5px;
       font-weight: 600;
       display: inline-flex;
@@ -192,8 +203,8 @@
       cursor: pointer;
     }
     .sync-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--success);
     }
@@ -209,24 +220,29 @@
     /* KPI BAR */
     .kpi-strip {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 6px;
-      padding: 8px 12px 4px;
-      max-width: 760px;
+      padding: 8px 12px 2px;
+      max-width: 680px;
+      width: 100%;
       margin: 0 auto;
     }
     .kpi-box {
-      background: var(--bg-card);
+      background: rgba(19, 28, 49, 0.75);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 6px 4px;
+      padding: 6px 2px;
       text-align: center;
       cursor: pointer;
+      min-width: 0;
     }
     .kpi-val {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
-      line-height: 1.1;
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .kpi-lbl {
       font-size: 9.5px;
@@ -240,46 +256,56 @@
 
     .main-content {
       padding: 8px 12px 24px;
-      max-width: 760px;
+      max-width: 680px;
+      width: 100%;
       margin: 0 auto;
     }
 
-    /* DUAL CONTROLS ROW IN AGENDA */
+    /* CONTROLS STACK (NO HORIZONTAL OVERFLOW ON ANY MOBILE SCREEN) */
     .agenda-controls {
-      display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       margin-bottom: 8px;
+      width: 100%;
     }
-    @media (max-width: 420px) {
+    @media (min-width: 640px) {
       .agenda-controls {
-        grid-template-columns: 1fr;
-        gap: 6px;
+        flex-direction: row;
+      }
+      .agenda-controls > .segmented {
+        flex: 1;
       }
     }
     .segmented {
       display: flex;
+      width: 100%;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 2px;
+      gap: 2px;
     }
     .seg-btn {
       flex: 1;
+      min-width: 0;
       border: none;
       background: transparent;
       color: var(--text-muted);
       font-size: 12px;
       font-weight: 600;
-      padding: 6px 6px;
+      padding: 6px 4px;
       border-radius: 8px;
       cursor: pointer;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all 0.15s ease;
     }
     .seg-btn.active {
       background: var(--bg-elevated);
       color: var(--text);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     }
     .seg-btn.scope-active {
       background: linear-gradient(135deg, #0284C7, #4F46E5);
@@ -293,27 +319,35 @@
       justify-content: space-between;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 6px 10px;
+      border-radius: 11px;
+      padding: 6px 8px;
       margin-bottom: 8px;
+      gap: 8px;
     }
     .date-nav-center {
       text-align: center;
       cursor: pointer;
+      min-width: 0;
+      flex: 1;
     }
     .date-nav-title {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       text-transform: capitalize;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .date-nav-sub {
-      font-size: 11px;
-      color: var(--primary);
+      font-size: 10.5px;
+      color: #FDE68A;
       margin-top: 1px;
+      display: none;
     }
     .nav-arrow {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--bg-elevated);
@@ -331,31 +365,35 @@
       align-items: center;
       gap: 6px;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding: 4px 0 8px;
+      padding: 2px 0 8px;
+      width: 100%;
     }
     .garde-strip::-webkit-scrollbar { display: none; }
     .garde-strip-lbl {
-      font-size: 10.5px;
-      font-weight: 800;
+      font-size: 10px;
+      font-weight: 700;
       color: #FCA5A5;
       white-space: nowrap;
       padding: 4px 8px;
-      border-radius: 8px;
-      background: rgba(239, 68, 68, 0.16);
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 7px;
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.32);
       text-decoration: none;
+      flex-shrink: 0;
     }
     .garde-chip {
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      background: rgba(19, 28, 49, 0.9);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      background: rgba(19, 28, 49, 0.85);
       color: #FECACA;
-      padding: 5px 9px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 7px;
+      font-size: 10.5px;
+      font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .garde-chip.active {
       background: #DC2626;
@@ -366,77 +404,80 @@
     /* VACATION CARDS & COLORED POST PILLS */
     .vac-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
       margin-bottom: 10px;
     }
     .vac-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 9px 10px;
+      border-radius: 11px;
+      padding: 8px 10px;
+      min-width: 0;
     }
     .vac-period {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.6px;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
     .post-pills {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 4px;
     }
     .post-pill {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      font-size: 11.5px;
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 11px;
       font-weight: 700;
       line-height: 1.25;
+      max-width: 100%;
+      overflow-wrap: break-word;
     }
     /* Varied color palette for hospital & private posts */
-    .post-tdm-achard { background: rgba(6, 182, 212, 0.20); color: #67E8F9; border: 1px solid rgba(6, 182, 212, 0.45); }
-    .post-gestes     { background: rgba(249, 115, 22, 0.22); color: #FDBA74; border: 1px solid rgba(249, 115, 22, 0.45); }
-    .post-cs         { background: rgba(99, 102, 241, 0.22); color: #C7D2FE; border: 1px solid rgba(99, 102, 241, 0.45); }
-    .post-echo       { background: rgba(16, 185, 129, 0.20); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.45); }
-    .post-irm        { background: rgba(168, 85, 247, 0.22); color: #E9D5FF; border: 1px solid rgba(168, 85, 247, 0.45); }
-    .post-sau        { background: rgba(56, 189, 248, 0.18); color: #BAE6FD; border: 1px solid rgba(56, 189, 248, 0.40); }
-    .post-staff      { background: rgba(234, 179, 8, 0.20);  color: #FEF08A; border: 1px solid rgba(234, 179, 8, 0.45); }
-    .post-liberal    { background: rgba(245, 158, 11, 0.26); color: #FDE68A; border: 1px solid rgba(245, 158, 11, 0.55); }
-    .post-libre      { background: rgba(100, 116, 139, 0.16); color: #94A3B8; border: 1px dashed rgba(148, 163, 184, 0.3); }
+    .post-tdm-achard { background: rgba(6, 182, 212, 0.18); color: #67E8F9; border: 1px solid rgba(6, 182, 212, 0.40); }
+    .post-gestes     { background: rgba(249, 115, 22, 0.20); color: #FDBA74; border: 1px solid rgba(249, 115, 22, 0.40); }
+    .post-cs         { background: rgba(99, 102, 241, 0.20); color: #C7D2FE; border: 1px solid rgba(99, 102, 241, 0.40); }
+    .post-echo       { background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.40); }
+    .post-irm        { background: rgba(168, 85, 247, 0.20); color: #E9D5FF; border: 1px solid rgba(168, 85, 247, 0.40); }
+    .post-sau        { background: rgba(56, 189, 248, 0.16); color: #BAE6FD; border: 1px solid rgba(56, 189, 248, 0.35); }
+    .post-staff      { background: rgba(234, 179, 8, 0.18);  color: #FEF08A; border: 1px solid rgba(234, 179, 8, 0.40); }
+    .post-liberal    { background: rgba(245, 158, 11, 0.24); color: #FDE68A; border: 1px solid rgba(245, 158, 11, 0.50); }
+    .post-libre      { background: rgba(100, 116, 139, 0.14); color: #94A3B8; border: 1px dashed rgba(148, 163, 184, 0.28); }
 
     /* GARDE BANNER */
     .garde-banner {
-      border-radius: 11px;
-      padding: 8px 12px;
+      border-radius: 10px;
+      padding: 7px 11px;
       margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12.5px;
+      font-size: 12px;
       background: rgba(30, 41, 59, 0.7);
       border: 1px solid var(--border);
     }
     .garde-banner.is-me {
-      background: linear-gradient(135deg, rgba(220, 38, 38, 0.28), rgba(234, 88, 12, 0.22));
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.26), rgba(234, 88, 12, 0.20));
       border: 1.5px solid #EF4444;
       color: #FEE2E2;
       font-weight: 700;
     }
 
-    /* EVENT CARDS WITH VARIED COLORS */
+    /* EVENT CARDS — CLEAN & STREAMLINED */
     .section-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       color: var(--text-muted);
-      margin: 10px 2px 6px;
+      margin: 8px 2px 6px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -444,40 +485,43 @@
     .event-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-left: 4px solid var(--primary);
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-bottom: 8px;
+      border-left: 3.5px solid var(--primary);
+      border-radius: 11px;
+      padding: 9px 11px;
+      margin-bottom: 7px;
       cursor: pointer;
+      width: 100%;
+      overflow-wrap: break-word;
     }
-    .event-card.type-acte     { border-left-color: var(--acte); background: linear-gradient(90deg, rgba(244,63,94,0.07) 0%, var(--bg-card) 35%); }
-    .event-card.type-biopsie  { border-left-color: var(--biopsie); background: linear-gradient(90deg, rgba(168,85,247,0.07) 0%, var(--bg-card) 35%); }
-    .event-card.type-cs       { border-left-color: var(--cs); background: linear-gradient(90deg, rgba(59,130,246,0.07) 0%, var(--bg-card) 35%); }
-    .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(20,184,166,0.07) 0%, var(--bg-card) 35%); }
-    .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(245,158,11,0.12) 0%, var(--bg-card) 45%); }
+    .event-card.type-acte     { border-left-color: var(--acte); background: linear-gradient(90deg, rgba(244,63,94,0.06) 0%, var(--bg-card) 35%); }
+    .event-card.type-biopsie  { border-left-color: var(--biopsie); background: linear-gradient(90deg, rgba(168,85,247,0.06) 0%, var(--bg-card) 35%); }
+    .event-card.type-cs       { border-left-color: var(--cs); background: linear-gradient(90deg, rgba(59,130,246,0.06) 0%, var(--bg-card) 35%); }
+    .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(20,184,166,0.06) 0%, var(--bg-card) 35%); }
+    .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(245,158,11,0.10) 0%, var(--bg-card) 45%); }
 
     .event-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .event-time-badge {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
-      color: var(--text);
-      background: rgba(255, 255, 255, 0.07);
+      color: #E2E8F0;
+      background: rgba(255, 255, 255, 0.06);
       padding: 2px 7px;
-      border-radius: 6px;
+      border-radius: 5px;
     }
     .pill {
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       padding: 2px 7px;
       border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
+      white-space: nowrap;
     }
     .pill-acte     { background: rgba(244, 63, 94, 0.2); color: #FDA4AF; }
     .pill-biopsie  { background: rgba(168, 85, 247, 0.22); color: #D8B4FE; }
@@ -491,7 +535,7 @@
     .pill-warn     { background: rgba(245, 158, 11, 0.22); color: #FDE68A; }
 
     .event-patient {
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       margin: 2px 0;
       display: flex;
@@ -500,34 +544,51 @@
       gap: 6px;
     }
     .event-ipp {
-      font-size: 11px;
+      font-size: 10.5px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       color: var(--primary);
       background: rgba(56, 189, 248, 0.1);
       padding: 1px 6px;
       border-radius: 5px;
+      flex-shrink: 0;
     }
     .event-title {
-      font-size: 12.5px;
-      color: #E2E8F0;
+      font-size: 12px;
+      color: #CBD5E1;
       font-weight: 500;
     }
     .event-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      align-items: center;
+      gap: 6px;
       margin-top: 5px;
       font-size: 11px;
       color: var(--text-muted);
     }
+    .doc-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-weight: 600;
+      font-size: 10.5px;
+      background: rgba(148, 163, 184, 0.12);
+      color: #E2E8F0;
+    }
+    .doc-tag.is-tl {
+      background: rgba(56, 189, 248, 0.16);
+      color: #7DD3FC;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
     .alert-anticoag {
       margin-top: 6px;
-      padding: 5px 8px;
-      border-radius: 7px;
-      background: rgba(239, 68, 68, 0.16);
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(239, 68, 68, 0.15);
       border: 1px solid rgba(239, 68, 68, 0.35);
       color: #FCA5A5;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
     }
 
@@ -535,8 +596,8 @@
     .week-day-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px;
+      border-radius: 11px;
+      padding: 9px 10px;
       margin-bottom: 8px;
     }
     .week-day-header {
@@ -547,7 +608,7 @@
       cursor: pointer;
     }
     .week-day-name {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
       text-transform: capitalize;
     }
@@ -555,28 +616,29 @@
     /* MONTH VIEW */
     .month-grid-header {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       text-align: center;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       color: var(--text-muted);
       margin-bottom: 4px;
     }
     .month-grid {
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(7, minmax(0, 1fr));
       gap: 4px;
     }
     .month-cell {
-      min-height: 64px;
+      min-height: 60px;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 9px;
+      border-radius: 8px;
       padding: 3px;
       display: flex;
       flex-direction: column;
       align-items: center;
       cursor: pointer;
+      min-width: 0;
     }
     .month-cell.other-month { opacity: 0.3; }
     .month-cell.selected {
@@ -588,14 +650,14 @@
       background: rgba(239, 68, 68, 0.16) !important;
     }
     .month-day-num {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
     }
     .month-vac-tag {
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 700;
       border-radius: 4px;
-      padding: 1px 3px;
+      padding: 1px 2px;
       margin-top: 2px;
       text-align: center;
       width: 100%;
@@ -612,8 +674,8 @@
       padding-top: 2px;
     }
     .m-dot {
-      width: 5px;
-      height: 5px;
+      width: 4.5px;
+      height: 4.5px;
       border-radius: 50%;
     }
     .m-dot.acte     { background: var(--acte); }
@@ -625,17 +687,17 @@
     /* SEARCH & CHIPS */
     .search-box {
       position: relative;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .search-input {
       width: 100%;
-      height: 40px;
+      height: 38px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: var(--bg-card);
       color: var(--text);
-      padding: 0 12px 0 34px;
-      font-size: 13.5px;
+      padding: 0 12px 0 32px;
+      font-size: 13px;
       outline: none;
     }
     .search-icon {
@@ -643,27 +705,31 @@
       left: 11px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
     }
     .chips-row {
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 4px;
       margin-bottom: 8px;
       scrollbar-width: none;
+      width: 100%;
     }
     .chips-row::-webkit-scrollbar { display: none; }
     .chip {
       border: 1px solid var(--border);
       background: var(--bg-card);
       color: var(--text-muted);
-      padding: 5px 11px;
+      padding: 5px 10px;
       border-radius: 999px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
+      flex-shrink: 0;
     }
     .chip.active {
       background: var(--primary-dark);
@@ -671,28 +737,37 @@
       border-color: var(--primary);
     }
 
-    /* INTERACTIVE WEEKLY STRIP & WEEK SUMMARY */
-    .week-strip-bar {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      margin-bottom: 10px;
+    /* SCROLLABLE DAYS BAR (BARRE DES JOURS DÉFILABLE) */
+    .day-strip-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      padding: 2px 2px 8px;
+      margin-bottom: 4px;
+      scrollbar-width: none;
+      width: 100%;
     }
+    .day-strip-scroll::-webkit-scrollbar { display: none; }
     .ws-day {
+      min-width: 56px;
+      flex-shrink: 0;
+      scroll-snap-align: center;
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 5px 2px;
+      border-radius: 11px;
+      padding: 6px 4px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.15s ease;
     }
     .ws-day.active {
       border-color: var(--primary);
-      background: rgba(56, 189, 248, 0.14);
+      background: rgba(56, 189, 248, 0.16);
       box-shadow: 0 0 0 1px var(--primary);
     }
     .ws-day.is-garde {
@@ -700,7 +775,7 @@
       background: rgba(239, 68, 68, 0.14);
     }
     .ws-dow {
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
       text-transform: uppercase;
       color: var(--text-muted);
@@ -709,30 +784,34 @@
       font-size: 13px;
       font-weight: 800;
       color: var(--text);
+      line-height: 1.1;
     }
     .ws-vac {
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 700;
       padding: 1px 4px;
       border-radius: 4px;
-      max-width: 100%;
+      max-width: 50px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
     .ws-cnt {
-      font-size: 8.5px;
+      font-size: 8px;
       font-weight: 700;
       color: var(--primary);
     }
+
     /* SELECTEUR DE SEMAINES (CARTES RÉSUMÉES EN MODE SEMAINE) */
     .weeks-selector-row {
       display: flex;
       gap: 7px;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 2px 2px 8px;
       margin-bottom: 6px;
       scrollbar-width: none;
+      width: 100%;
     }
     .weeks-selector-row::-webkit-scrollbar { display: none; }
     .week-sel-card {
@@ -776,19 +855,6 @@
       border-radius: 5px;
       white-space: nowrap;
     }
-    .week-summary-card {
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
-      border: 1px solid rgba(56, 189, 248, 0.28);
-      border-radius: 12px;
-      padding: 9px 12px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 11.5px;
-    }
     .week-group-header {
       background: rgba(30, 41, 59, 0.85);
       border: 1px solid var(--border);
@@ -796,7 +862,7 @@
       border-radius: 9px;
       padding: 6px 11px;
       margin: 12px 0 7px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       color: #E2E8F0;
       display: flex;
@@ -804,19 +870,32 @@
       justify-content: space-between;
     }
 
-    /* BOTTOM NAV (5 TABS) */
-    .bottom-nav {
+    /* MODERN FLOATING BOTTOM DOCK */
+    .bottom-nav-wrap {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(11, 17, 32, 0.95);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      padding: 5px 4px calc(5px + var(--safe-bottom));
       z-index: 200;
+      padding: 0 10px calc(6px + var(--safe-bottom));
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+    }
+    .bottom-nav {
+      pointer-events: auto;
+      width: 100%;
+      max-width: 500px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      padding: 4px;
+      gap: 2px;
     }
     .nav-item {
       border: none;
@@ -826,25 +905,42 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2px;
-      padding: 4px 1px;
+      gap: 3px;
+      padding: 6px 2px;
+      border-radius: 13px;
       font-size: 9.5px;
       font-weight: 600;
       cursor: pointer;
       position: relative;
+      transition: all 0.15s ease;
     }
-    .nav-item.active { color: var(--primary); }
-    .nav-icon { font-size: 18px; line-height: 1; }
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .nav-item.active {
+      color: #fff;
+      background: rgba(56, 189, 248, 0.18);
+    }
+    .nav-item.active svg {
+      stroke: var(--primary);
+    }
     .nav-badge {
       position: absolute;
-      top: 0;
-      right: 14%;
+      top: 2px;
+      right: 16%;
       background: var(--danger);
       color: #fff;
       font-size: 8.5px;
       font-weight: 800;
       padding: 1px 4px;
       border-radius: 999px;
+      line-height: 1.1;
     }
 
     /* MODAL */
@@ -924,12 +1020,12 @@
     }
     .empty-state {
       text-align: center;
-      padding: 20px 12px;
+      padding: 18px 12px;
       color: var(--text-muted);
-      font-size: 12.5px;
+      font-size: 12px;
       background: var(--bg-card);
       border: 1px dashed var(--border);
-      border-radius: 12px;
+      border-radius: 11px;
     }
   </style>
 </head>
@@ -938,7 +1034,7 @@
   <!-- PIN LOCK -->
   <div id="lock-screen">
     <div class="lock-card">
-      <div class="lock-logo">🏥</div>
+      <div class="lock-logo">RI</div>
       <h2 class="lock-title">Cochin Radiologie B</h2>
       <p class="lock-sub">Dr Thomas Lefèvre</p>
       <div class="pin-dots">
@@ -975,7 +1071,7 @@
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-icon" onclick="goToday()">📅 2 Nov</button>
+      <button class="btn-icon" onclick="goToday()">2 Nov</button>
       <button class="btn-icon" onclick="syncFromCloud(true)">
         <span class="sync-dot" id="sync-dot"></span>
         <span>Sync</span>
@@ -1003,21 +1099,19 @@
     </div>
     <div class="kpi-box" onclick="switchTab('perso')">
       <div class="kpi-val" style="color:var(--perso-msg)" id="kpi-perso">-</div>
-      <div class="kpi-lbl">Mes Mails</div>
+      <div class="kpi-lbl">Mails</div>
     </div>
   </div>
 
   <main class="main-content">
 
-    <!-- TAB 1 : AGENDA & ORGANISATION DE LA SEMAINE -->
+    <!-- TAB 1 : AGENDA -->
     <section id="tab-agenda">
       <div class="agenda-controls">
-        <!-- Sélecteur Mon agenda vs Agenda général -->
         <div class="segmented">
-          <button class="seg-btn scope-active" id="scope-btn-mine" onclick="setAgendaScope('mine')">👤 Mon agenda (TL)</button>
-          <button class="seg-btn" id="scope-btn-all" onclick="setAgendaScope('all')">🏥 Agenda général</button>
+          <button class="seg-btn scope-active" id="scope-btn-mine" onclick="setAgendaScope('mine')">Mon agenda (TL)</button>
+          <button class="seg-btn" id="scope-btn-all" onclick="setAgendaScope('all')">Service</button>
         </div>
-        <!-- Sélecteur Jour / Semaine / Mois -->
         <div class="segmented">
           <button class="seg-btn active" id="view-btn-day" onclick="setCalendarView('day')">Jour</button>
           <button class="seg-btn" id="view-btn-week" onclick="setCalendarView('week')">Semaine</button>
@@ -1034,7 +1128,7 @@
         <button class="nav-arrow" onclick="navigatePeriod(1)">›</button>
       </div>
 
-      <!-- Bandeau interactif de la semaine (Lun -> Dim) pour s'organiser d'un coup d'œil -->
+      <!-- Barre défilable des jours (mode Jour) ou des semaines (mode Semaine) -->
       <div id="week-strip-container"></div>
 
       <div class="garde-strip" id="my-gardes-strip"></div>
@@ -1042,63 +1136,58 @@
       <div id="calendar-container"></div>
     </section>
 
-    <!-- TAB 2 : ACTIVITÉ FUSIONNÉE (ACTES & CONSULTATIONS DE TL OU DU SERVICE) -->
+    <!-- TAB 2 : ACTIVITÉ FUSIONNÉE (ACTES & CONSULTATIONS) -->
     <section id="tab-activite" style="display:none;">
       <div class="agenda-controls">
-        <!-- Sélecteur Mes patients (TL) vs Tout le service -->
         <div class="segmented">
-          <button class="seg-btn scope-active" id="act-scope-mine" onclick="setActiviteScope('mine')">👤 Mes prises en charge (TL)</button>
-          <button class="seg-btn" id="act-scope-all" onclick="setActiviteScope('all')">🏥 Tout le service</button>
+          <button class="seg-btn scope-active" id="act-scope-mine" onclick="setActiviteScope('mine')">Mes patients (TL)</button>
+          <button class="seg-btn" id="act-scope-all" onclick="setActiviteScope('all')">Tout le service</button>
         </div>
-        <!-- Choix : Actes & Biopsies | Consultations & Imagerie | Les deux | À planifier -->
         <div class="segmented">
-          <button class="seg-btn active" id="act-mode-actes" onclick="setActiviteMode('actes')">⚡ Actes/Bio</button>
-          <button class="seg-btn" id="act-mode-cs" onclick="setActiviteMode('cs')">🩺 CS/IRM</button>
-          <button class="seg-btn" id="act-mode-both" onclick="setActiviteMode('both')">📋 Les deux</button>
-          <button class="seg-btn" id="act-mode-todo" onclick="setActiviteMode('todo')">⏳ À planif.</button>
+          <button class="seg-btn active" id="act-mode-actes" onclick="setActiviteMode('actes')">Actes & Bio</button>
+          <button class="seg-btn" id="act-mode-cs" onclick="setActiviteMode('cs')">CS & IRM</button>
+          <button class="seg-btn" id="act-mode-both" onclick="setActiviteMode('both')">Tout</button>
+          <button class="seg-btn" id="act-mode-todo" onclick="setActiviteMode('todo')">À planifier</button>
         </div>
       </div>
 
-      <!-- Sous-filtres dynamiques selon le mode choisi -->
       <div class="chips-row" id="activite-subchips"></div>
-
-      <!-- Liste organisée semaine par semaine -->
       <div id="activite-list-container"></div>
     </section>
 
     <!-- TAB 3 : DEMANDES D'AVIS (SERVICE) -->
     <section id="tab-avis" style="display:none;">
       <div class="chips-row">
-        <button class="chip active" id="flt-avis-all" onclick="setAvisFilter('all')">Tous les avis</button>
-        <button class="chip" id="flt-avis-non" onclick="setAvisFilter('Non répondu')">🔴 Non répondu</button>
-        <button class="chip" id="flt-avis-oui" onclick="setAvisFilter('Répondu')">🟢 Répondu</button>
+        <button class="chip active" id="flt-avis-all" onclick="setAvisFilter('all')">Tous</button>
+        <button class="chip" id="flt-avis-non" onclick="setAvisFilter('Non répondu')">Non répondu</button>
+        <button class="chip" id="flt-avis-oui" onclick="setAvisFilter('Répondu')">Répondu</button>
       </div>
       <div id="avis-list-container"></div>
     </section>
 
-    <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP — 100% PRIVÉ DANS L'APP) -->
+    <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP) -->
     <section id="tab-perso" style="display:none;">
       <div class="chips-row">
         <button class="chip active" id="flt-perso-all" onclick="setPersoFilter('all')">Tous</button>
-        <button class="chip" id="flt-perso-non" onclick="setPersoFilter('Non répondu')">🔴 À répondre</button>
-        <button class="chip" id="flt-perso-oui" onclick="setPersoFilter('Répondu')">🟢 Répondu</button>
-        <button class="chip" id="flt-perso-live" onclick="setPersoFilter('Live.fr')">📧 Live.fr</button>
-        <button class="chip" id="flt-perso-aphp" onclick="setPersoFilter('AP-HP')">🏥 AP-HP</button>
+        <button class="chip" id="flt-perso-non" onclick="setPersoFilter('Non répondu')">À répondre</button>
+        <button class="chip" id="flt-perso-oui" onclick="setPersoFilter('Répondu')">Répondu</button>
+        <button class="chip" id="flt-perso-live" onclick="setPersoFilter('Live.fr')">Live.fr</button>
+        <button class="chip" id="flt-perso-aphp" onclick="setPersoFilter('AP-HP')">AP-HP</button>
       </div>
       <div id="perso-list-container"></div>
     </section>
 
-    <!-- TAB 5 : PATIENTS -->
+    <!-- TAB 5 : DOSSIERS PATIENTS -->
     <section id="tab-patients" style="display:none;">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="patient-search" placeholder="Nom, IPP, pathologie, médecin..." oninput="renderPatientsTab()" />
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="patient-search" placeholder="Rechercher nom, IPP, acte, médecin..." oninput="renderPatientsTab()" />
       </div>
       <div class="chips-row">
         <button class="chip active" id="flt-pat-all" onclick="setPatientFilter('all')">Tous</button>
-        <button class="chip" id="flt-pat-todo" onclick="setPatientFilter('À planifier')">⏳ À planifier</button>
-        <button class="chip" id="flt-pat-irm" onclick="setPatientFilter('En attente IRM')">🧲 Attente IRM</button>
-        <button class="chip" id="flt-pat-plan" onclick="setPatientFilter('Planifié')">✅ Planifiés</button>
+        <button class="chip" id="flt-pat-todo" onclick="setPatientFilter('À planifier')">À planifier</button>
+        <button class="chip" id="flt-pat-irm" onclick="setPatientFilter('En attente IRM')">Attente IRM</button>
+        <button class="chip" id="flt-pat-plan" onclick="setPatientFilter('Planifié')">Planifiés</button>
       </div>
       <div id="patients-list-container"></div>
     </section>
@@ -1113,36 +1202,38 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAV (5 TABS OPTIMISÉS) -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" id="nav-agenda" onclick="switchTab('agenda')">
-      <span class="nav-icon">📅</span>
-      <span>Ma Semaine</span>
-    </button>
-    <button class="nav-item" id="nav-activite" onclick="switchTab('activite')">
-      <span class="nav-icon">🩺</span>
-      <span>Actes & CS</span>
-    </button>
-    <button class="nav-item" id="nav-avis" onclick="switchTab('avis')">
-      <span class="nav-icon">💬</span>
-      <span>Avis</span>
-      <span class="nav-badge" id="badge-avis-non" style="display:none;">0</span>
-    </button>
-    <button class="nav-item" id="nav-perso" onclick="switchTab('perso')">
-      <span class="nav-icon">📩</span>
-      <span>Mes Mails</span>
-      <span class="nav-badge" id="badge-perso-non" style="display:none;">0</span>
-    </button>
-    <button class="nav-item" id="nav-patients" onclick="switchTab('patients')">
-      <span class="nav-icon">👥</span>
-      <span>Dossiers</span>
-    </button>
-  </nav>
+  <!-- BOTTOM NAV DOCK (ICÔNES SVG ÉPURÉES) -->
+  <div class="bottom-nav-wrap">
+    <nav class="bottom-nav">
+      <button class="nav-item active" id="nav-agenda" onclick="switchTab('agenda')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Agenda</span>
+      </button>
+      <button class="nav-item" id="nav-activite" onclick="switchTab('activite')">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Actes & CS</span>
+      </button>
+      <button class="nav-item" id="nav-avis" onclick="switchTab('avis')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Avis</span>
+        <span class="nav-badge" id="badge-avis-non" style="display:none;">0</span>
+      </button>
+      <button class="nav-item" id="nav-perso" onclick="switchTab('perso')">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Mails</span>
+        <span class="nav-badge" id="badge-perso-non" style="display:none;">0</span>
+      </button>
+      <button class="nav-item" id="nav-patients" onclick="switchTab('patients')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Dossiers</span>
+      </button>
+    </nav>
+  </div>
 
   <script>
     const API_URL = "https://bfpyeoeggxhaiyvvltbm.supabase.co/functions/v1/agenda-cochin";
     const STORAGE_PIN_KEY = "cochin_agenda_pin_v1";
-    const STORAGE_CACHE_KEY = "cochin_agenda_cache_v5";
+    const STORAGE_CACHE_KEY = "cochin_agenda_cache_v7";
 
     const DEFAULT_GARDES_HIVER = {"2026-11-02": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2026-11-03": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-11-04": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2026-11-05": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-11-06": {"nature": "Jour semaine", "noms": ["HAMADOUCHE"], "is_tl": false}, "2026-11-07": {"nature": "Samedi garde", "noms": ["Lo Tito"], "is_tl": false}, "2026-11-08": {"nature": "Dimanche / Férié", "noms": ["Allel"], "is_tl": false}, "2026-11-09": {"nature": "Jour semaine", "noms": ["Pradier"], "is_tl": false}, "2026-11-10": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2026-11-11": {"nature": "Dimanche / Férié", "noms": ["Lecomte"], "is_tl": false}, "2026-11-12": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-11-13": {"nature": "Jour semaine", "noms": ["HAMADOUCHE"], "is_tl": false}, "2026-11-14": {"nature": "Samedi garde", "noms": ["Russomando"], "is_tl": false}, "2026-11-15": {"nature": "Dimanche / Férié", "noms": ["MONNIER"], "is_tl": false}, "2026-11-16": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2026-11-17": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-11-18": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2026-11-19": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2026-11-20": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-11-21": {"nature": "Samedi garde", "noms": ["Lecomte"], "is_tl": false}, "2026-11-22": {"nature": "Dimanche / Férié", "noms": ["Lo tito"], "is_tl": false}, "2026-11-23": {"nature": "Jour semaine", "noms": ["Pradier"], "is_tl": false}, "2026-11-24": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-11-25": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2026-11-26": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-11-27": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2026-11-28": {"nature": "Samedi garde", "noms": ["Lefevre"], "is_tl": true}, "2026-11-29": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2026-11-30": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2026-12-01": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-12-02": {"nature": "Jour semaine", "noms": ["Russomando", "Haffiane"], "is_tl": false}, "2026-12-03": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2026-12-04": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2026-12-05": {"nature": "Samedi garde", "noms": ["parat", "MONNIER"], "is_tl": false}, "2026-12-06": {"nature": "Dimanche / Férié", "noms": ["TALABARD", "Lo Tito"], "is_tl": false}, "2026-12-07": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2026-12-08": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-12-09": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-12-10": {"nature": "Jour semaine", "noms": ["LECOMTE", "Lo Tito"], "is_tl": false}, "2026-12-11": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-12-12": {"nature": "Samedi garde", "noms": ["Pesce"], "is_tl": false}, "2026-12-13": {"nature": "Dimanche / Férié", "noms": ["lo tito"], "is_tl": false}, "2026-12-14": {"nature": "Jour semaine", "noms": ["Sadoun"], "is_tl": false}, "2026-12-15": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2026-12-16": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2026-12-17": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2026-12-18": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2026-12-19": {"nature": "Samedi garde", "noms": ["HAMADOUCHE"], "is_tl": false}, "2026-12-20": {"nature": "Dimanche / Férié", "noms": ["Russomando", "Pesce"], "is_tl": false}, "2026-12-21": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2026-12-22": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-12-23": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2026-12-24": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2026-12-25": {"nature": "Dimanche / Férié", "noms": ["Lemouchi"], "is_tl": false}, "2026-12-26": {"nature": "Samedi garde", "noms": ["PRADIER"], "is_tl": false}, "2026-12-27": {"nature": "Dimanche / Férié", "noms": ["Allel"], "is_tl": false}, "2026-12-28": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2026-12-29": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2026-12-30": {"nature": "Jour semaine", "noms": ["Lemouchi", "Haffiane"], "is_tl": false}, "2026-12-31": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-01-01": {"nature": "Dimanche / Férié", "noms": ["HAMADOUCHE"], "is_tl": false}, "2027-01-02": {"nature": "Samedi garde", "noms": ["MONNIER"], "is_tl": false}, "2027-01-03": {"nature": "Dimanche / Férié", "noms": ["HAMADOUCHE"], "is_tl": false}, "2027-01-04": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-01-05": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-01-06": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-01-07": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2027-01-08": {"nature": "Jour semaine", "noms": ["Pesce"], "is_tl": false}, "2027-01-09": {"nature": "Samedi garde", "noms": ["Lecomte"], "is_tl": false}, "2027-01-10": {"nature": "Dimanche / Férié", "noms": ["Lusi"], "is_tl": false}, "2027-01-11": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-01-12": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-01-13": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-01-14": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-01-15": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-01-16": {"nature": "Samedi garde", "noms": ["Lusi"], "is_tl": false}, "2027-01-17": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-01-18": {"nature": "Jour semaine", "noms": ["Sadoun"], "is_tl": false}, "2027-01-19": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-01-20": {"nature": "Jour semaine", "noms": ["Russomando", "Haffiane"], "is_tl": false}, "2027-01-21": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-01-22": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-01-23": {"nature": "Samedi garde", "noms": ["Russomando"], "is_tl": false}, "2027-01-24": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2027-01-25": {"nature": "Jour semaine", "noms": ["Pesce"], "is_tl": false}, "2027-01-26": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-01-27": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-01-28": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-01-29": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-01-30": {"nature": "Samedi garde", "noms": ["parat"], "is_tl": false}, "2027-01-31": {"nature": "Dimanche / Férié", "noms": ["Lemouchi"], "is_tl": false}, "2027-02-01": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-02-02": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-02-03": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-02-04": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-02-05": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-02-06": {"nature": "Samedi garde", "noms": ["Lefevre"], "is_tl": true}, "2027-02-07": {"nature": "Dimanche / Férié", "noms": ["Lusi"], "is_tl": false}, "2027-02-08": {"nature": "Jour semaine", "noms": ["Sadoun"], "is_tl": false}, "2027-02-09": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-02-10": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-02-11": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-02-12": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2027-02-13": {"nature": "Samedi garde", "noms": ["Pradier"], "is_tl": false}, "2027-02-14": {"nature": "Dimanche / Férié", "noms": ["Russomando"], "is_tl": false}, "2027-02-15": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-02-16": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-02-17": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-02-18": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-02-19": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-02-20": {"nature": "Samedi garde", "noms": ["Lusi"], "is_tl": false}, "2027-02-21": {"nature": "Dimanche / Férié", "noms": ["TALABARD", "Lo Tito"], "is_tl": false}, "2027-02-22": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-02-23": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-02-24": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-02-25": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2027-02-26": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-02-27": {"nature": "Samedi garde", "noms": ["Allel"], "is_tl": false}, "2027-02-28": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-03-01": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-03-02": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-03-03": {"nature": "Jour semaine", "noms": ["Gracia"], "is_tl": false}, "2027-03-04": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-03-05": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-06": {"nature": "Samedi garde", "noms": ["parat"], "is_tl": false}, "2027-03-07": {"nature": "Dimanche / Férié", "noms": ["MONNIER"], "is_tl": false}, "2027-03-08": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-09": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-03-10": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-03-11": {"nature": "Jour semaine", "noms": ["Parat"], "is_tl": false}, "2027-03-12": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-03-13": {"nature": "Samedi garde", "noms": ["Lemouchi"], "is_tl": false}, "2027-03-14": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2027-03-15": {"nature": "Jour semaine", "noms": ["Gracia"], "is_tl": false}, "2027-03-16": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-03-17": {"nature": "Jour semaine", "noms": ["Pesce", "Haffiane"], "is_tl": false}, "2027-03-18": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-19": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-03-20": {"nature": "Samedi garde", "noms": ["Lo Tito"], "is_tl": false}, "2027-03-21": {"nature": "Dimanche / Férié", "noms": ["Lusi"], "is_tl": false}, "2027-03-22": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-03-23": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-03-24": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-03-25": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-03-26": {"nature": "Jour semaine", "noms": ["HAMADOUCHE"], "is_tl": false}, "2027-03-27": {"nature": "Samedi garde", "noms": ["Allel"], "is_tl": false}, "2027-03-28": {"nature": "Dimanche / Férié", "noms": ["Pesce"], "is_tl": false}, "2027-03-29": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-03-30": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-03-31": {"nature": "Jour semaine", "noms": ["Russomando"], "is_tl": false}, "2027-04-01": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-04-02": {"nature": "Jour semaine", "noms": ["Lemouchi"], "is_tl": false}, "2027-04-03": {"nature": "Samedi garde", "noms": ["Lo Tito"], "is_tl": false}, "2027-04-04": {"nature": "Dimanche / Férié", "noms": ["MONNIER"], "is_tl": false}, "2027-04-05": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-04-06": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-04-07": {"nature": "Jour semaine", "noms": ["CHASSAGNON"], "is_tl": false}, "2027-04-08": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-04-09": {"nature": "Jour semaine", "noms": ["TALABARD"], "is_tl": false}, "2027-04-10": {"nature": "Samedi garde", "noms": ["Allel"], "is_tl": false}, "2027-04-11": {"nature": "Dimanche / Férié", "noms": ["TALABARD"], "is_tl": false}, "2027-04-12": {"nature": "Jour semaine", "noms": ["MONNIER"], "is_tl": false}, "2027-04-13": {"nature": "Jour semaine", "noms": ["DOHAN"], "is_tl": false}, "2027-04-14": {"nature": "Jour semaine", "noms": ["Lefevre"], "is_tl": true}, "2027-04-15": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-04-16": {"nature": "Jour semaine", "noms": ["Lecomte"], "is_tl": false}, "2027-04-17": {"nature": "Samedi garde", "noms": ["Pesce"], "is_tl": false}, "2027-04-18": {"nature": "Dimanche / Férié", "noms": ["Lecomte"], "is_tl": false}, "2027-04-19": {"nature": "Jour semaine", "noms": ["Lo Tito"], "is_tl": false}, "2027-04-20": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-04-21": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-04-22": {"nature": "Jour semaine", "noms": ["Lusi"], "is_tl": false}, "2027-04-23": {"nature": "Jour semaine", "noms": ["Allel"], "is_tl": false}, "2027-04-24": {"nature": "Samedi garde", "noms": ["Russomando"], "is_tl": false}, "2027-04-25": {"nature": "Dimanche / Férié", "noms": ["Lemouchi"], "is_tl": false}, "2027-04-26": {"nature": "Jour semaine", "noms": ["Pesce"], "is_tl": false}, "2027-04-27": {"nature": "Jour semaine", "noms": ["BARAT"], "is_tl": false}, "2027-04-28": {"nature": "Jour semaine", "noms": ["lecomte"], "is_tl": false}, "2027-04-29": {"nature": "Jour semaine", "noms": ["PRADIER"], "is_tl": false}, "2027-04-30": {"nature": "Jour semaine", "noms": ["parat"], "is_tl": false}, "2027-05-01": {"nature": "Dimanche / Férié", "noms": ["Lecomte"], "is_tl": false}, "2027-05-02": {"nature": "Dimanche / Férié", "noms": ["parat"], "is_tl": false}, "2027-05-03": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-04": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-05": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-06": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-07": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-08": {"nature": "Samedi garde", "noms": [], "is_tl": false}, "2027-05-09": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-10": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-11": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-12": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-13": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-14": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-15": {"nature": "Samedi garde", "noms": [], "is_tl": false}, "2027-05-16": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-17": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-18": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-19": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-20": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-21": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-22": {"nature": "Samedi garde", "noms": [], "is_tl": false}, "2027-05-23": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-24": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-25": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-26": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-27": {"nature": "Dimanche / Férié", "noms": [], "is_tl": false}, "2027-05-28": {"nature": "", "noms": [], "is_tl": false}, "2027-05-29": {"nature": "Jour semaine", "noms": [], "is_tl": false}, "2027-05-30": {"nature": "Samedi garde", "noms": [], "is_tl": false}};
     const GENERAL_PLANNING_NOV = {"2026-11-02": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL méta OS"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "YA"}, {"poste": "IRM", "doc": "FEYDY"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM(Cirtal/Ewing)"}]}, "2026-11-03": {"am": [{"poste": "ECHO", "doc": "YA"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "SL"}, {"poste": "CONSULTATION", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "UCSA", "doc": "YA"}, {"poste": "STAFF", "doc": "Chef et AL sarcomes"}]}, "2026-11-04": {"am": [{"poste": "ECHO", "doc": "THEVENIN ET SL"}, {"poste": "GESTES (C)", "doc": "TL/SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH/SL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR/YA"}, {"poste": "IRM", "doc": "SL"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-11-05": {"am": [{"poste": "ECHO", "doc": "AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "SL"}], "pm": [{"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "HM/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-06": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "YA"}], "pm": [{"poste": "GESTES (C)", "doc": "YA"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "AC/SL"}, {"poste": "IRM", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}, "2026-11-09": {"am": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL méta OS"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "YA"}, {"poste": "IRM", "doc": "TL"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM(Cirtal/Ewing)"}]}, "2026-11-10": {"am": [{"poste": "ECHO", "doc": "YA"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "AL"}, {"poste": "CONSULTATION", "doc": "HM"}, {"poste": "UCSA", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "UCSA", "doc": "YA"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-11-11": {"am": [{"poste": "ECHO", "doc": "FERIE"}], "pm": []}, "2026-11-12": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "SL"}], "pm": [{"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "AL/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-13": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "YA"}], "pm": [{"poste": "GESTES (C)", "doc": "YA"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "AC/SL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "MIHOUBI (MPR RHUMATO)"}]}, "2026-11-16": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL méta OS"}], "pm": [{"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "YA"}, {"poste": "IRM", "doc": "FEYDY"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM Cirtal /Ewing"}]}, "2026-11-17": {"am": [{"poste": "ECHO", "doc": "YA"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL(à partir de 11h)"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "AL"}, {"poste": "CONSULTATION", "doc": "HM"}, {"poste": "UCSA", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "UCSA", "doc": "YA"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-11-18": {"am": [{"poste": "ECHO", "doc": "THEVENIN"}, {"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "YA"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR/YA"}, {"poste": "IRM", "doc": "MH"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-11-19": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM/MH"}, {"poste": "TDM ACHARD 1", "doc": "AL"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-20": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "YA"}], "pm": [{"poste": "GESTES (C)", "doc": "YA"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "HM/AC"}, {"poste": "IRM", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}, "2026-11-23": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "TL"}, {"poste": "IRM", "doc": "HM"}, {"poste": "STAFF", "doc": "HM"}]}, "2026-11-24": {"am": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "SL"}, {"poste": "CONSULTATION", "doc": "HM"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-11-25": {"am": [{"poste": "ECHO", "doc": "THEVENIN ET SL"}, {"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR"}, {"poste": "IRM", "doc": "SL"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-11-26": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "SL"}], "pm": [{"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "SL"}, {"poste": "TDM ACHARD 1", "doc": "AL/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-11-27": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "SL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "MH"}, {"poste": "STAFF", "doc": "GUERINI (prothèse)"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "TDM ACHARD 1", "doc": "AC/SL"}, {"poste": "CONSULTATION", "doc": "MH/INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}, "2026-11-30": {"am": [{"poste": "ECHO", "doc": "HAMMOUD"}, {"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "TL"}, {"poste": "UCSA", "doc": "TL"}, {"poste": "STAFF", "doc": "TL"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM OLLIER 3", "doc": "TL"}, {"poste": "IRM", "doc": "FEYDY"}, {"poste": "ECHO", "doc": "HM"}, {"poste": "STAFF", "doc": "HM"}]}, "2026-12-01": {"am": [{"poste": "ECHO", "doc": "YANG"}, {"poste": "GESTES (C)", "doc": "MIHOUBI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "IRM 3T", "doc": "DRAPE"}, {"poste": "IRM 1,5T", "doc": "AL"}, {"poste": "CONSULTATION", "doc": "HM"}, {"poste": "UCSA", "doc": "HM"}], "pm": [{"poste": "GESTES (C)", "doc": "HM"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "HM/MH"}, {"poste": "TDM ACHARD 1", "doc": "TL"}, {"poste": "ECHO", "doc": "MH"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "STAFF", "doc": "Chef et AL Sarcomes"}]}, "2026-12-02": {"am": [{"poste": "ECHO", "doc": "THEVENIN"}, {"poste": "GESTES (C)", "doc": "TL"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL/MH"}, {"poste": "TDM OLLIER 3", "doc": "MH"}, {"poste": "IRM 3T", "doc": "DRAPE/YANG"}, {"poste": "IRM 1,5T", "doc": "MOUTOUNET"}], "pm": [{"poste": "GESTES (C)", "doc": "DRAPE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "TL"}, {"poste": "TDM ACHARD 1", "doc": "SEROR"}, {"poste": "IRM", "doc": "MH"}, {"poste": "ECHO", "doc": "MIHOUBI"}, {"poste": "STAFF", "doc": "YANG(Rachis/Rhumato OS)"}]}, "2026-12-03": {"am": [{"poste": "ECHO", "doc": "AL/AC"}, {"poste": "GESTES (C)", "doc": "RUBINI"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM"}], "pm": [{"poste": "TDM OLLIER 4 (SAU)", "doc": "HM/MH"}, {"poste": "TDM ACHARD 1", "doc": "AL/MH"}, {"poste": "IRM", "doc": "AC"}, {"poste": "ECHO", "doc": "MD"}, {"poste": "ALLURA", "doc": "HM"}, {"poste": "CONSULTATION", "doc": "FEYDY"}]}, "2026-12-04": {"am": [{"poste": "ECHO", "doc": "TL/YANG"}, {"poste": "GESTES (C)", "doc": "MAINTENANCE"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "AC"}, {"poste": "IRM 3T", "doc": "HM"}, {"poste": "IRM 1,5T", "doc": "MH"}], "pm": [{"poste": "GESTES (C)", "doc": "MH"}, {"poste": "TDM OLLIER 4 (SAU)", "doc": "MH"}, {"poste": "TDM ACHARD 1", "doc": "HM/AC"}, {"poste": "IRM", "doc": "TL"}, {"poste": "CONSULTATION", "doc": "INTERNES"}, {"poste": "STAFF", "doc": "Mihoubi MPR Rhumato"}]}};
@@ -1861,15 +1952,36 @@
       }).join("");
     }
 
+    // Table de sécurité Priorité 1 (désignation explicite dans les mails reçus)
+    const EXPLICIT_EMAIL_DOC_BY_KEY = {
+      "2026-10-16|huitricquentin|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-10-28|jaoualnaima|cs": { medecin: "Dr HAMADOUCHE Macil (MH)", isMine: false },
+      "2026-10-30|wachtlermariebeatrice|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-10-30|cantinbaptiste|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-02|wajntrobraphael|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-02|abitbolmarc|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-02|dechatregaetan|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-03|dejuniensarneckipius|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-03|bouantounalexandrefaysal|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-03|mestreausacha|cs": { medecin: "Dr TALABARD Marie-Pauline (MP) / Internes RI", isMine: false },
+      "2026-11-03|mabitlaurence|cs": { medecin: "Dr TALABARD Marie-Pauline (MP)", isMine: false },
+      "2026-11-17|delekianghislaine|cs": { medecin: "Dr HAMADOUCHE Macil (MH) (Écho)", isMine: false }
+    };
+
     // Règle d'attribution en 2 niveaux :
     // 1. Priorité 1 (Mail explicite) : Si un mail désigne clairement le médecin opérateur/consultant (ex: "avec MP" = Dr TALABARD Marie-Pauline, "avec Thomas" / "@LEFEVRE Thomas Jean" = Dr LEFEVRE Thomas Jean, "avec Macil" = Dr HAMADOUCHE Macil), on privilégie ce médecin.
     // 2. Priorité 2 (Planning d'Anne-Marie V3 + Maquette) : Si le mail ne désigne pas clairement l'opérateur/consultant, on détermine le médecin via le planning d'Anne-Marie sur le poste correspondant (et si TL est au poste -> isMine = true de facto).
-    function resolveEventWithPlanning(rawMedecin, title, lieu, isoDate, horaire, category, instructions) {
+    function resolveEventWithPlanning(rawMedecin, title, lieu, isoDate, horaire, category, instructions, patientName) {
       const tLow = String(title || "").toLowerCase();
       const lLow = String(lieu || "").toLowerCase();
       const mRaw = String(rawMedecin || "").trim();
       const mLow = mRaw.toLowerCase();
       const remLow = String(instructions || "").toLowerCase();
+      const pKey = `${isoDate || ""}|${normName(patientName)}|${category}`;
+
+      if (EXPLICIT_EMAIL_DOC_BY_KEY[pKey]) {
+        return EXPLICIT_EMAIL_DOC_BY_KEY[pKey];
+      }
 
       // 1. Consultations d'anesthésie -> Médecin Anesthésiste
       if ((tLow.includes("anesthésie") || lLow.includes("anesth") || mLow.includes("anesth")) && !tLow.includes("arthroscanner") && !tLow.includes("écho") && !tLow.includes("echo")) {
@@ -1889,31 +2001,33 @@
 
       const myV = getMyVacationForIso(isoDate);
 
-      // 3. PRIORITÉ 1 : Si le médecin opérateur/consultant est clairement désigné (MP = Marie-Pauline Talabard, TL = Thomas Lefèvre, MH = Macil Hamadouche, etc.)
-      const hasExplicitTL = mLow.includes("lefevre") || mLow.includes("lefèvre") || /\btl\b/.test(mLow) || /avec\s+thomas|dr\s+lefevre|t\.\s*lefevre/i.test(remLow);
-      const hasExplicitMP = mLow.includes("talabard") || /\bmp\b|\bmpt\b/.test(mLow) || /avec\s+mp\b|dr\s+talabard/i.test(remLow);
-      const hasOtherExplicitDoc = /hamadouche|\bmh\b|monnier|\bhm\b|laporte|\bal\b|lusi|\bsl\b|allel|\bya\b|costea|\bac\b|feydy|drap[eé]|moutounet|yang|mihoubi|seror|rubini|th[eé]venin/i.test(mLow);
+      // Ignorer l'ancienne mention générique "(Consultation RI)" si elle provient d'un cache antérieur
+      const isGenericOldTag = mRaw === "Dr LEFEVRE Thomas Jean (Consultation RI)" || mRaw === "Dr LEFEVRE Thomas Jean / Internes (Consultation RI)";
+      const cleanMRaw = isGenericOldTag ? "" : mRaw;
+      const cleanMLow = cleanMRaw.toLowerCase();
 
-      // Si MP (Marie-Pauline Talabard) est désignée seule (ex: "Lundi 02.11 avec MP", "Mardi 03.11 avec MP", "Télécs avec Dr TALABARD")
+      // 3. PRIORITÉ 1 : Si le médecin opérateur/consultant est clairement désigné (MP = Marie-Pauline Talabard, TL = Thomas Lefèvre, MH = Macil Hamadouche, etc.)
+      const hasExplicitTL = cleanMLow.includes("lefevre") || cleanMLow.includes("lefèvre") || /\btl\b/.test(cleanMLow) || /avec\s+thomas|dr\s+lefevre|t\.\s*lefevre/i.test(remLow);
+      const hasExplicitMP = cleanMLow.includes("talabard") || /\bmp\b|\bmpt\b/.test(cleanMLow) || /avec\s+mp\b|dr\s+talabard/i.test(remLow);
+      const hasOtherExplicitDoc = /hamadouche|\bmh\b|monnier|\bhm\b|laporte|\bal\b|lusi|\bsl\b|allel|\bya\b|costea|\bac\b|feydy|drap[eé]|moutounet|yang|mihoubi|seror|rubini|th[eé]venin/i.test(cleanMLow);
+
       if (hasExplicitMP && !hasExplicitTL) {
         return {
-          medecin: mRaw.includes("TALABARD") ? mRaw : "Dr TALABARD Marie-Pauline (MP)",
+          medecin: cleanMRaw.includes("TALABARD") ? cleanMRaw : "Dr TALABARD Marie-Pauline (MP)",
           isMine: false
         };
       }
 
-      // Si un autre médecin senior est explicitement désigné sans TL (ex: "avec Macil", "Dr HAMADOUCHE Macil", "Dr MONNIER Hippolyte")
       if (hasOtherExplicitDoc && !hasExplicitTL) {
         return {
-          medecin: mRaw,
+          medecin: cleanMRaw,
           isMine: false
         };
       }
 
-      // Si TL (Thomas Lefèvre) est explicitement désigné (et qu'il n'est pas en journée libre hors Cochin)
       if (hasExplicitTL && !myV.offCochin) {
         return {
-          medecin: mRaw || "Dr LEFEVRE Thomas Jean (TL)",
+          medecin: cleanMRaw || "Dr LEFEVRE Thomas Jean (TL)",
           isMine: true
         };
       }
@@ -1985,9 +2099,9 @@
       }
 
       if (myV.offCochin) {
-        return { medecin: mRaw || "Service Radio B", isMine: false };
+        return { medecin: cleanMRaw || "Service Radio B", isMine: false };
       }
-      return { medecin: mRaw || "Service Radio B", isMine: hasExplicitTL };
+      return { medecin: cleanMRaw || "Service Radio B", isMine: hasExplicitTL };
     }
 
     function getAllTimedEvents() {
@@ -1995,7 +2109,7 @@
       for (const a of (appData.actes || [])) {
         if (!String(a["Identité Patient"] || "").trim() || String(a["Date"] || "").includes("SEMAINE")) continue;
         const iso = parseFrDateToIso(a["Date"]);
-        const res = resolveEventWithPlanning(a["Médecin en charge"], a["Type d'acte / Consultation"], a["Lieu / Modalité"], iso, a["Horaire"], "acte", a["Instructions & Remarques"]);
+        const res = resolveEventWithPlanning(a["Médecin en charge"], a["Type d'acte / Consultation"], a["Lieu / Modalité"], iso, a["Horaire"], "acte", a["Instructions & Remarques"], a["Identité Patient"]);
         events.push({
           category: "acte",
           badgeLabel: "Acte RI",
@@ -2014,7 +2128,7 @@
       for (const b of (appData.Biopsies || [])) {
         if (!String(b["Identité Patient"] || "").trim() || String(b["Date"] || "").includes("SEMAINE")) continue;
         const iso = parseFrDateToIso(b["Date"]);
-        const res = resolveEventWithPlanning(b["Médecin en charge"], b["Type d'acte / Consultation"], b["Lieu / Modalité"], iso, b["Horaire"], "biopsie", b["Instructions & Remarques"]);
+        const res = resolveEventWithPlanning(b["Médecin en charge"], b["Type d'acte / Consultation"], b["Lieu / Modalité"], iso, b["Horaire"], "biopsie", b["Instructions & Remarques"], b["Identité Patient"]);
         events.push({
           category: "biopsie",
           badgeLabel: "Biopsie",
@@ -2034,7 +2148,7 @@
         if (!String(c["Identité Patient"] || "").trim() || String(c["Date"] || "").includes("SEMAINE")) continue;
         const iso = parseFrDateToIso(c["Date"]);
         const isTele = String(c["Type d'acte / Consultation"] || "").toLowerCase().includes("télé");
-        const res = resolveEventWithPlanning(c["Médecin en charge"], c["Type d'acte / Consultation"], c["Lieu / Modalité"], iso, c["Horaire"], "cs", c["Instructions & Remarques"]);
+        const res = resolveEventWithPlanning(c["Médecin en charge"], c["Type d'acte / Consultation"], c["Lieu / Modalité"], iso, c["Horaire"], "cs", c["Instructions & Remarques"], c["Identité Patient"]);
         events.push({
           category: "cs",
           badgeLabel: isTele ? "Télécs" : "Consult",
@@ -2054,7 +2168,7 @@
         if (!String(im["Identité Patient"] || "").trim() || String(im["Date"] || "").includes("SEMAINE")) continue;
         const iso = parseFrDateToIso(im["Date"]);
         const isAnesth = String(im["Type d'acte / Consultation"] || "").toLowerCase().includes("anesth") && !String(im["Type d'acte / Consultation"] || "").toLowerCase().includes("arthroscanner");
-        const res = resolveEventWithPlanning(im["Médecin en charge"], im["Type d'acte / Consultation"], im["Lieu / Modalité"], iso, im["Horaire"], "img", im["Instructions & Remarques"]);
+        const res = resolveEventWithPlanning(im["Médecin en charge"], im["Type d'acte / Consultation"], im["Lieu / Modalité"], iso, im["Horaire"], "img", im["Instructions & Remarques"], im["Identité Patient"]);
         events.push({
           category: "img",
           badgeLabel: isAnesth ? "CS Anesth" : "Imagerie",
@@ -2073,7 +2187,7 @@
       for (const rdv of PERSONAL_MAIL_RDVS) {
         events.push({
           category: "mail-rdv",
-          badgeLabel: "📌 RDV / Libéral",
+          badgeLabel: "RDV / Libéral",
           isoDate: rdv.isoDate,
           dateStr: rdv.dateStr,
           horaire: rdv.horaire,
@@ -2142,16 +2256,16 @@
         return `
           <div class="event-card type-mail-rdv">
             <div class="event-top">
-              <span class="event-time-badge">🕒 ${showDate ? `${ev.dateStr} • ` : ""}${ev.horaire}</span>
+              <span class="event-time-badge">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
               <span class="pill pill-mail-rdv">${ev.badgeLabel}</span>
             </div>
             <div class="event-patient"><span>${ev.title}</span></div>
             <div class="event-title">${ev.patient}</div>
             <div class="event-meta">
-              <span>📍 ${ev.lieu || "-"}</span>
-              <span>👤 ${ev.medecin || "-"}</span>
+              <span class="doc-tag">${ev.medecin || "-"}</span>
+              <span>${ev.lieu || "-"}</span>
             </div>
-            ${ev.remarques ? `<div style="font-size:11.5px; color:#FDE68A; margin-top:4px;">${ev.remarques}</div>` : ""}
+            ${ev.remarques ? `<div style="font-size:11px; color:#FDE68A; margin-top:4px;">${ev.remarques}</div>` : ""}
           </div>
         `;
       }
@@ -2165,24 +2279,25 @@
         ev.category === "cs" ? "pill-cs" : "pill-img";
 
       const safePatientAttr = encodeURIComponent(JSON.stringify({ name: ev.patient, ipp: ev.ipp }));
+      const isTlDoc = /lefevre|lefèvre|\btl\b/i.test(ev.medecin || "");
 
       return `
         <div class="event-card type-${ev.category}" onclick="openPatientModal('${safePatientAttr}')">
           <div class="event-top">
-            <span class="event-time-badge">🕒 ${showDate ? `${ev.dateStr} • ` : ""}${ev.horaire}</span>
+            <span class="event-time-badge">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
             <span class="pill ${pillClass}">${ev.badgeLabel}</span>
           </div>
           <div class="event-patient">
             <span>${ev.patient}</span>
-            <span class="event-ipp">${ev.ipp && ev.ipp !== "Non spécifié" ? ev.ipp : ""}</span>
+            ${ev.ipp && ev.ipp !== "Non spécifié" ? `<span class="event-ipp">${ev.ipp}</span>` : ""}
           </div>
           <div class="event-title">${ev.title}</div>
           <div class="event-meta">
-            <span>👨‍⚕️ ${ev.medecin || "-"}</span>
-            <span>📍 ${ev.lieu || "-"}</span>
+            <span class="doc-tag ${isTlDoc ? "is-tl" : ""}">${ev.medecin || "-"}</span>
+            <span>${ev.lieu || "-"}</span>
           </div>
-          ${ev.remarques ? `<div style="font-size:11.5px; color:#CBD5E1; margin-top:4px;">${ev.remarques}</div>` : ""}
-          ${anticoag ? `<div class="alert-anticoag">⚠️ Anticoagulant / Hémostase (voir fiche)</div>` : ""}
+          ${ev.remarques ? `<div style="font-size:11px; color:#94A3B8; margin-top:4px;">${ev.remarques}</div>` : ""}
+          ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
         </div>
       `;
     }
@@ -2239,9 +2354,9 @@
         const [y, m, d] = iso.split("-").map(Number);
         const dt = new Date(y, m - 1, d, 12, 0, 0);
         const lbl = dt.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
-        return `<button class="garde-chip ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">🚨 ${lbl}</button>`;
+        return `<button class="garde-chip ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">${lbl}</button>`;
       }).join("");
-      stripEl.innerHTML = `<a class="garde-strip-lbl" href="https://docs.google.com/spreadsheets/d/1_XCqFLamiYM02RamAfc1khawt-jU3RG0CUU20x_M_Lw/edit" target="_blank" rel="noopener">Mes Gardes ↗</a>${chips}`;
+      stripEl.innerHTML = `<a class="garde-strip-lbl" href="https://docs.google.com/spreadsheets/d/1_XCqFLamiYM02RamAfc1khawt-jU3RG0CUU20x_M_Lw/edit" target="_blank" rel="noopener">Gardes ↗</a>${chips}`;
     }
 
     function renderGardeBannerHtml(iso) {
@@ -2250,7 +2365,7 @@
       if (g.is_tl) {
         return `
           <div class="garde-banner is-me">
-            <span>🚨 <strong>VOUS ÊTES DE GARDE</strong> (${g.nature})</span>
+            <span><strong>VOUS ÊTES DE GARDE</strong> (${g.nature})</span>
             <span class="pill pill-danger">Dr LEFEVRE</span>
           </div>
         `;
@@ -2258,7 +2373,7 @@
       if (agendaScope === "mine") return "";
       return `
         <div class="garde-banner">
-          <span>🌙 Garde (${g.nature}) : <strong>Dr ${g.noms.join(" / ")}</strong></span>
+          <span>Garde (${g.nature}) : <strong>Dr ${g.noms.join(" / ")}</strong></span>
           <span class="pill pill-cs">Garde</span>
         </div>
       `;
@@ -2266,7 +2381,7 @@
 
     function getShortVacTagForDay(iso, dt) {
       const g = getGardeForIso(iso);
-      if (g && g.is_tl) return { lbl: "🚨Garde", cls: "post-liberal" };
+      if (g && g.is_tl) return { lbl: "Garde", cls: "post-liberal" };
       const dow = dt.getDay();
       if (dow === 0 || dow === 6) return { lbl: "WE", cls: "post-libre" };
       const myV = getMyVacationForIso(iso);
@@ -2290,15 +2405,14 @@
       const activeMon = getMondayOf(selectedDate);
       const activeMonIso = dateToIso(activeMon);
 
-      // En mode SEMAINE : afficher les cases résumées de chaque semaine (cliquables pour sélectionner la semaine à visualiser)
+      // En mode SEMAINE : afficher les cases résumées de chaque semaine (défilables et cliquables)
       if (calendarView === "week") {
-        const startMon = new Date(2026, 9, 26, 12, 0, 0); // Lundi 26 oct 2026
+        const startMon = new Date(2026, 9, 26, 12, 0, 0);
         const weeksList = [];
         for (let w = 0; w < 18; w++) {
           const m = new Date(startMon.getFullYear(), startMon.getMonth(), startMon.getDate() + w * 7, 12, 0, 0);
           weeksList.push(m);
         }
-        // S'assurer que la semaine actuellement sélectionnée est dans la liste si l'utilisateur navigue plus loin
         if (!weeksList.some(m => dateToIso(m) === activeMonIso)) {
           weeksList.push(activeMon);
           weeksList.sort((a, b) => a.getTime() - b.getTime());
@@ -2338,9 +2452,9 @@
           let badges = "";
           if (nbGestes > 0) badges += `<span class="wsc-tag pill-acte">${nbGestes} Geste${nbGestes > 1 ? "s" : ""}</span>`;
           if (nbCs > 0) badges += `<span class="wsc-tag pill-cs">${nbCs} CS/Exam</span>`;
-          if (hasGarde) badges += `<span class="wsc-tag pill-danger">🚨 Garde</span>`;
-          if (hasLiberal) badges += `<span class="wsc-tag post-liberal">💼 JDP/GSH</span>`;
-          if (hasMaster) badges += `<span class="wsc-tag post-staff">🎓 Master.</span>`;
+          if (hasGarde) badges += `<span class="wsc-tag pill-danger">Garde</span>`;
+          if (hasLiberal) badges += `<span class="wsc-tag post-liberal">JDP/GSH</span>`;
+          if (hasMaster) badges += `<span class="wsc-tag post-staff">Master.</span>`;
           if (!badges) badges = `<span class="wsc-tag post-libre">Planning std</span>`;
 
           const isActive = (monIso === activeMonIso);
@@ -2364,26 +2478,41 @@
         return;
       }
 
-      // En mode JOUR : afficher les 7 jours de la semaine (Lun -> Dim) pour changer de jour d'un tap (les flèches < > changent de semaine)
+      // En mode JOUR : Barre des jours défilable horizontalement (de -14j à +45j autour de la semaine ou du 26 oct au 31 janv)
       const selIso = dateToIso(selectedDate);
-      const dows = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+      const startDay = new Date(2026, 9, 26, 12, 0, 0);
+      const endDay = new Date(2027, 1, 7, 12, 0, 0);
+      const minDate = selectedDate < startDay ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() - 7, 12, 0, 0) : startDay;
+      const maxDate = selectedDate > endDay ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 14, 12, 0, 0) : endDay;
+
       let cellsHtml = "";
-      for (let i = 0; i < 7; i++) {
-        const cur = new Date(activeMon.getFullYear(), activeMon.getMonth(), activeMon.getDate() + i, 12, 0, 0);
+      const cur = new Date(minDate.getTime());
+      while (cur <= maxDate) {
         const iso = dateToIso(cur);
         const g = getGardeForIso(iso);
         const evCnt = allEvents.filter(e => e.isoDate === iso).length;
         const tag = getShortVacTagForDay(iso, cur);
+        const dowLbl = cur.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
+        const dayNum = cur.getDate();
+        const monthShort = dayNum === 1 ? " " + cur.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "") : "";
+
         cellsHtml += `
-          <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" onclick="selectDayFromWeekStrip('${iso}')">
-            <span class="ws-dow">${dows[i]}</span>
-            <span class="ws-num">${cur.getDate()}</span>
+          <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" id="ws-day-${iso}" onclick="selectDayFromWeekStrip('${iso}')">
+            <span class="ws-dow">${dowLbl}</span>
+            <span class="ws-num">${dayNum}${monthShort}</span>
             <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
             <span class="ws-cnt">${evCnt > 0 ? evCnt + " RDV" : "·"}</span>
           </div>
         `;
+        cur.setDate(cur.getDate() + 1);
       }
-      stripContainer.innerHTML = `<div class="week-strip-bar">${cellsHtml}</div>`;
+      stripContainer.innerHTML = `<div class="day-strip-scroll" id="day-strip-scroll">${cellsHtml}</div>`;
+      setTimeout(() => {
+        const activeDayEl = document.getElementById("ws-day-" + selIso);
+        if (activeDayEl && activeDayEl.scrollIntoView) {
+          activeDayEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        }
+      }, 20);
     }
 
     function selectWeekFromSummary(monIso) {
@@ -2417,7 +2546,13 @@
           year: "numeric"
         });
         const myVac = getMyVacationForIso(iso);
-        subEl.textContent = myVac.note || (isGeneral ? "Agenda général du service" : "Mon agenda personnel (Dr T. Lefèvre)");
+        if (myVac.note) {
+          subEl.textContent = myVac.note;
+          subEl.style.display = "block";
+        } else {
+          subEl.textContent = "";
+          subEl.style.display = "none";
+        }
 
         const genVac = getGeneralPlanningForIso(iso);
         const dayEvents = allEvents.filter(e => e.isoDate === iso);
@@ -2426,22 +2561,21 @@
           ${renderGardeBannerHtml(iso)}
           <div class="vac-grid">
             <div class="vac-card">
-              <div class="vac-period">☀️ Matin</div>
+              <div class="vac-period">Matin</div>
               <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
             </div>
             <div class="vac-card">
-              <div class="vac-period">🌤️ Après-midi</div>
+              <div class="vac-period">Après-midi</div>
               <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
             </div>
           </div>
           <div class="section-label">
-            <span>${isGeneral ? "Tous les RDV & Patients du service" : "Mes RDV & Patients"} (${dayEvents.length})</span>
-            <span style="color:var(--primary); cursor:pointer;" onclick="setCalendarView('week')">Vue Semaine ›</span>
+            <span>${isGeneral ? "Patients du service" : "Patients & RDV"} (${dayEvents.length})</span>
           </div>
         `;
 
         html += dayEvents.length === 0
-          ? `<div class="empty-state">${myVac.offCochin && !isGeneral ? "Journée hors Cochin (aucun patient Cochin à votre charge)." : "Aucun RDV programmé sur votre créneau."}</div>`
+          ? `<div class="empty-state">${myVac.offCochin && !isGeneral ? "Journée hors Cochin." : "Aucun RDV programmé sur ce créneau."}</div>`
           : dayEvents.map(ev => renderEventCard(ev, false)).join("");
 
         container.innerHTML = html;
@@ -2450,7 +2584,8 @@
         const mon = getMondayOf(selectedDate);
         const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 12, 0, 0);
         titleEl.textContent = `Semaine du ${mon.getDate()}/${mon.getMonth() + 1} au ${sun.getDate()}/${sun.getMonth() + 1}/${sun.getFullYear()}`;
-        subEl.textContent = isGeneral ? "Touchez une semaine ci-dessus pour la visualiser (Équipe Radio B)" : "Touchez une semaine ci-dessus pour la visualiser (Dr T. Lefèvre)";
+        subEl.textContent = "";
+        subEl.style.display = "none";
 
         let html = "";
 
@@ -2469,8 +2604,8 @@
           }
 
           const gardeBadge = g && g.is_tl
-            ? `<span class="pill pill-danger">🚨 DE GARDE</span>`
-            : (isGeneral && g && g.noms && g.noms.length ? `<span class="pill pill-cs">🌙 Garde : ${g.noms.join("/")}</span>` : `<span class="pill pill-cs">${dayEvs.length} RDV ›</span>`);
+            ? `<span class="pill pill-danger">DE GARDE</span>`
+            : (isGeneral && g && g.noms && g.noms.length ? `<span class="pill pill-cs">Garde : ${g.noms.join("/")}</span>` : `<span class="pill pill-cs">${dayEvs.length} RDV</span>`);
 
           html += `
             <div class="week-day-card" style="${g && g.is_tl ? "border-color:#EF4444;background:rgba(239,68,68,0.08);" : ""}">
@@ -2479,9 +2614,9 @@
                 ${gardeBadge}
               </div>
               ${!isWeekend ? `
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:${dayEvs.length ? "8px" : "0"};">
-                  <div><span style="font-size:10px;color:var(--text-muted);">☀️</span> ${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
-                  <div><span style="font-size:10px;color:var(--text-muted);">🌤️</span> ${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+                <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:${dayEvs.length ? "8px" : "0"};">
+                  <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
+                  <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
                 </div>
               ` : ""}
               ${dayEvs.map(ev => renderEventCard(ev, false)).join("")}
@@ -2494,7 +2629,8 @@
         const year = selectedDate.getFullYear();
         const month = selectedDate.getMonth();
         titleEl.textContent = new Date(year, month, 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
-        subEl.textContent = isGeneral ? "Calendrier mensuel général" : "Mon calendrier mensuel";
+        subEl.textContent = "";
+        subEl.style.display = "none";
 
         const firstDay = new Date(year, month, 1, 12, 0, 0);
         const startOffset = (firstDay.getDay() + 6) % 7;
@@ -2519,9 +2655,9 @@
 
           let tagHtml = "";
           if (g && g.is_tl) {
-            tagHtml = `<div class="month-vac-tag" style="background:rgba(220,38,38,0.35);color:#FCA5A5;">🚨 GARDE</div>`;
+            tagHtml = `<div class="month-vac-tag" style="background:rgba(220,38,38,0.35);color:#FCA5A5;">GARDE</div>`;
           } else if (isGeneral && g && g.noms && g.noms.length && (dow === 0 || dow === 6)) {
-            tagHtml = `<div class="month-vac-tag" style="background:rgba(59,130,246,0.2);color:#93C5FD;">🌙 ${g.noms[0].slice(0, 6)}</div>`;
+            tagHtml = `<div class="month-vac-tag" style="background:rgba(59,130,246,0.2);color:#93C5FD;">${g.noms[0].slice(0, 6)}</div>`;
           } else if (dow >= 1 && dow <= 5 && cellDate >= new Date(2026, 10, 2)) {
             const myV = getMyVacationForIso(iso);
             const firstPost = (myV.am[0] || "").toLowerCase();
@@ -2556,12 +2692,11 @@
         html += `
           <div class="section-label" style="margin-top:12px;">
             <span>${selTitle} (${selEvs.length} RDV)</span>
-            <span style="color:var(--primary); cursor:pointer;" onclick="setCalendarView('day')">Vue Jour ›</span>
           </div>
           ${renderGardeBannerHtml(selectedIso)}
           <div class="vac-grid">
-            <div class="vac-card"><div class="vac-period">☀️ Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral)}</div></div>
-            <div class="vac-card"><div class="vac-period">🌤️ Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral)}</div></div>
+            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral)}</div></div>
+            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral)}</div></div>
           </div>
           ${selEvs.map(ev => renderEventCard(ev, false)).join("")}
         `;
@@ -2582,9 +2717,9 @@
     }
 
     // ONGLET FUSIONNÉ : ACTIVITÉ (ACTES/BIOPSIES & CONSULTATIONS/IMAGERIE DE TL OU DU SERVICE)
-    let activiteScope = "mine"; // 'mine' (Mes prises en charge TL) | 'all' (Tout le service)
-    let activiteMode = "actes"; // 'actes' | 'cs' | 'both' | 'todo'
-    let activiteSub = "all";    // sous-filtre ('all' | 'acte' | 'biopsie' | 'cs' | 'img')
+    let activiteScope = "mine";
+    let activiteMode = "actes";
+    let activiteSub = "all";
 
     function openActiviteView(mode, sub) {
       activiteMode = mode;
@@ -2632,7 +2767,7 @@
       const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 12, 0, 0);
       const mStr = mon.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
       const sStr = sun.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
-      return `Semaine du Lun ${mStr} au Dim ${sStr}`;
+      return `Semaine du ${mStr} au ${sStr}`;
     }
 
     function renderActiviteTab() {
@@ -2640,20 +2775,19 @@
       const subEl = document.getElementById("activite-subchips");
       const container = document.getElementById("activite-list-container");
 
-      // Sous-filtres contextuels selon si l'on regarde Actes/Bio ou CS/IRM
       if (activiteMode === "actes") {
         subEl.style.display = "flex";
         subEl.innerHTML = `
-          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tous les gestes</button>
-          <button class="chip ${activiteSub === "acte" ? "active" : ""}" onclick="setActiviteSub('acte')">🔴 Actes thérapeutiques</button>
-          <button class="chip ${activiteSub === "biopsie" ? "active" : ""}" onclick="setActiviteSub('biopsie')">🟣 Biopsies</button>
+          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tous</button>
+          <button class="chip ${activiteSub === "acte" ? "active" : ""}" onclick="setActiviteSub('acte')">Actes thérapeutiques</button>
+          <button class="chip ${activiteSub === "biopsie" ? "active" : ""}" onclick="setActiviteSub('biopsie')">Biopsies</button>
         `;
       } else if (activiteMode === "cs") {
         subEl.style.display = "flex";
         subEl.innerHTML = `
-          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tout (CS + Examens)</button>
-          <button class="chip ${activiteSub === "cs" ? "active" : ""}" onclick="setActiviteSub('cs')">🔵 Consultations</button>
-          <button class="chip ${activiteSub === "img" ? "active" : ""}" onclick="setActiviteSub('img')">🟢 IRM / TDM / Anesth</button>
+          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tout</button>
+          <button class="chip ${activiteSub === "cs" ? "active" : ""}" onclick="setActiviteSub('cs')">Consultations</button>
+          <button class="chip ${activiteSub === "img" ? "active" : ""}" onclick="setActiviteSub('img')">IRM / TDM / Anesth</button>
         `;
       } else {
         subEl.style.display = "none";
@@ -2690,11 +2824,10 @@
       }
 
       if (evs.length === 0) {
-        container.innerHTML = `<div class="empty-state">${activiteScope === "mine" ? "Aucun patient sur vos vacations dans cette catégorie (passez sur '🏥 Tout le service' pour voir ceux de vos collègues)." : "Aucun élément dans cette catégorie."}</div>`;
+        container.innerHTML = `<div class="empty-state">${activiteScope === "mine" ? "Aucun patient sur vos vacations dans cette catégorie." : "Aucun élément dans cette catégorie."}</div>`;
         return;
       }
 
-      // Regroupement par semaine pour organiser ses semaines facilement
       const groups = [];
       let currentLabel = null;
       let currentBucket = null;
@@ -2710,7 +2843,7 @@
 
       container.innerHTML = groups.map(g => `
         <div class="week-group-header">
-          <span>📅 ${g.label}</span>
+          <span>${g.label}</span>
           <span class="pill pill-cs">${g.items.length} patient${g.items.length > 1 ? "s" : ""}</span>
         </div>
         ${g.items.map(ev => renderEventCard(ev, true)).join("")}
