@@ -1628,13 +1628,138 @@
       return { am: def.am, pm: def.pm, note: "", offCochin: def.offCochin };
     }
 
+    // Maquette hebdomadaire complète du service (Modèle Nov 2026) pour les dates au-delà du tableau hebdomadaire
+    const GENERAL_MAQUETTE_DOW = {
+      1: {
+        am: [
+          { poste: "ECHO", doc: "HAMMOUD" },
+          { poste: "GESTES (C)", doc: "HM" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "YA" },
+          { poste: "CONSULTATION", doc: "TL" },
+          { poste: "UCSA", doc: "TL" },
+          { poste: "STAFF", doc: "TL (méta OS)" }
+        ],
+        pm: [
+          { poste: "GESTES (C)", doc: "TL" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "TL" },
+          { poste: "TDM OLLIER 3", doc: "YA" },
+          { poste: "IRM", doc: "FEYDY" },
+          { poste: "ECHO", doc: "HM" },
+          { poste: "STAFF", doc: "HM (Cirtal/Ewing)" }
+        ]
+      },
+      2: {
+        am: [
+          { poste: "ECHO", doc: "YA" },
+          { poste: "GESTES (C)", doc: "MIHOUBI" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "MH" },
+          { poste: "TDM ACHARD 1", doc: "TL" },
+          { poste: "IRM 3T", doc: "DRAPE/YANG" },
+          { poste: "IRM 1,5T", doc: "AL" },
+          { poste: "CONSULTATION", doc: "HM" },
+          { poste: "UCSA", doc: "SL" }
+        ],
+        pm: [
+          { poste: "GESTES (C)", doc: "HM" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "SL" },
+          { poste: "TDM ACHARD 1", doc: "TL" },
+          { poste: "ECHO", doc: "MH" },
+          { poste: "CONSULTATION", doc: "INTERNES" },
+          { poste: "UCSA", doc: "YA" }
+        ]
+      },
+      3: {
+        am: [
+          { poste: "ECHO", doc: "THEVENIN ET SL" },
+          { poste: "GESTES (C)", doc: "TL" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "YA" },
+          { poste: "TDM OLLIER 3", doc: "MH" },
+          { poste: "IRM 3T", doc: "DRAPE/YANG" },
+          { poste: "IRM 1,5T", doc: "MOUTOUNET" }
+        ],
+        pm: [
+          { poste: "GESTES (C)", doc: "DRAPE" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "TL" },
+          { poste: "TDM ACHARD 1", doc: "SEROR/YA" },
+          { poste: "IRM", doc: "SL" },
+          { poste: "ECHO", doc: "MIHOUBI" },
+          { poste: "CONSULTATION", doc: "TL" },
+          { poste: "UCSA", doc: "MH" }
+        ]
+      },
+      4: {
+        am: [
+          { poste: "ECHO", doc: "AL/AC" },
+          { poste: "GESTES (C)", doc: "RUBINI" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "MH" },
+          { poste: "TDM ACHARD 1", doc: "HM" },
+          { poste: "CONSULTATION", doc: "SL" }
+        ],
+        pm: [
+          { poste: "GESTES (C)", doc: "SL" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "SL" },
+          { poste: "TDM ACHARD 1", doc: "AL/MH" },
+          { poste: "IRM", doc: "AC" },
+          { poste: "ECHO", doc: "MD" },
+          { poste: "ALLURA", doc: "HM" },
+          { poste: "CONSULTATION", doc: "FEYDY" }
+        ]
+      },
+      5: {
+        am: [
+          { poste: "ECHO", doc: "TL/YANG" },
+          { poste: "GESTES (C)", doc: "MH" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "AC" },
+          { poste: "IRM 3T", doc: "HM" },
+          { poste: "IRM 1,5T", doc: "YA" }
+        ],
+        pm: [
+          { poste: "GESTES (C)", doc: "YA" },
+          { poste: "TDM OLLIER 4 (SAU)", doc: "HM" },
+          { poste: "TDM ACHARD 1", doc: "AC/SL" },
+          { poste: "IRM", doc: "TL" },
+          { poste: "CONSULTATION", doc: "MH/INTERNES" }
+        ]
+      }
+    };
+
+    const DOC_CODE_MAP = {
+      "TL": "Dr LEFEVRE Thomas Jean",
+      "HM": "Dr MONNIER Hippolyte",
+      "MH": "Dr HAMADOUCHE Macil",
+      "SL": "Dr LUSI Stéphano",
+      "YA": "Dr ALLEL Yazid",
+      "AL": "Dr LAPORTE Amandine",
+      "AC": "Dr COSTEA Adina",
+      "FEYDY": "Pr FEYDY Antoine",
+      "DRAPE": "Pr DRAPÉ Jean-Luc",
+      "YANG": "Dr YANG",
+      "MIHOUBI": "Dr MIHOUBI Fadila",
+      "MD": "Dr MIHOUBI Fadila",
+      "SEROR": "Dr SEROR Paul",
+      "RUBINI": "Dr RUBINI",
+      "THEVENIN": "Dr THÉVENIN",
+      "MOUTOUNET": "Dr MOUTOUNET",
+      "HAMMOUD": "Dr HAMMOUD",
+      "INTERNES": "Internes RI"
+    };
+
+    function expandDocString(docCodeStr) {
+      if (!docCodeStr) return "";
+      const clean = String(docCodeStr).replace(/\(.*?\)/g, "").trim();
+      const parts = clean.split(/[\/&,]+|\s+ET\s+/i).map(s => s.trim()).filter(Boolean);
+      const expanded = parts.map(p => DOC_CODE_MAP[p.toUpperCase()] || p);
+      return expanded.join(" / ");
+    }
+
     function getGeneralPlanningForIso(isoDate) {
       if (GENERAL_PLANNING_NOV[isoDate]) return GENERAL_PLANNING_NOV[isoDate];
-      const myV = getMyVacationForIso(isoDate);
-      return {
-        am: myV.am.map(p => ({ poste: p, doc: "TL" })),
-        pm: myV.pm.map(p => ({ poste: p, doc: "TL" }))
-      };
+      if (!isoDate) return { am: [], pm: [] };
+      const [y, m, d] = isoDate.split("-").map(Number);
+      const dt = new Date(y, m - 1, d, 12, 0, 0);
+      const dow = dt.getDay();
+      if (GENERAL_MAQUETTE_DOW[dow]) return GENERAL_MAQUETTE_DOW[dow];
+      return { am: [], pm: [] };
     }
 
     function renderPostPills(items, isGeneral) {
@@ -1649,38 +1774,122 @@
       }).join("");
     }
 
-    // Cohérence stricte : si Dr Thomas Lefèvre est en journée libre / libéral (ex: tous les jeudis comme le 12/11 ou 26/11),
-    // il ne s'occupe d'aucun patient de Cochin ce jour-là !
-    function isCochinEventMine(medecin, lieu, isoDate, category) {
-      if (!isoDate) return false;
-      const myV = getMyVacationForIso(isoDate);
-      // Si Thomas n'est pas à Cochin ce jour-là (journée libre, libéral JDP/GSH Clinique du Sport, Masterclass, Férié) -> AUCUN patient Cochin dans Mon agenda
-      if (myV.offCochin) return false;
+    // Recroisement automatique de chaque RDV patient avec le Planning du service :
+    // - Si Dr Thomas Lefèvre (TL) est au poste correspondant sur le planning -> le patient passe de facto dans l'agenda de TL (isMine = true)
+    // - Si un autre médecin est au poste sur le planning -> le patient est attribué au médecin en poste sur ce créneau (isMine = false)
+    function resolveEventWithPlanning(rawMedecin, title, lieu, isoDate, horaire, category) {
+      const tLow = String(title || "").toLowerCase();
+      const lLow = String(lieu || "").toLowerCase();
+      const mLow = String(rawMedecin || "").toLowerCase();
 
-      const m = String(medecin || "").toLowerCase();
-      // Si un autre médecin de Cochin est explicitement nommé (Monnier, Talabard, Hamadouche, Lusi, Allel, Laporte, Feydy, Anesthésiste), ce n'est pas mon RDV
-      if (m.includes("monnier") || m.includes("talabard") || m.includes("hamadouche") || m.includes("lusi") || m.includes("allel") || m.includes("laporte") || m.includes("feydy") || m.includes("anesth")) {
-        return false;
+      // 1. Consultations d'anesthésie -> Médecin Anesthésiste
+      if ((tLow.includes("anesthésie") || lLow.includes("anesth") || mLow.includes("anesth")) && !tLow.includes("arthroscanner") && !tLow.includes("écho") && !tLow.includes("echo")) {
+        return { medecin: "Médecin Anesthésiste", isMine: false };
       }
-      // Si Thomas est explicitement nommé (ex: Consultation Dr LEFEVRE)
-      if (m.includes("lefevre") || m.includes("lefèvre") || /\btl\b/.test(m)) {
-        return true;
+
+      // 2. Dates avant la prise de poste du 02/11/2026
+      if (!isoDate) {
+        const isMe = mLow.includes("lefevre") || mLow.includes("lefèvre") || /\btl\b/.test(mLow);
+        return { medecin: rawMedecin || "À planifier", isMine: isMe };
       }
-      // Pour les actes et biopsies à Cochin : uniquement si Thomas est sur la vacation correspondante ce jour-là (ex: Mardi au scanner Achard 1)
-      if (category === "acte" || category === "biopsie") {
-        const allMyPosts = [...myV.am, ...myV.pm].join(" ").toLowerCase();
-        const l = String(lieu || "").toLowerCase();
-        if (allMyPosts.includes("achard") && (l.includes("achard") || l.includes("scanner") || !l)) return true;
-        if (allMyPosts.includes("gestes") && l.includes("geste")) return true;
-        if (allMyPosts.includes("écho") && (l.includes("écho") || l.includes("echo"))) return true;
+      const [y, m, d] = isoDate.split("-").map(Number);
+      const dt = new Date(y, m - 1, d, 12, 0, 0);
+      if (dt < new Date(2026, 10, 2)) {
+        return { medecin: rawMedecin || "Service Radio B", isMine: false };
       }
-      return false;
+
+      const myV = getMyVacationForIso(isoDate);
+      const genPlan = getGeneralPlanningForIso(isoDate);
+      const mins = parseMinutes(horaire);
+      const isPm = (mins >= 13 * 60 && mins < 23 * 60);
+      const halfDaySlots = isPm ? (genPlan.pm || []) : (genPlan.am || []);
+      const otherHalfSlots = isPm ? (genPlan.am || []) : (genPlan.pm || []);
+
+      // 3. Déterminer le poste cible du patient (TDM ACHARD 1, ECHO, GESTES (C), CONSULTATION, IRM, ALLURA)
+      let targetPostType = "TDM ACHARD 1";
+      let displayPostShort = "TDM Achard 1";
+      if (tLow.includes("écho") || tLow.includes("echo") || lLow.includes("écho") || lLow.includes("echo")) {
+        targetPostType = "ECHO";
+        displayPostShort = "Écho";
+      } else if (tLow.includes("arthroscanner") || lLow.includes("geste") || tLow.includes("scopie")) {
+        targetPostType = "GESTES";
+        displayPostShort = "Gestes";
+      } else if (tLow.includes("allura") || lLow.includes("allura") || tLow.includes("embolisation") || tLow.includes("artério")) {
+        targetPostType = "ALLURA";
+        displayPostShort = "Allura";
+      } else if (category === "img" && (tLow.includes("irm") || lLow.includes("irm"))) {
+        targetPostType = "IRM";
+        displayPostShort = "IRM";
+      } else if (category === "cs") {
+        targetPostType = "CONSULTATION";
+        displayPostShort = "Consultation";
+      } else {
+        targetPostType = "TDM ACHARD 1";
+        displayPostShort = "TDM Achard 1";
+      }
+
+      function findMatchingDocs(slots, postType) {
+        const matches = slots.filter(s => {
+          const p = String(s.poste || "").toUpperCase();
+          const dc = String(s.doc || "").toUpperCase();
+          if (!dc || dc === "FERME" || dc === "FERIE" || dc === "MAINTENANCE") return false;
+          if (postType === "ECHO") return p.includes("ECHO");
+          if (postType === "GESTES") return p.includes("GESTES");
+          if (postType === "ALLURA") return p.includes("ALLURA");
+          if (postType === "IRM") return p.includes("IRM");
+          if (postType === "CONSULTATION") return p.includes("CONSULTATION");
+          if (postType === "TDM ACHARD 1") return p.includes("ACHARD");
+          return false;
+        });
+        return matches;
+      }
+
+      let matchedSlots = findMatchingDocs(halfDaySlots, targetPostType);
+
+      // Cas particulier pour les consultations / téléconsultations de RI si le poste CONSULTATION de la demi-journée est fermé ou tenu par les internes RI :
+      if (targetPostType === "CONSULTATION") {
+        if (matchedSlots.length === 0) {
+          matchedSlots = findMatchingDocs(otherHalfSlots, "CONSULTATION");
+        }
+        // Lundi 02/11 (prise de poste TL en UCSA/Ollier) ou Mardi 03/11 13h (INTERNES + TL au TDM Achard 1 pour ses patients)
+        if (!myV.offCochin && (isoDate === "2026-11-02" || isoDate === "2026-11-03")) {
+          return {
+            medecin: isoDate === "2026-11-03" ? "Dr LEFEVRE Thomas Jean / Internes (Consultation RI)" : "Dr LEFEVRE Thomas Jean (Consultation RI)",
+            isMine: true
+          };
+        }
+      }
+
+      if (matchedSlots.length > 0) {
+        const rawCodes = matchedSlots.map(s => s.doc).join(" / ");
+        const hasTL = /\bTL\b/i.test(rawCodes) && !myV.offCochin;
+        if (hasTL) {
+          return {
+            medecin: `Dr LEFEVRE Thomas Jean (${displayPostShort})`,
+            isMine: true
+          };
+        } else {
+          const expandedNames = matchedSlots.map(s => expandDocString(s.doc)).join(" / ");
+          return {
+            medecin: `${expandedNames} (${displayPostShort})`,
+            isMine: false
+          };
+        }
+      }
+
+      // Fallback si le poste n'est pas trouvé dans la demi-journée
+      if (myV.offCochin) {
+        return { medecin: rawMedecin || "Service Radio B", isMine: false };
+      }
+      const isExplicitTL = mLow.includes("lefevre") || mLow.includes("lefèvre") || /\btl\b/.test(mLow);
+      return { medecin: rawMedecin || "Service Radio B", isMine: isExplicitTL };
     }
 
     function getAllTimedEvents() {
       const events = [];
       for (const a of appData.actes) {
         const iso = parseFrDateToIso(a["Date"]);
+        const res = resolveEventWithPlanning(a["Médecin en charge"], a["Type d'acte / Consultation"], a["Lieu / Modalité"], iso, a["Horaire"], "acte");
         events.push({
           category: "acte",
           badgeLabel: "Acte RI",
@@ -1689,19 +1898,16 @@
           horaire: a["Horaire"] || "-",
           patient: a["Identité Patient"],
           ipp: a["N° Dossier / IPP"],
-          medecin: a["Médecin en charge"],
+          medecin: res.medecin,
           title: a["Type d'acte / Consultation"],
           lieu: a["Lieu / Modalité"],
           remarques: a["Instructions & Remarques"],
-          isMine: isCochinEventMine(a["Médecin en charge"], a["Lieu / Modalité"], iso, "acte")
+          isMine: res.isMine
         });
       }
       for (const b of appData.Biopsies) {
         const iso = parseFrDateToIso(b["Date"]);
-        let med = b["Médecin en charge"] || "";
-        // S'assurer que le 12/11 et le 26/11 affichent bien le senior de Cochin en poste même si le cache local est ancien
-        if (iso === "2026-11-12" && (!med || med.includes("quipe"))) med = "Dr MONNIER Hippolyte (TDM Achard-1)";
-        if (iso === "2026-11-26" && (!med || med.includes("quipe"))) med = "Dr LAPORTE Amandine / Dr COSTEA Adina (Écho)";
+        const res = resolveEventWithPlanning(b["Médecin en charge"], b["Type d'acte / Consultation"], b["Lieu / Modalité"], iso, b["Horaire"], "biopsie");
         events.push({
           category: "biopsie",
           badgeLabel: "Biopsie",
@@ -1710,16 +1916,17 @@
           horaire: b["Horaire"] || "-",
           patient: b["Identité Patient"],
           ipp: b["N° Dossier / IPP"],
-          medecin: med,
+          medecin: res.medecin,
           title: b["Type d'acte / Consultation"],
           lieu: b["Lieu / Modalité"],
           remarques: b["Instructions & Remarques"],
-          isMine: isCochinEventMine(med, b["Lieu / Modalité"], iso, "biopsie")
+          isMine: res.isMine
         });
       }
       for (const c of appData.Consultations) {
         const iso = parseFrDateToIso(c["Date"]);
         const isTele = String(c["Type d'acte / Consultation"] || "").toLowerCase().includes("télé");
+        const res = resolveEventWithPlanning(c["Médecin en charge"], c["Type d'acte / Consultation"], c["Lieu / Modalité"], iso, c["Horaire"], "cs");
         events.push({
           category: "cs",
           badgeLabel: isTele ? "Télécs" : "Consult",
@@ -1728,16 +1935,17 @@
           horaire: c["Horaire"] || "-",
           patient: c["Identité Patient"],
           ipp: c["N° Dossier / IPP"],
-          medecin: c["Médecin en charge"],
+          medecin: res.medecin,
           title: c["Type d'acte / Consultation"],
           lieu: c["Lieu / Modalité"],
           remarques: c["Instructions & Remarques"],
-          isMine: isCochinEventMine(c["Médecin en charge"], c["Lieu / Modalité"], iso, "cs")
+          isMine: res.isMine
         });
       }
       for (const im of appData.Imagerie_Anesthesie) {
         const iso = parseFrDateToIso(im["Date"]);
-        const isAnesth = String(im["Type d'acte / Consultation"] || "").toLowerCase().includes("anesth");
+        const isAnesth = String(im["Type d'acte / Consultation"] || "").toLowerCase().includes("anesth") && !String(im["Type d'acte / Consultation"] || "").toLowerCase().includes("arthroscanner");
+        const res = resolveEventWithPlanning(im["Médecin en charge"], im["Type d'acte / Consultation"], im["Lieu / Modalité"], iso, im["Horaire"], "img");
         events.push({
           category: "img",
           badgeLabel: isAnesth ? "CS Anesth" : "Imagerie",
@@ -1746,11 +1954,11 @@
           horaire: im["Horaire"] || "-",
           patient: im["Identité Patient"],
           ipp: im["N° Dossier / IPP"],
-          medecin: im["Médecin en charge"],
+          medecin: res.medecin,
           title: im["Type d'acte / Consultation"],
           lieu: im["Lieu / Modalité"],
           remarques: im["Instructions & Remarques"],
-          isMine: isCochinEventMine(im["Médecin en charge"], im["Lieu / Modalité"], iso, "img")
+          isMine: res.isMine
         });
       }
       for (const rdv of PERSONAL_MAIL_RDVS) {
