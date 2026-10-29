@@ -2036,10 +2036,14 @@
 
     function getSuiviEntry(ev) {
       const k = getSuiviKey(ev);
-      if (suiviBlocMap[k]) return suiviBlocMap[k];
       const fallbackKey = `${ev.isoDate || "nodate"}_${normName(ev.patient)}`;
-      if (suiviBlocMap[fallbackKey]) return suiviBlocMap[fallbackKey];
-      return { materiel: "", remarques: "", updated_at: "" };
+      const stored = suiviBlocMap[k] || suiviBlocMap[fallbackKey] || {};
+      return {
+        materiel: stored.materiel !== undefined && stored.materiel !== "" ? stored.materiel : (ev.sheetMateriel || ""),
+        remarques: stored.remarques !== undefined && stored.remarques !== "" ? stored.remarques : (ev.sheetRemarquesSuivi || ""),
+        anapath: stored.anapath !== undefined && stored.anapath !== "" ? stored.anapath : (ev.sheetAnapath || ""),
+        updated_at: stored.updated_at || ""
+      };
     }
 
     function escHtmlAttr(s) {
@@ -2053,10 +2057,12 @@
     async function saveSuiviFromDom(suiviKey, encodedMeta, prefix = "") {
       const matEl = document.getElementById((prefix || "") + "mat-" + suiviKey);
       const remEl = document.getElementById((prefix || "") + "rem-" + suiviKey);
+      const anaEl = document.getElementById((prefix || "") + "ana-" + suiviKey);
       const statusEl = document.getElementById((prefix || "") + "status-" + suiviKey);
-      if (!matEl && !remEl) return;
+      if (!matEl && !remEl && !anaEl) return;
       const materiel = matEl ? matEl.value.trim() : "";
       const remarques = remEl ? remEl.value.trim() : "";
+      const anapath = anaEl ? anaEl.value.trim() : "";
       let meta = {};
       try {
         meta = JSON.parse(decodeURIComponent(encodedMeta));
@@ -2064,6 +2070,7 @@
 
       const entry = {
         suivi_key: suiviKey,
+        row: meta.row || 0,
         patient_name: meta.patient || "",
         ipp: meta.ipp || "",
         iso_date: meta.isoDate || "",
@@ -2071,6 +2078,7 @@
         title: meta.title || "",
         materiel,
         remarques,
+        anapath,
         updated_at: new Date().toISOString()
       };
       suiviBlocMap[suiviKey] = entry;
@@ -2078,15 +2086,27 @@
         localStorage.setItem(STORAGE_SUIVI_KEY, JSON.stringify(suiviBlocMap));
       } catch (e) {}
 
+      // Mettre à jour en mémoire dans appData.actes ou appData.Biopsies
+      const targetArr = meta.category === "biopsie" ? (appData.Biopsies || []) : (appData.actes || []);
+      for (const r of targetArr) {
+        if ((meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === normName(meta.patient)) {
+          r["Matériel utilisé"] = materiel;
+          r["Remarques & Suivi"] = remarques;
+          if (meta.category === "biopsie") {
+            r["Anatomopathologie"] = anapath;
+          }
+        }
+      }
+
       if (statusEl) {
-        statusEl.textContent = "✓ Enregistré";
+        statusEl.textContent = "⏳ Sync GSheet...";
       }
       updateKpis();
 
       const savedPin = localStorage.getItem(STORAGE_PIN_KEY);
       if (!savedPin) return;
       try {
-        await fetch(API_URL, {
+        const resp = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-agenda-pin": savedPin },
           body: JSON.stringify({
@@ -2095,7 +2115,12 @@
             ...entry
           })
         });
-      } catch (e) {}
+        if (resp.ok && statusEl) {
+          statusEl.textContent = "✓ GSheet synchronisé";
+        }
+      } catch (e) {
+        if (statusEl) statusEl.textContent = "✓ Sauvegardé (local)";
+      }
     }
 
     function loadPersoWithLocalStatus() {
@@ -2552,6 +2577,7 @@
         const iso = parseFrDateToIso(a["Date"]);
         const res = resolveEventWithPlanning(a["Médecin en charge"], a["Type d'acte / Consultation"], a["Lieu / Modalité"], iso, a["Horaire"], "acte", a["Instructions & Remarques"], a["Identité Patient"]);
         events.push({
+          row: a._row || 0,
           category: "acte",
           badgeLabel: "Acte RI",
           isoDate: iso,
@@ -2563,6 +2589,9 @@
           title: a["Type d'acte / Consultation"],
           lieu: a["Lieu / Modalité"],
           remarques: a["Instructions & Remarques"],
+          sheetMateriel: a["Matériel utilisé"] || "",
+          sheetRemarquesSuivi: a["Remarques & Suivi"] || "",
+          sheetAnapath: "",
           isMine: res.isMine
         });
       }
@@ -2571,6 +2600,7 @@
         const iso = parseFrDateToIso(b["Date"]);
         const res = resolveEventWithPlanning(b["Médecin en charge"], b["Type d'acte / Consultation"], b["Lieu / Modalité"], iso, b["Horaire"], "biopsie", b["Instructions & Remarques"], b["Identité Patient"]);
         events.push({
+          row: b._row || 0,
           category: "biopsie",
           badgeLabel: "Biopsie",
           isoDate: iso,
@@ -2582,6 +2612,9 @@
           title: b["Type d'acte / Consultation"],
           lieu: b["Lieu / Modalité"],
           remarques: b["Instructions & Remarques"],
+          sheetMateriel: b["Matériel utilisé"] || "",
+          sheetRemarquesSuivi: b["Remarques & Suivi"] || "",
+          sheetAnapath: b["Anatomopathologie"] || "",
           isMine: res.isMine
         });
       }
@@ -2743,31 +2776,43 @@
       const sEntry = getSuiviEntry(ev);
       const todayIso = dateToIso(new Date());
       const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
-      const hasSaved = Boolean((sEntry.materiel && sEntry.materiel.trim()) || (sEntry.remarques && sEntry.remarques.trim()));
+      const isBio = (ev.category === "biopsie");
+      const hasSaved = Boolean(
+        (sEntry.materiel && sEntry.materiel.trim()) ||
+        (sEntry.remarques && sEntry.remarques.trim()) ||
+        (sEntry.anapath && sEntry.anapath.trim())
+      );
       const safeEvMeta = encodeURIComponent(JSON.stringify({
+        row: ev.row || 0,
         patient: ev.patient,
         ipp: ev.ipp,
         isoDate: ev.isoDate,
         category: ev.category,
         title: ev.title
       }));
-      const statusTxt = hasSaved ? "✓ Enregistré" : (isBlocDayOrPast ? "Jour du bloc — À remplir" : "À venir");
+      const statusTxt = hasSaved ? "✓ GSheet synchronisé" : (isBlocDayOrPast ? "Jour du bloc — À remplir" : "À venir");
       return `
         <div class="bloc-notes-box" onclick="event.stopPropagation()">
           <div class="bloc-notes-header">
-            <span>🔧 Matériel & Remarques bloc</span>
+            <span>🔧 ${isBio ? "Biopsie : Matériel, Suivi & Anapath" : "Bloc : Matériel & Remarques"}</span>
             <span class="bloc-save-status" id="${prefix}status-${sKey}">${statusTxt}</span>
           </div>
           <div>
-            <label class="bloc-field-lbl">Matériel utilisé</label>
-            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Ex : Sonde cryo, trocart 11G, aiguille biopsie, ciment..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')" />
+            <label class="bloc-field-lbl">Matériel utilisé (Col. K GSheet)</label>
+            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="${isBio ? "Ex : Trocart 11G/14G, aiguille coaxiale..." : "Ex : Sonde cryo IceSphere, trocart, ciment..."}" onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')" />
           </div>
           <div>
-            <label class="bloc-field-lbl">Remarques & Suivi post-geste</label>
-            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Ex : Déroulement, contrôle TDM, suites, anapath ou CS à prévoir..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">${escHtmlAttr(sEntry.remarques)}</textarea>
+            <label class="bloc-field-lbl">Remarques & Suivi (Col. L GSheet)</label>
+            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Ex : Déroulement du geste, contrôle TDM, suites..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">${escHtmlAttr(sEntry.remarques)}</textarea>
           </div>
+          ${isBio ? `
+          <div>
+            <label class="bloc-field-lbl" style="color:#E9D5FF;">🔬 Anatomopathologie (Col. M GSheet Biopsies)</label>
+            <textarea rows="2" class="bloc-input" style="border-color:rgba(168,85,247,0.4);" id="${prefix}ana-${sKey}" placeholder="Résultat anapath, histologie, confrontation..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">${escHtmlAttr(sEntry.anapath)}</textarea>
+          </div>
+          ` : ""}
           <div class="bloc-save-row">
-            <span style="font-size:9.5px; color:var(--text-muted);">Synchronisé dans Suivi</span>
+            <span style="font-size:9.5px; color:var(--text-muted);">Remplit directement l'onglet ${isBio ? "Biopsies" : "actes"} du GSheet</span>
             <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">Enregistrer</button>
           </div>
         </div>
@@ -2813,7 +2858,7 @@
       const todayIso = dateToIso(new Date());
       const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
       const sEntry = isGeste ? getSuiviEntry(ev) : null;
-      const hasSavedSuivi = Boolean(sEntry && ((sEntry.materiel && sEntry.materiel.trim()) || (sEntry.remarques && sEntry.remarques.trim())));
+      const hasSavedSuivi = Boolean(sEntry && ((sEntry.materiel && sEntry.materiel.trim()) || (sEntry.remarques && sEntry.remarques.trim()) || (sEntry.anapath && sEntry.anapath.trim())));
       const showInlineBlocBox = isGeste && (inSuiviTab || (ev.isMine && (isBlocDayOrPast || hasSavedSuivi)));
 
       return `
@@ -3632,20 +3677,20 @@
       let evs = getAllTimedEvents().filter(e => {
         if (e.category !== "acte" && e.category !== "biopsie") return false;
         const entry = getSuiviEntry(e);
-        const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()));
+        const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()) || (entry.anapath && entry.anapath.trim()));
         return e.isMine || hasNotes;
       });
 
       if (suiviFilter === "done") {
         evs = evs.filter(e => {
           const entry = getSuiviEntry(e);
-          const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()));
+          const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()) || (entry.anapath && entry.anapath.trim()));
           return (e.isoDate && e.isoDate <= todayIso) || hasNotes;
         });
       } else if (suiviFilter === "upcoming") {
         evs = evs.filter(e => {
           const entry = getSuiviEntry(e);
-          const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()));
+          const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()) || (entry.anapath && entry.anapath.trim()));
           return (!e.isoDate || e.isoDate > todayIso) && !hasNotes;
         });
       } else if (suiviFilter === "acte") {
@@ -3657,7 +3702,7 @@
       if (q) {
         evs = evs.filter(e => {
           const entry = getSuiviEntry(e);
-          const hay = `${e.patient} ${e.ipp} ${e.title} ${e.remarques} ${entry.materiel} ${entry.remarques}`.toLowerCase();
+          const hay = `${e.patient} ${e.ipp} ${e.title} ${e.remarques} ${entry.materiel} ${entry.remarques} ${entry.anapath}`.toLowerCase();
           return hay.includes(q);
         });
       }
