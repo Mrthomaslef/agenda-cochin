@@ -763,28 +763,49 @@
 
     /* SCROLLABLE DAYS BAR (BARRE DES JOURS DÉFILABLE) */
     .day-strip-scroll {
+      position: relative;
       display: flex;
-      gap: 6px;
+      gap: 4px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      padding: 2px 2px 8px;
+      padding: 2px 0 8px;
       margin-bottom: 4px;
       scrollbar-width: none;
       width: 100%;
     }
     .day-strip-scroll::-webkit-scrollbar { display: none; }
     .ws-day {
-      min-width: 56px;
-      flex-shrink: 0;
+      flex: 0 0 calc((100% - 24px) * 0.156);
+      min-width: 48px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 11px;
-      padding: 6px 4px;
+      padding: 6px 3px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
       cursor: pointer;
+    }
+    .ws-day.is-weekend {
+      flex: 0 0 calc((100% - 24px) * 0.11);
+      min-width: 34px;
+      padding: 6px 1px;
+      opacity: 0.88;
+    }
+    .ws-day.is-weekend .ws-dow {
+      font-size: 8px;
+    }
+    .ws-day.is-weekend .ws-num {
+      font-size: 11.5px;
+    }
+    .ws-day.is-weekend .ws-mon {
+      display: none;
+    }
+    .ws-day.is-weekend .ws-vac {
+      font-size: 7px;
+      padding: 1px 2px;
+      max-width: 32px;
     }
     .ws-day.active {
       border-color: var(--primary);
@@ -2775,30 +2796,25 @@
       const maxDate = selectedDate > endDay ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 14, 12, 0, 0) : endDay;
 
       let cellsHtml = "";
-      let prevMonthIdx = -1;
       const cur = new Date(minDate.getTime());
       while (cur <= maxDate) {
         const iso = dateToIso(cur);
         const g = getGardeForIso(iso);
         const evCnt = allEvents.filter(e => e.isoDate === iso).length;
         const tag = getShortVacTagForDay(iso, cur);
+        const dowNum = cur.getDay();
+        const isWe = (dowNum === 0 || dowNum === 6);
         const dowLbl = cur.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
         const dayNum = cur.getDate();
-        const curMonthIdx = cur.getMonth();
         const monthShort = cur.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "");
         const monthFull = cur.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
-        if (curMonthIdx !== prevMonthIdx) {
-          cellsHtml += `<div class="ws-month-sep">${monthShort}</div>`;
-          prevMonthIdx = curMonthIdx;
-        }
-
         cellsHtml += `
-          <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
+          <div class="ws-day ${isWe ? "is-weekend" : ""} ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
             <span class="ws-dow">${dowLbl}</span>
             <span class="ws-num">${dayNum}<span class="ws-mon">${monthShort}</span></span>
             <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
-            <span class="ws-cnt">${evCnt > 0 ? evCnt + " RDV" : "·"}</span>
+            <span class="ws-cnt">${evCnt > 0 ? (isWe ? evCnt : evCnt + " RDV") : "·"}</span>
           </div>
         `;
         cur.setDate(cur.getDate() + 1);
@@ -2818,7 +2834,7 @@
           const targetIso = (opts && opts.alignMonday) ? activeMonIso : getMondayOf(selectedDate) ? dateToIso(getMondayOf(selectedDate)) : selIso;
           const monEl = document.getElementById("ws-day-" + targetIso) || document.getElementById("ws-day-" + selIso);
           if (monEl) {
-            newDayScroll.scrollLeft = Math.max(0, monEl.offsetLeft - 2);
+            newDayScroll.scrollLeft = Math.max(0, monEl.offsetLeft);
           }
         }
         updateDayStripVisibleMonth();
