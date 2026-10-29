@@ -2026,7 +2026,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v34"; /*__APP_BUILD_ID:v34__*/
+        const CURRENT_BUILD_ID = "v35"; /*__APP_BUILD_ID:v35__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -4045,22 +4045,23 @@
         ].join("\n");
       }
 
-      // Mode 2 : Consultation de Suivi
+      // Mode 2 : Consultation de Suivi (rappel concis, sans détails techniques ni matériel)
       let indicInitSuivi = prof.indicationInitiale || "[indication initiale : douleurs et retentissement fonctionnel pré-opératoire à préciser]";
       if (!isPureDiagBiopsie && !/fonctionnel/i.test(indicInitSuivi) && !indicInitSuivi.includes("À préciser")) {
         indicInitSuivi += /doul/i.test(indicInitSuivi) ? " avec retentissement fonctionnel" : " responsable de douleurs et d'un retentissement fonctionnel";
       }
-      let detailsProc = prof.detailsProcedure || "[détails de la procédure : niveaux, gestes associés type biopsie à préciser]";
-      if (sEntry.materiel && sEntry.materiel.trim()) {
-        detailsProc += ` (matériel utilisé : ${sEntry.materiel.trim()})`;
-      }
-      if (sEntry.anapath && sEntry.anapath.trim()) {
-        detailsProc += ` [anatomopathologie : ${sEntry.anapath.trim()}]`;
-      }
-      const resTech = prof.resultatTechnique || "[résultat technique : remplissage, réduction à préciser]";
-      const partProc = (sEntry.remarques && sEntry.remarques.trim())
-        ? sEntry.remarques.trim()
-        : (prof.particularitesProcedurales || "l'absence d'anomalie procédurale notable [ou particularités à préciser]");
+      const gesteSuiviCourt = String(prof.gesteRealise || "[nom de l'intervention / niveaux traités à préciser]")
+        .replace(/\s+sous\s+(?:guidage\s+|contrôle\s+)?(?:scanographique|scanner|échographique|échographie|scopique|anesthésie\s+générale|anesthésie\s+locale|AG|AL)(?:\s+et\s+sous\s+[^,.)]+)?/gi, "")
+        .replace(/\s+en\s+HDJ(?:\s+radio\s*B)?/gi, "")
+        .trim();
+
+      const partSuivi = (sEntry.remarques && sEntry.remarques.trim())
+        ? stripTechnicalMaterialForCrh(sEntry.remarques.trim())
+        : (prof.particularitesProcedurales || "");
+      const suitesRappelClause = partSuivi
+        ? `marqué par ${partSuivi}`
+        : "avec des suites simples";
+
       const evoGlobale = prof.evolutionGlobale || "[favorable / défavorable / stationnaire à préciser]";
       const evoDetails = (sEntry.suivi_cs && sEntry.suivi_cs.trim())
         ? sEntry.suivi_cs.trim()
@@ -4070,9 +4071,9 @@
       return [
         "Chère Consœur, Cher Confrère,",
         "",
-        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${prof.gesteRealise}.`,
+        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${gesteSuiviCourt}.`,
         "",
-        `Pour rappel, ${lePatient} présentait ${indicInitSuivi}. L'intervention a consisté en ${detailsProc}. Le geste a permis ${resTech}, marqué sur le plan procédural par ${partProc}.`,
+        `Pour rappel, ce geste avait été réalisé devant ${indicInitSuivi}, ${suitesRappelClause}.`,
         "",
         `Sur le plan clinique, ${lePatient} rapporte une évolution ${evoGlobale} au décours de la procédure, tant sur le plan des douleurs que du retentissement fonctionnel (${evoDetails}), sans complication ${compCibles} intercurrente.`,
         "",
