@@ -1906,7 +1906,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v26"; /*__APP_BUILD_ID:v26__*/
+        const CURRENT_BUILD_ID = "v27"; /*__APP_BUILD_ID:v27__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -2041,30 +2041,52 @@
         pullDist = 0;
       }, { passive: true });
 
-      // Garantir le défilement vertical à la molette de souris sur tous les navigateurs / WebViews
+      // Garantir le défilement vertical et horizontal à la molette de souris sur tous les navigateurs / WebViews
       window.addEventListener("wheel", (e) => {
-        if (e.ctrlKey || e.metaKey || !e.deltaY) return;
+        if (e.ctrlKey || e.metaKey) return;
+        const dy = e.deltaY || 0;
+        const dx = e.deltaX || 0;
+        if (!dy && !dx) return;
+
+        // 1. Si la modale patient est ouverte, défiler l'intérieur de la modale
         const modal = document.getElementById("patient-modal");
         if (modal && modal.classList.contains("open")) {
           const sheet = modal.querySelector(".modal-sheet");
-          if (sheet) {
+          if (sheet && dy) {
             const before = sheet.scrollTop;
-            const dy = e.deltaY;
             requestAnimationFrame(() => {
               if (sheet.scrollTop === before) sheet.scrollTop += dy;
             });
           }
           return;
         }
-        const beforeY = window.scrollY || document.documentElement.scrollTop || 0;
-        const dy = e.deltaY;
-        requestAnimationFrame(() => {
-          const afterY = window.scrollY || document.documentElement.scrollTop || 0;
-          if (afterY === beforeY) {
-            window.scrollBy(0, dy);
-          }
-        });
-      }, { passive: true });
+
+        // 2. Si le curseur survole une barre horizontale (barre des jours, semaines, gardes, filtres), la molette fait défiler la barre horizontalement
+        const horiz = e.target && e.target.closest
+          ? e.target.closest("#day-strip-scroll, #weeks-selector-scroll, .garde-strip, .chips-row")
+          : null;
+        if (horiz && horiz.scrollWidth > horiz.clientWidth && Math.abs(dy) > Math.abs(dx)) {
+          horiz.scrollLeft += dy;
+          if (horiz.id === "day-strip-scroll") updateDayStripVisibleMonth();
+          e.preventDefault();
+          return;
+        }
+
+        // 3. Défilement vertical de la page
+        if (dy) {
+          const scEl = document.scrollingElement || document.documentElement;
+          const beforeY = window.scrollY || scEl.scrollTop || 0;
+          requestAnimationFrame(() => {
+            const afterY = window.scrollY || scEl.scrollTop || 0;
+            if (afterY === beforeY) {
+              scEl.scrollTop += dy;
+              if ((window.scrollY || scEl.scrollTop || 0) === beforeY) {
+                document.body.scrollTop += dy;
+              }
+            }
+          });
+        }
+      }, { passive: false });
     }
 
     const STORAGE_PERSO_KEY = "cochin_ri_perso_status_v3";

@@ -1,4 +1,4 @@
-const CACHE_NAME = "cochin-ri-pwa-v26";
+const CACHE_NAME = "cochin-ri-pwa-v27";
 const ASSETS = [
   "./",
   "./index.html",
@@ -11,15 +11,30 @@ const ASSETS = [
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
+    caches.open(CACHE_NAME).then(async cache => {
+      for (const url of ASSETS) {
+        try {
+          const res = await fetch(url, { cache: "no-store" });
+          if (res.ok) await cache.put(url, res);
+        } catch (_) {}
+      }
+    })
   );
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+      .then(() => self.clients.matchAll({ type: "window" }))
+      .then(clients => {
+        for (const client of clients) {
+          if ("navigate" in client) {
+            client.navigate(client.url).catch(() => {});
+          }
+        }
+      })
   );
 });
 
@@ -29,12 +44,12 @@ self.addEventListener("fetch", event => {
     return;
   }
   event.respondWith(
-    fetch(req, req.url.includes("_t=") ? { cache: "no-store" } : undefined)
+    fetch(req, { cache: "no-store" })
       .then(res => {
         const clone = res.clone();
         caches.open(CACHE_NAME).then(c => {
           c.put(req, clone);
-          if (req.url.includes("index.html?_t=")) {
+          if (req.url.includes("index.html")) {
             c.put("./index.html", res.clone());
             c.put("./", res.clone());
           }
