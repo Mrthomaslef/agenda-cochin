@@ -1148,7 +1148,8 @@
       margin-top: 7px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
+      flex-wrap: wrap;
       gap: 6px;
     }
     .bloc-toggle-btn {
@@ -1156,14 +1157,29 @@
       background: rgba(15, 23, 42, 0.8);
       color: #BAE6FD;
       border-radius: 8px;
-      padding: 5px 10px;
-      font-size: 11px;
+      padding: 4px 9px;
+      font-size: 10.5px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       cursor: pointer;
       transition: all 0.15s ease;
+    }
+    .bloc-toggle-btn.cr-btn {
+      border-color: rgba(148, 163, 184, 0.3);
+      background: rgba(30, 41, 59, 0.75);
+      color: #CBD5E1;
+    }
+    .bloc-toggle-btn.cr-primary {
+      border-color: rgba(99, 102, 241, 0.55);
+      background: rgba(99, 102, 241, 0.18);
+      color: #C7D2FE;
+    }
+    .bloc-toggle-btn.copied {
+      border-color: rgba(34, 197, 94, 0.65) !important;
+      background: rgba(20, 83, 45, 0.45) !important;
+      color: #86EFAC !important;
     }
     .bloc-toggle-btn.has-saved {
       border-color: rgba(34, 197, 94, 0.45);
@@ -2012,7 +2028,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v29"; /*__APP_BUILD_ID:v29__*/
+        const CURRENT_BUILD_ID = "v30"; /*__APP_BUILD_ID:v30__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3064,6 +3080,893 @@
 
     const openBlocNoteIds = new Set();
 
+    // SKILL RÉDACTION COMPTES RENDUS RI (MODE 1 PRÉOPÉRATOIRE & MODE 2 SUIVI — FIDÉLITÉ STRICTE, ZÉRO HALLUCINATION)
+    const PREBUILT_PATIENT_CRS = {
+      "belmerbernard": {
+        civiliteNom: "M. BELMER Bernard", fem: false, age: "75", defaultMode: "preop",
+        motif: "une localisation secondaire du pied douloureuse",
+        terrain: "un cancer du rein métastatique traité par Lenvatinib (suivi à l'HEGP)",
+        arguments: "la symptomatologie douloureuse et le bilan d'imagerie",
+        gesteRetenu: "cryoablation associée à une électrochimiothérapie (ECT) de la lésion du pied sous anesthésie générale",
+        objectifs: "antalgique et de contrôle tumoral local",
+        principesNom: "la cryoablation percutanée couplée à l'électrochimiothérapie",
+        benefices: "contrôle tumoral local et de réduction des douleurs",
+        risques: "les risques hémorragique, infectieux, cutané, neurologique et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un cancer du rein métastatique sous Lenvatinib",
+        gesteRealise: "la cryoablation couplée à une électrochimiothérapie (ECT) du pied",
+        indicationInitiale: "une localisation secondaire douloureuse du pied",
+        detailsProcedure: "une cryoablation percutanée associée à une électrochimiothérapie du pied sous guidage scanographique et sous anesthésie générale"
+      },
+      "betarireem": {
+        civiliteNom: "Mme BETARI Reem", fem: true, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une tumeur desmoïde [localisation à préciser]",
+        terrain: "[À préciser]",
+        arguments: "l'évolution clinique et le bilan d'imagerie",
+        gesteRetenu: "traitement percutané [nature et localisation à préciser]",
+        objectifs: "antalgique et de contrôle local de la tumeur desmoïde",
+        principesNom: "l'ablation percutanée sous guidage radiologique",
+        benefices: "contrôle volumétrique tumoral et d'amélioration symptomatique",
+        risques: "les risques hémorragique, infectieux, neurologique et de récidive locale",
+        terrainSuivi: "une tumeur desmoïde",
+        gesteRealise: "[nom de l'intervention / niveau traité à préciser]",
+        indicationInitiale: "une tumeur desmoïde symptomatique [localisation à préciser]",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "khezrourmazd": {
+        civiliteNom: "M. KHEZR Ourmazd", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "[motif / tableau clinique / imagerie à préciser]",
+        terrain: "[À préciser]",
+        arguments: "[arguments cliniques et paracliniques à préciser]",
+        gesteRetenu: "[geste retenu / niveau à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "[nom de l'intervention / niveaux traités à préciser]",
+        indicationInitiale: "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "wajntrobraphael": {
+        civiliteNom: "M. WAJNTROB Raphael", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "[motif / tableau clinique / imagerie à préciser]",
+        terrain: "[À préciser]",
+        arguments: "[arguments cliniques et paracliniques à préciser]",
+        gesteRetenu: "[geste retenu / niveau à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "[nom de l'intervention / niveaux traités à préciser]",
+        indicationInitiale: "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "abitbolmarc": {
+        civiliteNom: "M. ABITBOL Marc", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "[motif / tableau clinique / imagerie à préciser]",
+        terrain: "[À préciser]",
+        arguments: "[arguments cliniques et paracliniques à préciser]",
+        gesteRetenu: "[geste retenu / niveau à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "[nom de l'intervention / niveaux traités à préciser]",
+        indicationInitiale: "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "dechatregaetan": {
+        civiliteNom: "M. DECHATRE Gaetan", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une pathologie rachidienne lombaire explorée par IRM (séquences centrées sur L4-S1)",
+        terrain: "[À préciser]",
+        arguments: "les données cliniques et de l'IRM du rachis lombaire (L4-S1)",
+        gesteRetenu: "[geste retenu / niveau L4-S1 à préciser]",
+        objectifs: "antalgique",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "soulagement douloureux et d'amélioration fonctionnelle",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "une pathologie rachidienne lombaire (niveau L4-S1)",
+        gesteRealise: "[nom de l'intervention / niveau L4-S1 à préciser]",
+        indicationInitiale: "une symptomatologie lombaire documentée sur l'IRM L4-S1",
+        detailsProcedure: "[détails de la procédure au niveau L4-S1 à préciser]"
+      },
+      "deboissonneaux": {
+        civiliteNom: "M. DE BOISSONNEAUX Bertrand", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "[motif / tableau clinique / imagerie à préciser]",
+        terrain: "[À préciser]",
+        arguments: "[arguments cliniques et paracliniques à préciser]",
+        gesteRetenu: "[geste retenu / niveau à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "[nom de l'intervention / niveaux traités à préciser]",
+        indicationInitiale: "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "deboissonneauxbertrand": {
+        civiliteNom: "M. DE BOISSONNEAUX Bertrand", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "[motif / tableau clinique / imagerie à préciser]",
+        terrain: "[À préciser]",
+        arguments: "[arguments cliniques et paracliniques à préciser]",
+        gesteRetenu: "[geste retenu / niveau à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "[nom de l'intervention / niveaux traités à préciser]",
+        indicationInitiale: "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "mabitlaurence": {
+        civiliteNom: "Mme MABIT Laurence", fem: true, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une lésion de la cuisse explorée par IRM",
+        terrain: "[À préciser]",
+        arguments: "les données cliniques et de l'IRM de cuisse",
+        gesteRetenu: "[geste retenu au niveau de la cuisse à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "soulagement symptomatique et de contrôle local",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "une pathologie de la cuisse contrôlée par IRM",
+        gesteRealise: "[nom de l'intervention au niveau de la cuisse à préciser]",
+        indicationInitiale: "une lésion symptomatique de la cuisse",
+        detailsProcedure: "[détails de la procédure au niveau de la cuisse à préciser]"
+      },
+      "lassallecorinne": {
+        civiliteNom: "Mme LASSALLE Corinne", fem: true, age: "58", defaultMode: "preop",
+        motif: "un syndrome de Morton rebelle associé à une aponévrosite plantaire bilatérale et des tendinopathies calcanéennes",
+        terrain: "[À préciser]",
+        arguments: "la symptomatologie douloureuse rebelle et les données de l'IRM",
+        gesteRetenu: "cryoablation de névrome de Morton [espace et côté à préciser] / embolisation à discuter selon imagerie",
+        objectifs: "antalgique et fonctionnelle",
+        principesNom: "la cryothérapie percutanée (ou embolisation sélective)",
+        benefices: "réduction durable des douleurs plantaires et de reprise de la marche sans gêne",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie résiduelle et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un syndrome de Morton rebelle et une aponévrosite plantaire bilatérale",
+        gesteRealise: "la cryothérapie percutanée [espace et côté à préciser]",
+        indicationInitiale: "un syndrome de Morton rebelle associé à une aponévrosite plantaire bilatérale",
+        detailsProcedure: "une cryothérapie percutanée sous guidage radiologique"
+      },
+      "wachtlermariebeatrice": {
+        civiliteNom: "Mme WACHTLER Marie-Béatrice", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "des douleurs neuropathiques lombaires rebelles évoluant depuis 2020 avec bloc test du nerf clunéal positif réalisé le 28/08/2026",
+        terrain: "[À préciser]",
+        arguments: "la persistance de douleurs neuropathiques rebelles et la positivité du bloc test anesthésique du nerf clunéal",
+        gesteRetenu: "cryoneurolyse percutanée du nerf clunéal [côté à préciser]",
+        objectifs: "antalgique",
+        principesNom: "la cryoneurolyse percutanée du nerf clunéal",
+        benefices: "soulagement durable des douleurs neuropathiques lombaires et fessières",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie cutanée dans le territoire du nerf clunéal, de douleur transitoire et d'échec ou de récidive douloureuse",
+        terrainSuivi: "des douleurs neuropathiques lombaires rebelles dans le territoire du nerf clunéal",
+        gesteRealise: "la cryoneurolyse percutanée du nerf clunéal [côté à préciser]",
+        indicationInitiale: "des douleurs neuropathiques lombaires rebelles avec bloc test du nerf clunéal positif",
+        detailsProcedure: "une cryoneurolyse percutanée du nerf clunéal sous guidage radiologique"
+      },
+      "huitricquentin": {
+        civiliteNom: "M. HUITRIC Quentin", fem: false, age: "22", defaultMode: "preop",
+        motif: "un tableau clinique et scanographique/IRM typique d'ostéome ostéoïde du coude [côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "la symptomatologie douloureuse caractéristique et la mise en évidence du nidus sur le couple TDM/IRM du coude",
+        gesteRetenu: "thermoablation par radiofréquence de l'ostéome ostéoïde du coude [côté à préciser] sous guidage scanographique en ambulatoire (HDJ)",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée par radiofréquence",
+        benefices: "destruction complète du nidus et de disparition rapide des douleurs inflammatoires",
+        risques: "les risques hémorragique, infectieux, de brûlure cutanée ou neurologique de voisinage, de raideur articulaire et de récidive en cas d'ablation incomplète",
+        terrainSuivi: "un ostéome ostéoïde du coude [côté à préciser]",
+        gesteRealise: "la thermoablation par radiofréquence de l'ostéome ostéoïde du coude sous guidage scanographique",
+        indicationInitiale: "un ostéome ostéoïde symptomatique du coude confirmé en TDM et IRM",
+        detailsProcedure: "une thermoablation percutanée par radiofréquence du nidus du coude sous guidage scanographique"
+      },
+      "cantinbaptiste": {
+        civiliteNom: "M. CANTIN Baptiste", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "un chondroblastome du genou [côté à préciser] situé à distance de la lame sous-chondrale au scanner",
+        terrain: "[À préciser]",
+        arguments: "la symptomatologie douloureuse et la localisation du chondroblastome à distance de la lame sous-chondrale sur le scanner du genou",
+        gesteRetenu: "thermoablation par radiofréquence du chondroblastome du genou [côté à préciser] sous guidage scanographique en HDJ",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée par radiofréquence",
+        benefices: "destruction tumorale locale en préservant l'interligne articulaire et de sédation des douleurs",
+        risques: "les risques hémorragique, infectieux, d'atteinte cartilagineuse sous-chondrale, de fracture secondaire et de récidive locale",
+        terrainSuivi: "un chondroblastome du genou [côté à préciser]",
+        gesteRealise: "la thermoablation par radiofréquence du chondroblastome du genou sous guidage scanographique",
+        indicationInitiale: "un chondroblastome symptomatique du genou situé à distance de la lame sous-chondrale",
+        detailsProcedure: "une thermoablation percutanée par radiofréquence de la lésion du genou sous guidage scanographique"
+      },
+      "dequeckerhelene": {
+        civiliteNom: "Mme DEQUECKER Helene", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "un névrome de Morton rebelle du 3e espace intermétatarsien [côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "la persistance de métatarsalgies neuropathiques rebelles au traitement médical bien conduit et la corrélation à l'imagerie",
+        gesteRetenu: "cryothérapie percutanée sous anesthésie locale du névrome de Morton du 3e espace [côté à préciser] sous guidage scanographique",
+        objectifs: "antalgique",
+        principesNom: "la cryothérapie percutanée du névrome de Morton sous anesthésie locale",
+        benefices: "soulagement durable des douleurs à la marche et au chaussage",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale séquellaire et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un névrome de Morton du 3e espace intermétatarsien [côté à préciser]",
+        gesteRealise: "la cryothérapie percutanée sous anesthésie locale du névrome de Morton du 3e espace",
+        indicationInitiale: "un névrome de Morton rebelle du 3e espace intermétatarsien",
+        detailsProcedure: "une cryoablation percutanée du névrome de Morton du 3e espace sous anesthésie locale et sous guidage scanographique"
+      },
+      "rebequetjoceline": {
+        civiliteNom: "Mme REBEQUET Joceline", fem: true, age: "78", defaultMode: "preop",
+        motif: "des douleurs neuropathiques post-zostériennes du nerf intercostal droit évoluant depuis 17 mois, avec bloc test anesthésique positif réalisé le 18/08/2026",
+        terrain: "un antécédent de zona intercostal droit",
+        arguments: "le caractère rebelle des douleurs neuropathiques post-zostériennes et la positivité franche du bloc test anesthésique intercostal",
+        gesteRetenu: "cryoneurolyse percutanée du nerf intercostal droit [niveau exact à préciser] sous anesthésie locale et guidage scanographique en HDJ",
+        objectifs: "antalgique",
+        principesNom: "la cryoneurolyse percutanée intercostale sous guidage scanographique",
+        benefices: "réduction significative et prolongée des douleurs neuropathiques post-zostériennes",
+        risques: "les risques de pneumothorax, d'hématome intercostal, d'infection, d'hypoesthésie dans le territoire intercostal et d'échec ou de récidive douloureuse",
+        terrainSuivi: "des douleurs neuropathiques post-zostériennes du nerf intercostal droit",
+        gesteRealise: "la cryoneurolyse percutanée du nerf intercostal droit sous anesthésie locale",
+        indicationInitiale: "des douleurs neuropathiques post-zona du nerf intercostal droit évoluant depuis 17 mois avec bloc test positif",
+        detailsProcedure: "une cryoneurolyse percutanée du nerf intercostal droit sous anesthésie locale et sous guidage scanographique"
+      },
+      "selemanevalerie": {
+        civiliteNom: "Mme SELEMANE Valerie", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "une volumineuse tumeur desmoïde de l'épaule et du creux sus-claviculaire [côté à préciser] située à proximité du plexus brachial",
+        terrain: "un suivi conjoint en oncologie médicale (Dr Tlemsani)",
+        arguments: "le volume lésionnel symptomatique et les rapports anatomiques étroits avec le plexus brachial sur le bilan d'imagerie",
+        gesteRetenu: "cryothérapie percutanée partielle prudente de la tumeur desmoïde du creux sus-claviculaire sous guidage scanographique (avec hospitalisation en oncologie)",
+        objectifs: "antalgique et de réduction tumorale partielle tout en préservant le plexus brachial",
+        principesNom: "la cryoablation percutanée partielle sous contrôle scanographique",
+        benefices: "contrôle local et de diminution des douleurs tout en respectant les structures nerveuses adjacentes",
+        risques: "les risques d'atteinte neurologique du plexus brachial, de lésion vasculaire ou cutanée, d'hématome, d'infection et de poursuite évolutive sur la portion non traitée",
+        terrainSuivi: "une volumineuse tumeur desmoïde du creux sus-claviculaire",
+        gesteRealise: "la cryothérapie percutanée partielle de la tumeur desmoïde du creux sus-claviculaire",
+        indicationInitiale: "une volumineuse tumeur desmoïde du creux sus-claviculaire à proximité immédiate du plexus brachial",
+        detailsProcedure: "une cryoablation percutanée partielle prudente sous guidage scanographique avec protection des structures nerveuses adjacentes"
+      },
+      "monninipaule": {
+        civiliteNom: "Mme MONNINI Paule", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "deux névromes de Morton très douloureux documentés en échographie et IRM [espaces et côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "l'importance du retentissement douloureux à la marche et la confirmation échographique et IRM des deux névromes de Morton",
+        gesteRetenu: "cryothérapie percutanée des névromes de Morton [espaces et côté à préciser] sous guidage radiologique",
+        objectifs: "antalgique",
+        principesNom: "la cryothérapie percutanée des névromes de Morton",
+        benefices: "sédation durable des métatarsalgies et d'amélioration du périmètre de marche",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale et d'échec ou de récidive douloureuse",
+        terrainSuivi: "deux névromes de Morton symptomatiques",
+        gesteRealise: "la cryothérapie percutanée des névromes de Morton [espaces et côté à préciser]",
+        indicationInitiale: "deux névromes de Morton très douloureux confirmés en échographie et IRM",
+        detailsProcedure: "une cryoablation percutanée sous guidage radiologique"
+      },
+      "najimsaid": {
+        civiliteNom: "M. NAJIM Said", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "un ostéome ostéoïde superficiel du col de l'astragale [côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "le tableau clinique douloureux typique et l'aspect caractéristique du nidus superficiel du col de l'astragale en TDM et IRM dynamique",
+        gesteRetenu: "thermoablation percutanée (radiofréquence ou cryothérapie avec technique « no touch ») de l'ostéome ostéoïde du col de l'astragale sous guidage scanographique et sous anesthésie générale en HDJ",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée (radiofréquence ou cryothérapie)",
+        benefices: "destruction complète du nidus et de disparition des douleurs de cheville",
+        risques: "les risques hémorragique, infectieux, d'atteinte chondrale ou synoviale de voisinage, de brûlure cutanée et de récidive locale",
+        terrainSuivi: "un ostéome ostéoïde superficiel du col de l'astragale [côté à préciser]",
+        gesteRealise: "la thermoablation percutanée (radiofréquence / cryothérapie) de l'ostéome ostéoïde de l'astragale",
+        indicationInitiale: "un ostéome ostéoïde superficiel du col de l'astragale confirmé en IRM dynamique et scanner",
+        detailsProcedure: "une thermoablation percutanée du nidus du col de l'astragale sous guidage scanographique et sous anesthésie générale"
+      },
+      "elnaggarkawthar": {
+        civiliteNom: "Mlle ELNAGGAR Kawthar", fem: true, age: "16", defaultMode: "preop",
+        motif: "un ostéome ostéoïde du tibia [côté à préciser]",
+        terrain: "une patiente mineure résidant en Égypte",
+        arguments: "le tableau clinique douloureux et les données d'imagerie en faveur d'un ostéome ostéoïde tibial",
+        gesteRetenu: "thermoablation par radiofréquence de l'ostéome ostéoïde du tibia [côté à préciser] sous guidage scanographique",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée par radiofréquence",
+        benefices: "destruction complète du nidus et de sédation rapide des douleurs",
+        risques: "les risques hémorragique, infectieux, de brûlure cutanée ou thermique locale et de récidive",
+        terrainSuivi: "un ostéome ostéoïde du tibia [côté à préciser]",
+        gesteRealise: "la thermoablation par radiofréquence de l'ostéome ostéoïde du tibia",
+        indicationInitiale: "un ostéome ostéoïde symptomatique du tibia",
+        detailsProcedure: "une thermoablation percutanée par radiofréquence du nidus tibial sous guidage scanographique"
+      },
+      "dossantoslopescecile": {
+        civiliteNom: "Mme DOS SANTOS LOPES Cécile", fem: true, age: "42", defaultMode: "preop",
+        motif: "un névrome de Morton du pied droit très handicapant [espace intermétatarsien à préciser]",
+        terrain: "un échec du traitement médical bien conduit et de la kinésithérapie",
+        arguments: "l'importance de la gêne fonctionnelle persistante malgré le traitement conservateur et les données d'imagerie du pied droit",
+        gesteRetenu: "cryothérapie percutanée du névrome de Morton du pied droit [espace à préciser] sous guidage radiologique",
+        objectifs: "antalgique et fonctionnelle",
+        principesNom: "la cryothérapie percutanée du névrome de Morton",
+        benefices: "diminution durable des douleurs plantaires et de reprise normale de l'appui et du chaussage",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un névrome de Morton rebelle du pied droit",
+        gesteRealise: "la cryothérapie percutanée du névrome de Morton du pied droit",
+        indicationInitiale: "un névrome de Morton du pied droit très handicapant en échec de kinésithérapie et de traitement médical",
+        detailsProcedure: "une cryoablation percutanée du névrome de Morton du pied droit sous guidage radiologique"
+      },
+      "mestreausacha": {
+        civiliteNom: "M. MESTREAU Sacha", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "un volumineux kyste osseux essentiel de l'aile iliaque [côté à préciser]",
+        terrain: "un patient mineur (adressé par le Dr Valérie Dumaine)",
+        arguments: "le volume du kyste essentiel de l'aile iliaque et le risque de fragilisation mécanique",
+        gesteRetenu: "alcoolisation percutanée (associée le cas échéant à une cimentoplastie) du kyste essentiel de l'aile iliaque [côté à préciser] en HDJ (avec autorisation parentale)",
+        objectifs: "de sclérose kystique et de consolidation osseuse",
+        principesNom: "l'alcoolisation percutanée du kyste osseux essentiel (+/- cimentoplastie)",
+        benefices: "involution progressive de la cavité kystique, d'ossification secondaire et de réduction du risque fracturaire",
+        risques: "les risques hémorragique, infectieux, de fuite extra-osseuse d'agent sclérosant ou de ciment, de douleur post-procédurale et de nécessité d'une séance complémentaire",
+        terrainSuivi: "un volumineux kyste osseux essentiel de l'aile iliaque [côté à préciser]",
+        gesteRealise: "l'alcoolisation percutanée (+/- cimentoplastie) du kyste essentiel de l'aile iliaque",
+        indicationInitiale: "un volumineux kyste essentiel de l'aile iliaque chez un patient mineur",
+        detailsProcedure: "une alcoolisation percutanée sous guidage radiologique du kyste de l'aile iliaque"
+      },
+      "mikoumehdi": {
+        civiliteNom: "M. MIKOU Mehdi", fem: false, age: "15", defaultMode: "preop",
+        motif: "un ostéome ostéoïde de la hanche droite",
+        terrain: "un patient mineur résidant au Maroc",
+        arguments: "la symptomatologie douloureuse typique et le bilan d'imagerie (scanner et IRM dynamique de hanche droite)",
+        gesteRetenu: "thermoablation par radiofréquence associée à une infiltration de la hanche droite sous anesthésie générale en HDJ (avec consentement signé des deux parents)",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée par radiofréquence sous guidage scanographique",
+        benefices: "destruction complète du nidus et de disparition rapide des douleurs nocturnes",
+        risques: "les risques hémorragique, infectieux, d'atteinte chondrale ou nerveuse de voisinage et de récidive locale",
+        terrainSuivi: "un ostéome ostéoïde de la hanche droite",
+        gesteRealise: "la thermoablation par radiofréquence de l'ostéome ostéoïde de la hanche droite sous anesthésie générale",
+        indicationInitiale: "un ostéome ostéoïde symptomatique de la hanche droite",
+        detailsProcedure: "une thermoablation percutanée par radiofréquence du nidus de la hanche droite associée à une infiltration sous guidage scanographique"
+      },
+      "bourgeoisjerome": {
+        civiliteNom: "M. BOURGEOIS Jérôme", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "un névrome de Morton symptomatique du 3e espace intermétatarsien droit",
+        terrain: "[À préciser]",
+        arguments: "les métatarsalgies rebelles du 3e espace droit et les données de l'IRM réalisée en ville (après évaluation par le Dr Raphaël Dautry)",
+        gesteRetenu: "cryothérapie percutanée sous anesthésie locale du névrome de Morton du 3e espace droit sous guidage scanographique en HDJ",
+        objectifs: "antalgique",
+        principesNom: "la cryothérapie percutanée du névrome de Morton sous anesthésie locale",
+        benefices: "soulagement durable des douleurs plantaires lors de l'appui et du chaussage",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un névrome de Morton du 3e espace intermétatarsien droit",
+        gesteRealise: "la cryothérapie percutanée sous anesthésie locale du névrome de Morton du 3e espace droit",
+        indicationInitiale: "un névrome de Morton symptomatique du 3e espace intermétatarsien droit",
+        detailsProcedure: "une cryoablation percutanée du névrome de Morton du 3e espace droit sous anesthésie locale et sous guidage scanographique"
+      },
+      "guenerymicheline": {
+        civiliteNom: "Mme GUENERY Micheline", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "un nodule paravertébral droit [nature histologique et niveau vertébral exact à préciser]",
+        terrain: "un traitement antiagrégant plaquettaire par Kardégic 75 mg (adressée par le Pr David Biau)",
+        arguments: "les données cliniques et d'imagerie mettant en évidence ce nodule paravertébral droit accessible par voie percutanée",
+        gesteRetenu: "cryothérapie percutanée du nodule paravertébral droit en HDJ sous guidage scanographique",
+        objectifs: "de contrôle tumoral local et antalgique",
+        principesNom: "la cryoablation percutanée sous guidage scanographique",
+        benefices: "destruction locale ciblée du nodule paravertébral droit",
+        risques: "les risques hémorragique (majoré par le terrain sous Kardégic), infectieux, d'atteinte radiculaire ou nerveuse de voisinage et de récidive locale",
+        terrainSuivi: "un nodule paravertébral droit (patiente sous Kardégic 75 mg)",
+        gesteRealise: "la cryothérapie percutanée du nodule paravertébral droit",
+        indicationInitiale: "un nodule paravertébral droit symptomatique / évolutif",
+        detailsProcedure: "une cryoablation percutanée du nodule paravertébral droit sous guidage scanographique"
+      },
+      "jaoualnaima": {
+        civiliteNom: "Mme JAOUAL Naima", fem: true, age: "62", defaultMode: "preop",
+        motif: "une gonarthrose symptomatique [côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "les gonalgies mécaniques rebelles sur gonarthrose",
+        gesteRetenu: "test anesthésique des nerfs géniculés du genou sous guidage échographique avant éventuelle neurolyse par radiofréquence",
+        objectifs: "diagnostique et pré-thérapeutique (avant radiofréquence des nerfs géniculés en cas de test positif)",
+        principesNom: "le bloc test anesthésique des nerfs géniculés sous échographie avant éventuelle radiofréquence",
+        benefices: "confirmation de l'origine neurogène articulaire des douleurs et de sélection avant radiofréquence antalgique",
+        risques: "les risques d'hématome au point de ponction, d'infection, de douleur transitoire et d'absence de réponse au test",
+        terrainSuivi: "une gonarthrose symptomatique [côté à préciser]",
+        gesteRealise: "le test anesthésique des nerfs géniculés sous échographie [+/- radiofréquence à préciser]",
+        indicationInitiale: "une gonarthrose douloureuse évaluée en vue d'une radiofréquence des nerfs géniculés",
+        detailsProcedure: "un bloc test anesthésique ciblé des nerfs géniculés sous guidage échographique"
+      },
+      "dejuniensarneckipius": {
+        civiliteNom: "M. DE JUNIEN SARNECKI Pius", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "une atteinte osseuse fragilisante du bassin en territoire post-radiothérapie [localisation précise et primitif à préciser]",
+        terrain: "un antécédent de radiothérapie pelvienne (suivi en oncologie médicale à l'HEGP par les Drs Meraouna et Auclin)",
+        arguments: "le retentissement douloureux mécanique et la fragilisation osseuse pelvienne post-radique sur le scanner",
+        gesteRetenu: "vissage percutané du bassin (+/- cimentoplastie selon constatations per-procédurales) sous guidage scanographique en HDJ",
+        objectifs: "antalgique et de stabilisation mécanique du bassin",
+        principesNom: "l'ostéosynthèse percutanée par vissage du bassin sous guidage scanographique",
+        benefices: "consolidation mécanique de l'anneau pelvien, de réduction des douleurs à la mise en charge et de préservation de l'autonomie",
+        risques: "les risques hémorragique, infectieux, d'atteinte nerveuse ou articulaire, de malposition ou migration du matériel et de pseudarthrose sur os radique",
+        terrainSuivi: "une atteinte osseuse du bassin post-radiothérapie",
+        gesteRealise: "le vissage percutané du bassin sous guidage scanographique",
+        indicationInitiale: "une fragilisation osseuse douloureuse du bassin post-radiothérapie",
+        detailsProcedure: "un vissage percutané du bassin sous contrôle scanographique en HDJ"
+      },
+      "coeuillefrederic": {
+        civiliteNom: "M. COEUILLE Frederic", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une lésion osseuse du bassin [nature histologique et côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "le volume tumoral et la fragilisation mécanique du bassin",
+        gesteRetenu: "cryothérapie de debulking associée à un vissage percutané du bassin",
+        objectifs: "de réduction tumorale et de stabilisation mécanique antalgique",
+        principesNom: "la cryoablation de debulking couplée au vissage percutané du bassin",
+        benefices: "stabilisation mécanique du bassin et de contrôle antalgique",
+        risques: "les risques hémorragique, infectieux, neurologique et mécanique",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "une cryothérapie de debulking associée à un vissage percutané du bassin (réévaluation à 1 mois)",
+        indicationInitiale: "une lésion extensive et fragilisante du bassin",
+        detailsProcedure: "une cryothérapie percutanée de debulking couplée à un vissage du bassin",
+        resultatTechnique: "une réduction tumorale partielle (debulking incomplet) et une ostéosynthèse pelvienne"
+      },
+      "supakanzijulienne": {
+        civiliteNom: "Mme SUPA KANZI Julienne", fem: true, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une lésion osseuse [localisation exacte à préciser] nécessitant une reprise de fixation",
+        terrain: "un antécédent de cryothérapie associée à un vissage percutané marqué par un déplacement secondaire de la vis",
+        arguments: "le déplacement de la vis observé lors de la pose initiale et la nécessité d'assurer une stabilisation mécanique pérenne",
+        gesteRetenu: "reprise de vissage percutané par voie antérieure [localisation à préciser]",
+        objectifs: "de refixation mécanique stable et antalgique",
+        principesNom: "la reprise d'ostéosynthèse percutanée par voie antérieure sous guidage scanographique",
+        benefices: "stabilisation osseuse secondaire et de soulagement douloureux",
+        risques: "les risques hémorragique, infectieux, vasculaire ou nerveux sur le trajet antérieur et de défaut d'ancrage secondaire",
+        terrainSuivi: "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: "une cryothérapie associée à un vissage percutané",
+        indicationInitiale: "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: "une cryothérapie percutanée associée à un vissage osseux",
+        resultatTechnique: "la réalisation de l'ablation thermique et du vissage",
+        particularitesProcedurales: "un déplacement de la vis lors de la pose faisant discuter une éventuelle reprise par voie antérieure pour refixer"
+      },
+      "hosfordpeter": {
+        civiliteNom: "M. HOSFORD Peter", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "un névrome de Morton symptomatique [espace et côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "les métatarsalgies rebelles et la confirmation à l'imagerie d'un névrome de Morton",
+        gesteRetenu: "cryothérapie percutanée du névrome de Morton [espace et côté à préciser]",
+        objectifs: "antalgique",
+        principesNom: "la cryothérapie percutanée du névrome de Morton",
+        benefices: "soulagement durable des douleurs de l'avant-pied",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale et de récidive douloureuse",
+        terrainSuivi: "un névrome de Morton symptomatique [espace et côté à préciser]",
+        gesteRealise: "la cryothérapie percutanée de névrome de Morton (contrôle à 1 mois)",
+        indicationInitiale: "un névrome de Morton douloureux rebelle au traitement médical",
+        detailsProcedure: "une cryoablation percutanée du névrome de Morton sous guidage radiologique",
+        resultatTechnique: "une couverture satisfaisante de la lésion par le glaçon de cryothérapie"
+      },
+      "cohencorinne": {
+        civiliteNom: "Mme COHEN Corinne", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "un ostéome ostéoïde du massif articulaire de C6 gauche",
+        terrain: "[À préciser]",
+        arguments: "les cervicalgies inflammatoires typiques et l'identification du nidus au sein du massif articulaire de C6 gauche au scanner et à l'IRM",
+        gesteRetenu: "thermoablation par radiofréquence de l'ostéome ostéoïde du massif articulaire de C6 gauche sous guidage scanographique",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée par radiofréquence sous contrôle scanographique",
+        benefices: "destruction complète du nidus et de disparition des cervicalgies",
+        risques: "les risques hémorragique, infectieux, d'atteinte radiculaire cervicale ou médullaire, de lésion de l'artère vertébrale et de récidive locale",
+        terrainSuivi: "un ostéome ostéoïde du massif articulaire de C6 gauche",
+        gesteRealise: "la thermoablation par radiofréquence de l'ostéome ostéoïde de C6 gauche",
+        indicationInitiale: "un ostéome ostéoïde symptomatique du massif articulaire de C6 gauche",
+        detailsProcedure: "une thermoablation percutanée par radiofréquence du nidus du massif articulaire de C6 gauche sous guidage scanographique"
+      },
+      "bouantounalexandrefaysal": {
+        civiliteNom: "M. BOU ANTOUN Alexandre Faysal", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "une lésion ostéolytique cervicale post-radiothérapie [niveau cervical exact et néoplasie primitive à préciser]",
+        terrain: "une néoplasie suivie en oncologie médicale à l'HEGP (Drs Meraouna et Auclin), chez un patient sous double traitement antithrombotique par Eliquis 5 mg et Plavix",
+        arguments: "le risque d'instabilité fracturaire cervicale et les douleurs rachidiennes après radiothérapie",
+        gesteRetenu: "cimentoplastie cervicale sous anesthésie générale et sous guidage scanographique en HDJ (après relais/arrêt adapté d'Eliquis et Plavix validé en consultation d'anesthésie)",
+        objectifs: "antalgique et de consolidation vertébrale",
+        principesNom: "la cimentoplastie vertébrale cervicale percutanée sous guidage radiologique",
+        benefices: "stabilisation mécanique du corps vertébral cervical et de réduction rapide des douleurs",
+        risques: "les risques hémorragique (sur terrain sous Eliquis et Plavix), infectieux, de fuite de ciment intracanalaires, foraminales ou vasculaires et de complication neurologique",
+        terrainSuivi: "une lésion rachidienne cervicale post-radiothérapie (patient sous Eliquis 5 mg et Plavix)",
+        gesteRealise: "la cimentoplastie cervicale sous anesthésie générale",
+        indicationInitiale: "une lésion vertébrale cervicale fragilisante et douloureuse post-radiothérapie",
+        detailsProcedure: "une cimentoplastie percutanée cervicale sous anesthésie générale et sous contrôle scanographique"
+      },
+      "molinasmichel": {
+        civiliteNom: "M. MOLINAS Michel", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "des douleurs pariétales thoraciques rebelles [localisation pariétale précise à préciser]",
+        terrain: "une pathologie thoracique suivie en oncologie thoracique à Cochin (Drs Slomka et Chelabi) et par l'équipe mobile douleur, avec mauvaise tolérance aux morphiniques",
+        arguments: "le caractère réfractaire des douleurs pariétales thoraciques et l'intolérance aux traitements opioïdes",
+        gesteRetenu: "cryothérapie pariétale thoracique percutanée [niveau/côté à préciser] sous guidage scanographique",
+        objectifs: "antalgique",
+        principesNom: "la cryoablation / cryoneurolyse pariétale thoracique sous guidage scanographique",
+        benefices: "diminution des douleurs pariétales et d'épargne morphinique",
+        risques: "les risques de pneumothorax, d'hémothorax ou d'hématome pariétal, d'infection, d'hypoesthésie intercostale et d'échec ou de récidive douloureuse",
+        terrainSuivi: "des douleurs pariétales thoraciques rebelles avec intolérance aux morphiniques",
+        gesteRealise: "la cryothérapie pariétale thoracique à visée antalgique",
+        indicationInitiale: "des douleurs pariétales thoraciques rebelles intolérantes aux morphiniques",
+        detailsProcedure: "une cryothérapie percutanée pariétale thoracique sous guidage scanographique"
+      },
+      "delekianghislaine": {
+        civiliteNom: "Mme DELEKIAN Ghislaine", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "des gonalgies chroniques rebelles [côté à préciser]",
+        terrain: "[À préciser]",
+        arguments: "la persistance des douleurs du genou malgré le traitement médical (évaluation initiale avec le Dr Bensamoun)",
+        gesteRetenu: "test anesthésique des nerfs géniculés du genou sous échographie avant éventuelle neurolyse par radiofréquence",
+        objectifs: "diagnostique et pré-thérapeutique avant radiofréquence antalgique",
+        principesNom: "le bloc test anesthésique sous guidage échographique avant éventuelle radiofréquence",
+        benefices: "validation de l'indication de neurolyse par radiofréquence en cas de sédation significative lors du test",
+        risques: "les risques d'hématome, d'infection, de douleur transitoire au point de ponction et de test négatif",
+        terrainSuivi: "des gonalgies chroniques évaluées par bloc test anesthésique du genou",
+        gesteRealise: "le test anesthésique du genou sous échographie [+/- radiofréquence à préciser]",
+        indicationInitiale: "des gonalgies rebelles candidates à une neurolyse par radiofréquence",
+        detailsProcedure: "un bloc test anesthésique du genou sous guidage échographique"
+      },
+      "perballucianivannathanael": {
+        civiliteNom: "M. PERBAL Lucian Ivan Nathanael", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une suspicion de récidive locale au scanner d'un chondroblastome [localisation exacte à préciser]",
+        terrain: "un antécédent de chondroblastome déjà traité par cryothérapie en 2025",
+        arguments: "l'apparition au scanner de contrôle d'un foyer suspect de récidive locale du chondroblastome traité en 2025",
+        gesteRetenu: "reprise de traitement ablatif percutané (cryothérapie ou radiofréquence) du chondroblastome [localisation à préciser] sous guidage scanographique",
+        objectifs: "curative et de contrôle local de la récidive",
+        principesNom: "la thermoablation percutanée de reprise sous guidage scanographique",
+        benefices: "éradication du contingent résiduel ou récidivant en évitant un abord chirurgical ouvert",
+        risques: "les risques hémorragique, infectieux, d'atteinte cartilagineuse sous-chondrale et de nouvelle récidive locale",
+        terrainSuivi: "un chondroblastome traité par cryothérapie en 2025",
+        gesteRealise: "la cryothérapie percutanée de chondroblastome réalisée en 2025",
+        indicationInitiale: "un chondroblastome symptomatique [localisation à préciser]",
+        detailsProcedure: "une cryoablation percutanée sous guidage scanographique réalisée en 2025",
+        particularitesProcedurales: "la mise en évidence sur le scanner de contrôle d'une récidive locale motivant la discussion d'une reprise de traitement percutané sans urgence"
+      },
+      "plugerclaude": {
+        civiliteNom: "M. PLUGER Claude", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "de multiples lésions osseuses hypermétaboliques au TEP-scanner faisant suspecter une récidive hématologique",
+        terrain: "un antécédent de lymphome B à grandes cellules cæcal en rémission (suivi en hématologie par le Dr Patricia Franchi Rezgui) et un traitement anticoagulant par Eliquis 2,5 mg",
+        arguments: "l'accessibilité scanographique de la lésion osseuse du genou [côté à préciser] pour documentation histologique de la suspicion de récidive",
+        gesteRetenu: "biopsie osseuse du genou sous guidage scanographique en HDJ (après arrêt d'Eliquis 2,5 mg à J-3, contrôle d'hémostase à 48h et reprise plus de 6 heures après le geste)",
+        objectifs: "diagnostique (documentation histologique et immunohistochimique)",
+        principesNom: "la biopsie osseuse percutanée au trocart sous guidage scanographique",
+        benefices: "caractérisation histologique précise pour guider la prise en charge hématologique",
+        risques: "les risques d'hématome ou de saignement (sous Eliquis), d'infection, de douleur post-procédurale et de prélèvement non contributif",
+        terrainSuivi: "une suspicion de récidive osseuse de lymphome B à grandes cellules (patient sous Eliquis 2,5 mg)",
+        gesteRealise: "la biopsie osseuse du genou sous guidage scanographique",
+        indicationInitiale: "de multiples lésions osseuses hypermétaboliques au TEP faisant suspecter une récidive de lymphome B",
+        detailsProcedure: "une biopsie osseuse percutanée du genou sous guidage scanographique après arrêt adapté d'Eliquis à J-3"
+      },
+      "pouvreaucedric": {
+        civiliteNom: "M. POUVREAU Cedric", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "un nodule synovial du récessus latéral du genou [côté à préciser] faisant suspecter une chondromatose synoviale",
+        terrain: "[À préciser]",
+        arguments: "l'aspect d'imagerie du nodule du récessus latéral du genou nécessitant une confirmation histologique",
+        gesteRetenu: "biopsie synoviale ciblée du nodule du récessus latéral du genou sous guidage scanographique en HDJ",
+        objectifs: "diagnostique",
+        principesNom: "la biopsie synoviale percutanée sous guidage scanographique",
+        benefices: "confirmation histologique du diagnostic de chondromatose synoviale",
+        risques: "les risques d'hémarthrose ou d'hématome, d'infection articulaire, de douleur transitoire et de prélèvement non contributif",
+        terrainSuivi: "une suspicion de chondromatose synoviale du genou",
+        gesteRealise: "la biopsie synoviale du nodule du récessus latéral du genou sous scanner",
+        indicationInitiale: "un nodule du récessus latéral du genou suspect de chondromatose synoviale",
+        detailsProcedure: "une biopsie percutanée ciblée du nodule du récessus latéral du genou sous guidage scanographique"
+      },
+      "dealmeidafidalgomarlene": {
+        civiliteNom: "Mme DE ALMEIDA FIDALGO Marlène", fem: true, age: "25", defaultMode: "suivi",
+        motif: "une lésion multiloculée de 3 cm du sinus du tarse de la cheville droite en hyposignal T2* évocatrice de tumeur ténosynoviale à cellules géantes (TTCG / synovite villonodulaire)",
+        terrain: "une rectocolite hémorragique (RCH) traitée par anti-TNF (suivie en rhumatologie par les Drs Raulet et Ayral)",
+        arguments: "l'aspect IRM évocateur de TTCG / synovite villonodulaire du sinus du tarse droit nécessitant une réévaluation évolutive sous traitement",
+        gesteRetenu: "surveillance par IRM de contrôle de la cheville droite à 6 mois d'anti-TNF avant réévaluation rhumatologique [geste interventionnel éventuel à préciser]",
+        objectifs: "de réévaluation évolutive locale",
+        principesNom: "[nom de l'intervention à préciser le cas échéant]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "[risques spécifiques à préciser]",
+        terrainSuivi: "une suspicion de tumeur ténosynoviale à cellules géantes (TTCG / synovite villonodulaire) du sinus du tarse droit sur terrain de RCH sous anti-TNF",
+        gesteRealise: "[nom de l'intervention / réévaluation IRM de cheville droite à préciser]",
+        indicationInitiale: "une lésion multiloculée de 3 cm du sinus du tarse droit évocatrice de TTCG / synovite villonodulaire",
+        detailsProcedure: "[détails de la prise en charge à préciser]"
+      },
+      "serreaxelle": {
+        civiliteNom: "Mme SERRE Axelle", fem: true, age: "[À préciser]", defaultMode: "preop",
+        motif: "une masse pré-sacrée / sacrée faisant suspecter un myélolipome",
+        terrain: "un suivi en chirurgie orthopédique (adressée par le Pr Philippe Anract et le Dr Guedj)",
+        arguments: "la nécessité de caractériser histologiquement cette masse pré-sacrée / sacrée",
+        gesteRetenu: "biopsie percutanée de la masse pré-sacrée / du sacrum sous guidage scanographique en HDJ",
+        objectifs: "diagnostique",
+        principesNom: "la biopsie percutanée sous guidage scanographique",
+        benefices: "confirmation histologique de la nature bénigne (myélolipome) de la lésion pré-sacrée",
+        risques: "les risques d'hématome pelvien ou pré-sacré, d'infection, d'atteinte radiculaire sacrée et de prélèvement non contributif",
+        terrainSuivi: "une masse pré-sacrée / sacrée suspecte de myélolipome",
+        gesteRealise: "la biopsie percutanée de la masse pré-sacrée / du sacrum sous scanner",
+        indicationInitiale: "une masse pré-sacrée / sacrée nécessitant une documentation histologique (suspicion de myélolipome)",
+        detailsProcedure: "une biopsie percutanée de la lésion pré-sacrée sous guidage scanographique en HDJ"
+      },
+      "cajgfingerlaurent": {
+        civiliteNom: "M. CAJGFINGER Laurent", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "une masse peu nodulaire apposée sur le fascia du bras [côté à préciser]",
+        terrain: "un suivi en chirurgie orthopédique (adressé par le Dr Valérie Dumaine)",
+        arguments: "la nécessité d'évaluer l'évolution échographique de la lésion et d'en obtenir une caractérisation histologique en respectant le plan aponévrotique",
+        gesteRetenu: "échographie assortie d'une biopsie percutanée sous guidage échographique de la masse du bras (avec trajet strictement superficiel sans traverser le fascia)",
+        objectifs: "diagnostique",
+        principesNom: "la biopsie percutanée des parties molles sous guidage échographique sans franchissement du fascia",
+        benefices: "caractérisation histologique précise tout en respectant les règles carcinologiques de non-contamination du compartiment profond",
+        risques: "les risques d'hématome, d'infection, de douleur locale et de prélèvement non contributif",
+        terrainSuivi: "une masse des parties molles apposée sur le fascia du bras",
+        gesteRealise: "la biopsie sous guidage échographique de la masse du bras (sans traverser le fascia)",
+        indicationInitiale: "une masse apposée sur le fascia du bras adressée par le Dr Dumaine",
+        detailsProcedure: "une biopsie percutanée sous contrôle échographique en restant strictement superficiel par rapport au fascia"
+      },
+      "charvin": {
+        civiliteNom: "Mme CHARVIN [Prénom à préciser]", fem: true, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une lésion de la cuisse contrôlée par IRM",
+        terrain: "[À préciser]",
+        arguments: "les données cliniques et de l'IRM de cuisse",
+        gesteRetenu: "[geste retenu à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "une pathologie de la cuisse réévaluée par IRM à 6 semaines",
+        gesteRealise: "[nom de l'intervention au niveau de la cuisse à préciser]",
+        indicationInitiale: "une lésion symptomatique de la cuisse",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "afonso": {
+        civiliteNom: "M. AFONSO [Prénom à préciser]", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une lésion du bassin suivie par scanner TDM",
+        terrain: "[À préciser]",
+        arguments: "les données cliniques et du scanner du bassin",
+        gesteRetenu: "[geste retenu au niveau du bassin à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "une pathologie du bassin contrôlée par scanner TDM à 3-6 mois",
+        gesteRealise: "[nom de l'intervention au niveau du bassin à préciser]",
+        indicationInitiale: "une atteinte osseuse du bassin",
+        detailsProcedure: "[détails de la procédure au niveau du bassin à préciser]"
+      },
+      "achir": {
+        civiliteNom: "Mme ACHIR [Prénom à préciser]", fem: true, age: "[À préciser]", defaultMode: "suivi",
+        motif: "une pathologie de l'avant-pied contrôlée par IRM",
+        terrain: "[À préciser]",
+        arguments: "les données cliniques et de l'IRM de l'avant-pied",
+        gesteRetenu: "[geste retenu au niveau de l'avant-pied à préciser]",
+        objectifs: "antalgique",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "soulagement douloureux à l'appui",
+        risques: "les risques d'hématome, d'infection et d'hypoesthésie",
+        terrainSuivi: "une pathologie de l'avant-pied réévaluée par IRM à 6 semaines",
+        gesteRealise: "[nom de l'intervention au niveau de l'avant-pied à préciser]",
+        indicationInitiale: "une lésion douloureuse de l'avant-pied",
+        detailsProcedure: "[détails de la procédure au niveau de l'avant-pied à préciser]"
+      },
+      "dawidowiczleonard": {
+        civiliteNom: "M. DAWIDOWICZ Leonard", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "une lésion de l'épaule [côté à préciser] en cours de bilan par scanner TDM épaule-thorax et IRM d'épaule",
+        terrain: "un suivi en chirurgie orthopédique (adressé par le Pr David Biau)",
+        arguments: "les données du bilan d'imagerie (TDM épaule + thorax et IRM d'épaule)",
+        gesteRetenu: "[geste retenu au niveau de l'épaule à préciser]",
+        objectifs: "[objectifs du geste à préciser]",
+        principesNom: "[nom de l'intervention à préciser]",
+        benefices: "[bénéfices spécifiques à préciser]",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "une pathologie de l'épaule explorée par TDM et IRM",
+        gesteRealise: "[nom de l'intervention au niveau de l'épaule à préciser]",
+        indicationInitiale: "une lésion de l'épaule adressée par le Pr Biau",
+        detailsProcedure: "[détails de la procédure à préciser]"
+      },
+      "marandetfranck": {
+        civiliteNom: "M. MARANDET Franck", fem: false, age: "[À préciser]", defaultMode: "preop",
+        motif: "une lésion tumorale [localisation exacte à préciser] relevant d'un traitement local par électrochimiothérapie",
+        terrain: "une néoplasie suivie en oncologie médicale à l'HEGP",
+        arguments: "l'indication oncologique d'électrochimiothérapie validée conjointement avec l'équipe d'oncologie de l'HEGP",
+        gesteRetenu: "électrochimiothérapie (ECT) percutanée sous anesthésie générale avec injection intraveineuse de Bléomycine (30 mg) sous guidage scanographique",
+        objectifs: "de contrôle tumoral local et antalgique",
+        principesNom: "l'électrochimiothérapie percutanée couplant l'administration de Bléomycine (30 mg) et l'application d'impulsions électriques par électrodes sous contrôle scanographique",
+        benefices: "cytotoxicité tumorale locale ciblée et de réduction douloureuse",
+        risques: "les risques hémorragique, infectieux, de nécrose ou d'hyperpigmentation cutanée, de douleur post-procédurale et les toxicités spécifiques liées à la bléomycine",
+        terrainSuivi: "une pathologie oncologique suivie à l'HEGP traitée par électrochimiothérapie",
+        gesteRealise: "l'électrochimiothérapie (ECT) sous anesthésie générale avec injection de Bléomycine (30 mg)",
+        indicationInitiale: "une lésion tumorale évolutive relevant d'un contrôle local par électrochimiothérapie",
+        detailsProcedure: "une électrochimiothérapie percutanée sous guidage scanographique et sous anesthésie générale après injection de 30 mg de Bléomycine"
+      },
+      "rocaisabelle": {
+        civiliteNom: "Mme ROCA Isabelle", fem: true, age: "51", defaultMode: "preop",
+        motif: "un névrome de Morton symptomatique du 3e espace intermétatarsien du pied droit",
+        terrain: "un suivi en chirurgie orthopédique (adressée par le Dr Aymeric Deygas)",
+        arguments: "les métatarsalgies rebelles du 3e espace droit et la corrélation clinique et radiologique",
+        gesteRetenu: "cryothérapie percutanée du névrome de Morton du 3e espace du pied droit sous guidage radiologique",
+        objectifs: "antalgique",
+        principesNom: "la cryothérapie percutanée du névrome de Morton",
+        benefices: "soulagement durable des douleurs plantaires à la marche et au chaussage",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un névrome de Morton du 3e espace du pied droit",
+        gesteRealise: "la cryothérapie percutanée du névrome de Morton du 3e espace droit",
+        indicationInitiale: "un névrome de Morton douloureux du 3e espace du pied droit",
+        detailsProcedure: "une cryoablation percutanée du névrome de Morton du 3e espace droit sous guidage radiologique"
+      },
+      "nicmaxime": {
+        civiliteNom: "M. NIC Maxime", fem: false, age: "[À préciser]", defaultMode: "suivi",
+        motif: "des douleurs persistantes de la hanche droite au décours d'une radiofréquence de lésion cartilagineuse",
+        terrain: "un antécédent de thermoablation par radiofréquence d'une lésion cartilagineuse de la hanche droite",
+        arguments: "la persistance de coxalgies droites motivant la recherche d'une composante intra-articulaire",
+        gesteRetenu: "arthroscanner de la hanche droite couplé à un test anesthésique intra-articulaire",
+        objectifs: "diagnostique et d'évaluation antalgique",
+        principesNom: "l'arthroscanner de hanche droite avec test anesthésique intra-articulaire",
+        benefices: "analyse fine du cartilage articulaire et d'évaluation de la part intra-articulaire des douleurs",
+        risques: "les risques d'hématome, d'infection articulaire, de réaction allergique au produit de contraste iodé et de recrudescence douloureuse transitoire",
+        terrainSuivi: "une lésion cartilagineuse de la hanche droite",
+        gesteRealise: "la thermoablation par radiofréquence d'une lésion cartilagineuse de la hanche droite",
+        indicationInitiale: "une lésion cartilagineuse symptomatique de la hanche droite",
+        detailsProcedure: "une radiofréquence percutanée de la hanche droite",
+        evolutionGlobale: "marquée par la persistance de douleurs de la hanche droite",
+        evolutionCliniqueDetails: "des coxalgies résiduelles motivant la réalisation d'un arthroscanner de la hanche droite couplé à un test anesthésique à la recherche d'une cause intra-articulaire"
+      },
+      "warraichfaiza": {
+        civiliteNom: "Mme WARRAICH Faiza", fem: true, age: "30", defaultMode: "preop",
+        motif: "un tableau clinique (douleurs nocturnes soulagées par le kétoprofène) et scintigraphique typique d'ostéome ostéoïde du tibia proximal gauche",
+        terrain: "un suivi en chirurgie orthopédique à Cochin (adressée par le Dr Alexandra Villard)",
+        arguments: "la symptomatologie clinique caractéristique sensible aux AINS et les données de la scintigraphie et de l'IRM dynamique de jambe gauche",
+        gesteRetenu: "thermoablation par radiofréquence de l'ostéome ostéoïde du tibia proximal gauche sous guidage scanographique en HDJ",
+        objectifs: "curative et antalgique",
+        principesNom: "la thermoablation percutanée par radiofréquence sous contrôle scanographique",
+        benefices: "destruction thermique complète du nidus tibial et de disparition définitive des douleurs nocturnes",
+        risques: "les risques hémorragique, infectieux, de brûlure cutanée ou thermique de voisinage et de récidive locale en cas d'ablation incomplète",
+        terrainSuivi: "un ostéome ostéoïde du tibia proximal gauche",
+        gesteRealise: "la thermoablation par radiofréquence de l'ostéome ostéoïde du tibia proximal gauche",
+        indicationInitiale: "un ostéome ostéoïde du tibia proximal gauche responsable de douleurs nocturnes sensibles au kétoprofène",
+        detailsProcedure: "une thermoablation percutanée par radiofréquence du nidus du tibia proximal gauche sous guidage scanographique"
+      }
+    };
+
+    function inferPatientCrProfile(ev) {
+      const pNorm = normName(ev.patient);
+      if (PREBUILT_PATIENT_CRS[pNorm]) {
+        return Object.assign({}, PREBUILT_PATIENT_CRS[pNorm]);
+      }
+      const master = findPatientMasterRecord(ev.patient, ev.ipp) || {};
+      const rawName = String(master["Identité Patient"] || ev.patient || "[Nom, Prénom à préciser]").trim();
+      const isFem = /(mme|mlle|madame|mademoiselle)/i.test(rawName) || /(née le|patiente)/i.test(String(master["Coordonnées / DDN"] || "") + " " + String(master["Instructions & Remarques Cliniques"] || ""));
+      let civiliteNom = rawName;
+      if (!/^(m\.|mr|mme|mlle)/i.test(civiliteNom)) {
+        civiliteNom = (isFem ? "Mme " : "M. ") + civiliteNom;
+      } else {
+        civiliteNom = civiliteNom.replace(/^mr/i, "M.");
+      }
+
+      const coord = String(master["Coordonnées / DDN"] || "");
+      const rem = String(master["Instructions & Remarques Cliniques"] || ev.remarques || "");
+      const interv = String(master["Type d'Intervention / Suivi"] || ev.title || "[geste à préciser]");
+
+      let age = "[À préciser]";
+      const ageMatch = (coord + " " + rem).match(/(\d{1,3})\s*ans/i);
+      if (ageMatch) {
+        age = ageMatch[1];
+      } else {
+        const ddnMatch = coord.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (ddnMatch) {
+          const bYear = parseInt(ddnMatch[3], 10);
+          const bMonth = parseInt(ddnMatch[2], 10);
+          const bDay = parseInt(ddnMatch[1], 10);
+          let calcAge = 2026 - bYear;
+          if (10 < bMonth || (10 === bMonth && 29 < bDay)) calcAge--;
+          if (calcAge > 0 && calcAge < 120) age = String(calcAge);
+        }
+      }
+
+      const isSuiviDefault = /suivi|post[\s\-]|contrôle|récidive/i.test(interv + " " + String(ev.title || ""));
+      return {
+        civiliteNom,
+        fem: isFem,
+        age,
+        defaultMode: isSuiviDefault ? "suivi" : "preop",
+        motif: rem && rem !== "-" ? rem : "[motif / tableau clinique / imagerie à préciser]",
+        terrain: coord && coord !== "-" && !/^\d/.test(coord) ? coord : "[terrain / antécédents pertinents à préciser]",
+        arguments: rem && rem !== "-" ? rem : "[arguments cliniques et paracliniques à préciser]",
+        gesteRetenu: interv !== "-" ? interv : "[geste retenu / niveau à préciser]",
+        objectifs: /biopsie/i.test(interv) ? "diagnostique" : "antalgique et thérapeutique",
+        principesNom: interv !== "-" ? interv : "[nom de l'intervention à préciser]",
+        benefices: /biopsie/i.test(interv) ? "caractérisation histologique précise" : "soulagement douloureux et de contrôle local",
+        risques: "les risques hémorragique, infectieux, neurologique et d'échec ou de récidive",
+        terrainSuivi: rem && rem !== "-" ? rem : "[terrain / pathologie sous-jacente à préciser]",
+        gesteRealise: interv !== "-" ? interv : "[nom de l'intervention / niveaux traités à préciser]",
+        indicationInitiale: rem && rem !== "-" ? rem : "[indication initiale / tableau pré-opératoire à préciser]",
+        detailsProcedure: interv !== "-" ? interv : "[détails de la procédure à préciser]"
+      };
+    }
+
+    function getDefaultCrModeForCard(ev, prof) {
+      const todayIso = dateToIso(new Date());
+      if (currentTab === "suivi" && (suiviFilter === "done" || suiviFilter === "cs_suivi")) return "suivi";
+      if (currentTab === "activite" && activiteSub === "done") return "suivi";
+      if (ev.isoDate && ev.isoDate <= todayIso && (ev.category === "acte" || ev.category === "biopsie")) return "suivi";
+      if (/suivi/i.test(String(ev.title || "") + " " + String(ev.catActe || ""))) return "suivi";
+      return prof.defaultMode || "preop";
+    }
+
+    function buildPatientCrText(ev, mode) {
+      const prof = inferPatientCrProfile(ev);
+      const sEntry = getSuiviEntry(ev);
+      const ageAccord = prof.fem ? "âgée" : "âgé";
+      const suiviAccord = prof.fem ? "suivie" : "suivi";
+      const auPatient = prof.fem ? "à la patiente" : "au patient";
+      const lePatient = prof.fem ? "la patiente" : "le patient";
+
+      if (mode === "preop") {
+        const extraRem = (sEntry.remarques && sEntry.remarques.trim()) ? ` (${sEntry.remarques.trim()})` : "";
+        return [
+          "Chère Consœur, Cher Confrère,",
+          "",
+          `Nous avons eu en consultation ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, présentant ${prof.motif}, survenant sur ${prof.terrain}.`,
+          "",
+          `Au regard de ${prof.arguments}${extraRem}, une indication de ${prof.gesteRetenu} à visée ${prof.objectifs} a été retenue.`,
+          "",
+          `Au cours de cette consultation, nous avons expliqué ${auPatient} :`,
+          `- les principes de ${prof.principesNom} ;`,
+          `- les modalités techniques du geste, réalisé sous guidage radiologique ;`,
+          `- les bénéfices attendus, notamment en termes de ${prof.benefices} ;`,
+          `- ainsi que les risques inhérents à la procédure, notamment ${prof.risques}.`,
+          "",
+          `Les modalités, bénéfices et risques de cette prise en charge ont été expliqués ${auPatient}, qui a bien compris l'ensemble de ces éléments et a donné son accord pour l'intervention.`,
+          "",
+          "Je vous prie de recevoir, Chère Consœur, Cher Confrère, l'assurance de mes sincères salutations.",
+          "",
+          "Dr Lefèvre"
+        ].join("
+");
+      }
+
+      // Mode 2 : Consultation de Suivi
+      let detailsProc = prof.detailsProcedure || "[détails de la procédure : niveaux, gestes associés type biopsie à préciser]";
+      if (sEntry.materiel && sEntry.materiel.trim()) {
+        detailsProc += ` (matériel utilisé : ${sEntry.materiel.trim()})`;
+      }
+      if (sEntry.anapath && sEntry.anapath.trim()) {
+        detailsProc += ` [anatomopathologie : ${sEntry.anapath.trim()}]`;
+      }
+      const resTech = prof.resultatTechnique || "[résultat technique : remplissage, réduction à préciser]";
+      const partProc = (sEntry.remarques && sEntry.remarques.trim())
+        ? sEntry.remarques.trim()
+        : (prof.particularitesProcedurales || "l'absence d'anomalie procédurale notable [ou particularités à préciser]");
+      const evoGlobale = prof.evolutionGlobale || "[favorable / défavorable / stationnaire à préciser]";
+      const evoDetails = (sEntry.suivi_cs && sEntry.suivi_cs.trim())
+        ? sEntry.suivi_cs.trim()
+        : (prof.evolutionCliniqueDetails || "[évolution de la douleur, autonomie, reprise des activités à préciser]");
+      const compCibles = prof.complicationsCibles || "neurologique, infectieuse ou spécifique au geste";
+
+      return [
+        "Chère Consœur, Cher Confrère,",
+        "",
+        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${prof.gesteRealise}.`,
+        "",
+        `Pour rappel, ${lePatient} présentait ${prof.indicationInitiale}. L'intervention a consisté en ${detailsProc}. Le geste a permis ${resTech}, marqué sur le plan procédural par ${partProc}.`,
+        "",
+        `Sur le plan clinique, ${lePatient} rapporte une évolution ${evoGlobale} au décours de la procédure, avec ${evoDetails}, sans complication ${compCibles} intercurrente.`,
+        "",
+        "Je vous prie de recevoir, Chère Consœur, Cher Confrère, l'assurance de mes sincères salutations.",
+        "",
+        "Dr T. Lefèvre"
+      ].join("
+");
+    }
+
+    function copyPatientCr(encodedMeta, mode, btnEl, clickEv) {
+      if (clickEv) clickEv.stopPropagation();
+      let meta = {};
+      try {
+        meta = JSON.parse(decodeURIComponent(encodedMeta));
+      } catch (e) {}
+      const crText = buildPatientCrText(meta, mode);
+      const doFeedback = () => {
+        if (!btnEl) return;
+        const origHtml = btnEl.getAttribute("data-orig-html") || btnEl.innerHTML;
+        if (!btnEl.getAttribute("data-orig-html")) btnEl.setAttribute("data-orig-html", origHtml);
+        btnEl.classList.add("copied");
+        btnEl.innerHTML = `<span>✅ ${mode === "preop" ? "CR Pré-op copié" : "CR Suivi copié"}</span>`;
+        setTimeout(() => {
+          btnEl.classList.remove("copied");
+          btnEl.innerHTML = origHtml;
+        }, 1500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(crText).then(doFeedback).catch(() => {
+          fallbackCopyText(crText);
+          doFeedback();
+        });
+      } else {
+        fallbackCopyText(crText);
+        doFeedback();
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+
     function toggleBlocNotes(boxDomId, ev) {
       if (ev) ev.stopPropagation();
       const boxEl = document.getElementById(boxDomId);
@@ -3082,6 +3985,8 @@
     function renderBlocNotesHtml(ev, prefix = "") {
       const sKey = getSuiviKey(ev);
       const sEntry = getSuiviEntry(ev);
+      const prof = inferPatientCrProfile(ev);
+      const defMode = getDefaultCrModeForCard(ev, prof);
       const hasSaved = Boolean(
         (sEntry.materiel && sEntry.materiel.trim()) ||
         (sEntry.remarques && sEntry.remarques.trim()) ||
@@ -3094,7 +3999,9 @@
         ipp: ev.ipp,
         isoDate: ev.isoDate,
         category: ev.category,
-        title: ev.title
+        title: ev.title,
+        remarques: ev.remarques,
+        catActe: ev.catActe
       }));
       const boxDomId = `${prefix}box-${sKey}`;
       const isOpen = openBlocNoteIds.has(boxDomId);
@@ -3104,6 +4011,12 @@
             <span>Notes</span>
             <span id="${prefix}btnbadge-${sKey}" style="font-size:10px;">${hasSaved ? "✓" : ""}</span>
             <span id="chev-${boxDomId}">${isOpen ? "▾" : "▸"}</span>
+          </button>
+          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "preop" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'preop', this, event)" title="Copier le compte rendu de consultation préopératoire">
+            <span>📋 CR Pré-op</span>
+          </button>
+          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "suivi" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'suivi', this, event)" title="Copier le compte rendu de consultation de suivi">
+            <span>📋 CR Suivi</span>
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
