@@ -45,13 +45,22 @@
       -webkit-touch-callout: none;
     }
 
-    html, body {
+    html {
       margin: 0;
       padding: 0;
       width: 100%;
-      max-width: 100vw;
       overflow-x: hidden;
-      overscroll-behavior-y: none;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: clip;
+      overflow-y: visible;
       -webkit-user-select: none;
       user-select: none;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
