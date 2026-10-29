@@ -3864,10 +3864,112 @@
     function stripTechnicalMaterialForCrh(txt) {
       if (!txt) return "";
       return String(txt)
-        .replace(/\b\d+(?:[.,]\d+)?\s*(?:G|Gauge|Fr|French|mm|cm|mL|mg|W|watts?|minutes?|min|sec|secondes?)\b/gi, "")
-        .replace(/\b(?:OsteoCool|IceRod|IceSphere|IceSeed|IceForce|IcePearl|Bonopty|Madison|Laredo|Kyphon|Confidence|Vertecem| Boston\s+Scientific|Medtronic|Stryker|Galil)\b/gi, "")
+        .replace(/\b\d+(?:[.,]\d+)?\s*(?:G|Gauge|Fr|French|mm|cm|mL|mg|W|watts?|minutes?|min|sec|secondes?|mGy(?:[.,]cm)?|°C)\b/gi, "")
+        .replace(/\b(?:OsteoCool|IceRod|IceSphere|IceSeed|IceForce|IcePearl|Bonopty|Madison|Laredo|Kyphon|Confidence|Vertecem|Boston\s+Scientific|Medtronic|Stryker|Galil|IGEA|Cliniporator)\b/gi, "")
+        .replace(/\b(?:trocart\s+coaxial|aiguille\s+coaxiale|coaxial|bipolaire|monopolaire|DLP|PDL|hydrodissection\s+au\s+[^,.;]+|cycles?\s+de\s+congélation|décongélation\s+active)\b/gi, "")
+        .replace(/\bEVA\s*[:=]?\s*(\d+\s*\/\s*10)\b/gi, "douleurs évaluées à $1")
+        .replace(/\bATB\b/g, "antibiothérapie")
+        .replace(/\bATG\b/g, "traitement antalgique")
+        .replace(/\bAINS\b/g, "anti-inflammatoires")
+        .replace(/\bHBPM\b/g, "anticoagulation préventive")
+        .replace(/\bPNO\b/gi, "pneumothorax")
+        .replace(/\bTDM\b/g, "scanner")
+        .replace(/\bCS\b/g, "consultation")
+        .replace(/\s+,/g, ",")
+        .replace(/,\s*,+/g, ",")
+        .replace(/^\s*[,;:\-–]+\s*|\s*[,;:\-–]+\s*$/g, "")
         .replace(/\s{2,}/g, " ")
         .trim();
+    }
+
+    function capFirstLetter(s) {
+      const str = String(s || "").trim();
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function lowFirstLetter(s) {
+      const str = String(s || "").trim();
+      if (!str) return "";
+      if (/^(?:IRM|TDM|TEP|RCP|HDJ|EVA|AINS|M\.|Mme)\b/.test(str)) return str;
+      return str.charAt(0).toLowerCase() + str.slice(1);
+    }
+
+    function extractClinicalAnnotations(sEntry) {
+      const result = {
+        complications: [],
+        recommandations: [],
+        clinique: [],
+        anapathNote: "",
+        inferredEvoGlobale: ""
+      };
+      if (!sEntry) return result;
+
+      // 1. Anatomopathologie (nettoyée des termes purement techniques d'aiguille)
+      if (sEntry.anapath && sEntry.anapath.trim()) {
+        const cleanAna = stripTechnicalMaterialForCrh(sEntry.anapath.trim()).replace(/[.]+$/, "").trim();
+        if (cleanAna) result.anapathNote = cleanAna;
+      }
+
+      // 2. Analyse combinée des annotations saisies dans Remarques et Suivi CS (le champ Matériel est volontairement ignoré)
+      const rawBlocks = [];
+      if (sEntry.remarques && sEntry.remarques.trim()) rawBlocks.push(sEntry.remarques.trim());
+      if (sEntry.suivi_cs && sEntry.suivi_cs.trim()) rawBlocks.push(sEntry.suivi_cs.trim());
+
+      const seenClauses = new Set();
+      for (const block of rawBlocks) {
+        const parts = String(block).split(/(?:\r?\n|[.;])+/);
+        for (const rawPart of parts) {
+          const trimmedRaw = rawPart.trim();
+          if (!trimmedRaw) continue;
+
+          // Détecter les préfixes explicites tapés par l'opérateur
+          const isExplicitComp = /^\s*(?:complications?|incidents?|événements?\s+indésirables?)\s*[:\-–]/i.test(trimmedRaw);
+          const isExplicitReco = /^\s*(?:recommandations?|consignes?|conseils?|conduite\s+à\s+tenir|cat|suites?\s+à\s+donner|à\s+prévoir)\s*[:\-–]/i.test(trimmedRaw);
+
+          const strippedPrefix = trimmedRaw
+            .replace(/^\s*(?:complications?|incidents?|événements?\s+indésirables?|recommandations?|consignes?|conseils?|conduite\s+à\s+tenir|cat|suites?\s+à\s+donner|à\s+prévoir)\s*[:\-–]\s*/i, "")
+            .trim();
+
+          const clean = stripTechnicalMaterialForCrh(strippedPrefix).replace(/[.]+$/, "").trim();
+          if (!clean) continue;
+
+          const dedupKey = clean.toLowerCase();
+          if (seenClauses.has(dedupKey)) continue;
+          seenClauses.add(dedupKey);
+
+          // Ignorer les mentions "RAS" / "aucune complication" brutes tout en notant l'évolution favorable
+          if (/^(?:ras|r\.a\.s\.?|aucune?\s+complication|pas\s+de\s+complication|suites?\s+simples?|sans\s+particularité|sans\s+complication)$/i.test(clean)) {
+            if (!result.inferredEvoGlobale) result.inferredEvoGlobale = "favorable";
+            continue;
+          }
+
+          const hasNegatedComp = /\b(?:sans|pas\s+de|pas\s+d'|absence\s+de|absence\s+d'|aucune?)\s+(?:complication|incident|hématome|saignement|infection|déficit|douleur|fuite|récidive)/i.test(clean);
+          const hasCompKeyword = !hasNegatedComp && (
+            isExplicitComp ||
+            /\b(?:complication|incident|hématome|saignement|hémorrag|hémarthrose|fuite|infection|abcès|fièvre|fébricule|déficit|parésie|paralysie|paresthésie|hypoesthésie|dysesthésie|radiculalgie|sciatique|cruralgie|névralgie|brûlure|nécrose|pneumothorax|épanchement|malaise|vagal|allerg|intolérance|oedème|œdème|phlébite|thrombose|recrudescence\s+douloureuse|douleurs?\s+(?:rebelle|intense|aiguë|post[\s\-]?op)|récidive|échec)\b/i.test(clean)
+          );
+
+          const hasRecoKeyword = isExplicitReco || /\b(?:recommand|consigne|conseil|conduite\s+à\s+tenir|prévoir|à\s+revoir|revoir|contrôle|surveillance|repos|appui|décharge|béquill|canne|attelle|orthèse|ceinture|corset|immobilisation|kiné|rééducation|physiothérapie|arrêt\s+de\s+travail|arrêt\s+du?\s+sport|reprise|eliquis|plavix|kard[eé]gic|anticoag|antiagrég|pansement|fils|glaçage|glace|ordonnance|traitement|antalgique|palier|anti-inflammatoire|antibiothérapie|rcp|adress)\b/i.test(clean);
+
+          if (hasCompKeyword && !isExplicitReco) {
+            result.complications.push(lowFirstLetter(clean));
+          } else if (hasRecoKeyword) {
+            result.recommandations.push(lowFirstLetter(clean));
+          } else {
+            result.clinique.push(lowFirstLetter(clean));
+          }
+
+          if (/\b(?:favorable|amélioration|soulagement|disparition|nette\s+diminution|bonne\s+évolution|très\s+bon|satisfaisant|indolore|efficace)\b/i.test(clean)) {
+            result.inferredEvoGlobale = "favorable";
+          } else if (/\b(?:stationnaire|inchangé|stable)\b/i.test(clean) && !result.inferredEvoGlobale) {
+            result.inferredEvoGlobale = "stationnaire";
+          } else if (/\b(?:défavorable|aggravation|échec|persistance|rebelle)\b/i.test(clean)) {
+            result.inferredEvoGlobale = "marquée par la persistance de la symptomatologie";
+          }
+        }
+      }
+      return result;
     }
 
     function findPatientInterventionDateAndAnesth(ev, prof) {
@@ -3947,27 +4049,39 @@
         benefEnrichis = `${benefEnrichis} et d'amélioration du retentissement fonctionnel`;
       }
 
+      const ann = extractClinicalAnnotations(sEntry);
+
       if (mode === "preop") {
-        const extraRem = (sEntry.remarques && sEntry.remarques.trim()) ? ` (${sEntry.remarques.trim()})` : "";
-        return [
+        const extraClin = ann.clinique.length > 0 ? ` (${ann.clinique.join(", ")})` : "";
+        const risquesEnrichis = ann.complications.length > 0
+          ? `${prof.risques} (avec vigilance particulière concernant : ${ann.complications.join(", ")})`
+          : prof.risques;
+        const linesPreop = [
           "Chère Consœur, Cher Confrère,",
           "",
           `Nous avons eu en consultation ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, présentant ${prof.motif}, survenant sur ${prof.terrain}.`,
           "",
-          `Au regard de ${argsEnrichis}${extraRem}, une indication de ${prof.gesteRetenu} à visée ${objEnrichi} a été retenue.`,
+          `Au regard de ${argsEnrichis}${extraClin}, une indication de ${prof.gesteRetenu} à visée ${objEnrichi} a été retenue.`,
           "",
           `Au cours de cette consultation, nous avons expliqué ${auPatient} :`,
           `- les principes de ${prof.principesNom} ;`,
           `- les modalités techniques du geste, réalisé sous guidage radiologique ;`,
           `- les bénéfices attendus, notamment en termes de ${benefEnrichis} ;`,
-          `- ainsi que les risques inhérents à la procédure, notamment ${prof.risques}.`,
+          `- ainsi que les risques inhérents à la procédure, notamment ${risquesEnrichis}.`,
           "",
-          `Les modalités, bénéfices et risques de cette prise en charge ont été expliqués ${auPatient}, qui a bien compris l'ensemble de ces éléments et a donné son accord pour l'intervention.`,
+          `Les modalités, bénéfices et risques de cette prise en charge ont été expliqués ${auPatient}, qui a bien compris l'ensemble de ces éléments et a donné son accord pour l'intervention.`
+        ];
+        if (ann.recommandations.length > 0) {
+          linesPreop.push("");
+          linesPreop.push(`En vue de cette prise en charge, il est recommandé : ${ann.recommandations.join(" ; ")}.`);
+        }
+        linesPreop.push(
           "",
           "Je vous prie de recevoir, Chère Consœur, Cher Confrère, l'assurance de mes sincères salutations.",
           "",
           "Dr Lefèvre"
-        ].join("\n");
+        );
+        return linesPreop.join("\n");
       }
 
       if (mode === "crh") {
@@ -3992,33 +4106,47 @@
         const isVissage = /vissage|ostéosynthèse/i.test(procContext);
         const isThermo = /cryo|radiofréquence|\brf\b|thermo|électrochimio|\bect\b|alcoolisation/i.test(procContext);
 
-        let deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un contrôle d'imagerie final satisfaisant et sans complication per-opératoire.`;
+        let deroulementBase = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un contrôle d'imagerie final satisfaisant`;
         if (isBiopsie) {
-          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, permettant la réalisation de prélèvements biopsiques ciblés sans complication per-opératoire.`;
+          deroulementBase = `L'intervention s'est déroulée ${anesth} et ${guidage}, permettant la réalisation de prélèvements biopsiques ciblés`;
         } else if (isThermo && (isCimento || isVissage)) {
-          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec une couverture satisfaisante de la lésion et une bonne stabilisation osseuse au contrôle final, sans complication per-opératoire.`;
+          deroulementBase = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec une couverture satisfaisante de la lésion et une bonne stabilisation osseuse au contrôle final`;
         } else if (isCimento) {
-          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un remplissage satisfaisant par le ciment au contrôle final, sans fuite extra-osseuse ni complication per-opératoire.`;
+          deroulementBase = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un remplissage satisfaisant par le ciment au contrôle final`;
         } else if (isVissage) {
-          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un bon positionnement de l'ostéosynthèse au contrôle final et sans complication per-opératoire.`;
+          deroulementBase = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un bon positionnement de l'ostéosynthèse au contrôle final`;
         } else if (isThermo) {
-          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec une couverture satisfaisante de la cible au contrôle final dans le respect des structures adjacentes, sans complication per-opératoire.`;
+          deroulementBase = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec une couverture satisfaisante de la cible au contrôle final dans le respect des structures adjacentes`;
         }
 
-        const cleanRemCrh = stripTechnicalMaterialForCrh(sEntry.remarques || "");
-        const suitesPhrase = cleanRemCrh
-          ? `Les suites immédiates sont marquées par : ${cleanRemCrh}.`
-          : `Les suites immédiates sont simples.`;
+        let deroulementEtSuites = "";
+        if (ann.complications.length > 0) {
+          const extraClinCrh = ann.clinique.length > 0 ? ` (${ann.clinique.join(", ")})` : "";
+          deroulementEtSuites = `${deroulementBase}. Les suites ont été marquées par ${ann.complications.join(", ")}${extraClinCrh}.`;
+        } else {
+          const sansComp = isCimento ? ", sans fuite extra-osseuse ni complication per-opératoire." : ", sans complication per-opératoire.";
+          const suitesTxt = ann.clinique.length > 0
+            ? `Les suites immédiates sont simples (${ann.clinique.join(", ")}).`
+            : `Les suites immédiates sont simples.`;
+          deroulementEtSuites = `${deroulementBase}${sansComp} ${suitesTxt}`;
+        }
 
         const impactCrh = isPureDiagBiopsie
           ? ""
           : (/doul/i.test(prof.motif) ? " avec retentissement fonctionnel" : " responsable de douleurs et d'un retentissement fonctionnel");
 
-        const consignesList = [
+        const consignesList = [];
+        for (const rec of ann.recommandations) {
+          consignesList.push(`- ${capFirstLetter(rec)}`);
+        }
+        if (ann.anapathNote) {
+          consignesList.push(`- Anatomopathologie : ${capFirstLetter(ann.anapathNote)}`);
+        }
+        consignesList.push(
           "- Repos relatif 48 heures et reprise progressive de l'appui / des activités selon la tolérance douloureuse",
           "- Pansement sec 48 heures (pas de fils à retirer) et traitement antalgique adapté"
-        ];
-        if (/eliquis|plavix|kard[eé]gic|anticoag/i.test(prof.terrain + " " + (prof.detailsProcedure || ""))) {
+        );
+        if (/eliquis|plavix|kard[eé]gic|anticoag/i.test(prof.terrain + " " + (prof.detailsProcedure || "")) && !ann.recommandations.some(r => /eliquis|plavix|kard[eé]gic|anticoag/i.test(r))) {
           consignesList.push("- Reprise du traitement antithrombotique selon le protocole validé");
         }
         consignesList.push(
@@ -4034,7 +4162,7 @@
           "",
           `Pour rappel, ${lePatient} présente ${prof.motif}${impactCrh}${terrainClause}, justifiant ce geste à visée ${objEnrichi} réalisé après information sur les bénéfices et les risques et recueil de son accord.`,
           "",
-          `${deroulementCourt} ${suitesPhrase}`,
+          deroulementEtSuites,
           "",
           "Suites et consignes :",
           ...consignesList,
@@ -4045,7 +4173,7 @@
         ].join("\n");
       }
 
-      // Mode 2 : Consultation de Suivi (rappel concis, sans détails techniques ni matériel)
+      // Mode 2 : Consultation de Suivi (rappel concis, sans détails techniques ni matériel, intégrant complications et recommandations)
       let indicInitSuivi = prof.indicationInitiale || "[indication initiale : douleurs et retentissement fonctionnel pré-opératoire à préciser]";
       if (!isPureDiagBiopsie && !/fonctionnel/i.test(indicInitSuivi) && !indicInitSuivi.includes("À préciser")) {
         indicInitSuivi += /doul/i.test(indicInitSuivi) ? " avec retentissement fonctionnel" : " responsable de douleurs et d'un retentissement fonctionnel";
@@ -4055,40 +4183,77 @@
         .replace(/\s+en\s+HDJ(?:\s+radio\s*B)?/gi, "")
         .trim();
 
-      const partSuivi = (sEntry.remarques && sEntry.remarques.trim())
-        ? stripTechnicalMaterialForCrh(sEntry.remarques.trim())
-        : (prof.particularitesProcedurales || "");
-      const suitesRappelClause = partSuivi
-        ? `marqué par ${partSuivi}`
-        : "avec des suites simples";
+      const remOnlyAnn = extractClinicalAnnotations({ remarques: sEntry.remarques || "", suivi_cs: "", anapath: "" });
+      const scsOnlyAnn = extractClinicalAnnotations({ remarques: "", suivi_cs: sEntry.suivi_cs || "", anapath: "" });
 
-      const evoGlobale = prof.evolutionGlobale || "[favorable / défavorable / stationnaire à préciser]";
-      const evoDetails = (sEntry.suivi_cs && sEntry.suivi_cs.trim())
-        ? sEntry.suivi_cs.trim()
+      let suitesRappelClause = "avec des suites simples";
+      if (remOnlyAnn.complications.length > 0) {
+        suitesRappelClause = `avec des suites marquées par ${remOnlyAnn.complications.join(", ")}`;
+      } else if (prof.particularitesProcedurales) {
+        suitesRappelClause = `marqué par ${prof.particularitesProcedurales}`;
+      }
+
+      const evoGlobale = ann.inferredEvoGlobale || prof.evolutionGlobale || "[favorable / défavorable / stationnaire à préciser]";
+      const evoDetails = ann.clinique.length > 0
+        ? ann.clinique.join(", ")
         : (prof.evolutionCliniqueDetails || "[évolution des douleurs et du retentissement fonctionnel : autonomie, mobilité, reprise des activités à préciser]");
       const compCibles = prof.complicationsCibles || "neurologique, infectieuse ou spécifique au geste";
 
-      return [
+      const compSuiviList = scsOnlyAnn.complications.length > 0 ? scsOnlyAnn.complications : remOnlyAnn.complications;
+      const compSuiviClause = compSuiviList.length > 0
+        ? `avec survenue de ${compSuiviList.join(", ")}`
+        : `sans complication ${compCibles} intercurrente`;
+
+      const linesSuivi = [
         "Chère Consœur, Cher Confrère,",
         "",
         `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${gesteSuiviCourt}.`,
         "",
         `Pour rappel, ce geste avait été réalisé devant ${indicInitSuivi}, ${suitesRappelClause}.`,
         "",
-        `Sur le plan clinique, ${lePatient} rapporte une évolution ${evoGlobale} au décours de la procédure, tant sur le plan des douleurs que du retentissement fonctionnel (${evoDetails}), sans complication ${compCibles} intercurrente.`,
+        `Sur le plan clinique, ${lePatient} rapporte une évolution ${evoGlobale} au décours de la procédure, tant sur le plan des douleurs que du retentissement fonctionnel (${evoDetails}), ${compSuiviClause}.`
+      ];
+
+      if (ann.anapathNote) {
+        linesSuivi.push("");
+        linesSuivi.push(`Sur le plan anatomopathologique, l'analyse retrouve : ${ann.anapathNote}.`);
+      }
+      if (ann.recommandations.length > 0) {
+        linesSuivi.push("");
+        linesSuivi.push(`Pour la suite de la prise en charge, nous recommandons : ${ann.recommandations.join(" ; ")}.`);
+      }
+
+      linesSuivi.push(
         "",
         "Je vous prie de recevoir, Chère Consœur, Cher Confrère, l'assurance de mes sincères salutations.",
         "",
         "Dr T. Lefèvre"
-      ].join("\n");
+      );
+      return linesSuivi.join("\n");
     }
 
-    function copyPatientCr(encodedMeta, mode, btnEl, clickEv) {
+    function copyPatientCr(encodedMeta, mode, btnEl, clickEv, prefix = "") {
       if (clickEv) clickEv.stopPropagation();
       let meta = {};
       try {
         meta = JSON.parse(decodeURIComponent(encodedMeta));
       } catch (e) {}
+      // Synchroniser immédiatement toute note en cours de saisie dans les champs ouverts de la carte avant de générer le CR
+      const sKey = getSuiviKey(meta);
+      const matEl = document.getElementById((prefix || "") + "mat-" + sKey);
+      const remEl = document.getElementById((prefix || "") + "rem-" + sKey);
+      const anaEl = document.getElementById((prefix || "") + "ana-" + sKey);
+      const scsEl = document.getElementById((prefix || "") + "scs-" + sKey);
+      if (matEl || remEl || anaEl || scsEl) {
+        const cur = getSuiviEntry(meta);
+        const domMat = matEl ? matEl.value.trim() : cur.materiel;
+        const domRem = remEl ? remEl.value.trim() : cur.remarques;
+        const domAna = anaEl ? anaEl.value.trim() : cur.anapath;
+        const domScs = scsEl ? scsEl.value.trim() : cur.suivi_cs;
+        if (domMat !== cur.materiel || domRem !== cur.remarques || domAna !== cur.anapath || domScs !== cur.suivi_cs) {
+          saveSuiviFromDom(sKey, encodedMeta, prefix, false);
+        }
+      }
       const crText = buildPatientCrText(meta, mode);
       const doFeedback = () => {
         if (!btnEl) return;
@@ -4170,21 +4335,21 @@
             <span id="${prefix}btnbadge-${sKey}" style="font-size:10px;">${hasSaved ? "✓" : ""}</span>
             <span id="chev-${boxDomId}">${isOpen ? "▾" : "▸"}</span>
           </button>
-          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "preop" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'preop', this, event)" title="Copier le compte rendu de consultation préopératoire">
+          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "preop" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'preop', this, event, '${prefix}')" title="Copier le compte rendu de consultation préopératoire">
             <span>📋 CR Pré-op</span>
           </button>
-          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "suivi" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'suivi', this, event)" title="Copier le compte rendu de consultation de suivi">
+          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "suivi" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'suivi', this, event, '${prefix}')" title="Copier le compte rendu de consultation de suivi">
             <span>📋 CR Suivi</span>
           </button>
-          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "crh" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'crh', this, event)" title="Copier le Compte Rendu d'Hospitalisation (CRH)">
+          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "crh" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'crh', this, event, '${prefix}')" title="Copier le Compte Rendu d'Hospitalisation (CRH)">
             <span>📋 CRH</span>
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
-          <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
-          <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
-          <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Biopsie / Anatomopathologie..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
-          <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Suivi (CS de suivi)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
+          <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé (interne, non inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
+          <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques, complications ou consignes (inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
+          <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Biopsie / Anatomopathologie (inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
+          <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Suivi clinique & recommandations CS (inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
           <div class="bloc-save-row" style="justify-content:flex-end; gap:8px;">
             <span class="bloc-save-status" id="${prefix}status-${sKey}"></span>
             <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', true)">OK</button>
