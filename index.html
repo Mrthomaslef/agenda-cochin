@@ -1365,9 +1365,9 @@
           <button class="seg-btn scope-active" id="act-scope-mine" onclick="setActiviteScope('mine')">Mes patients (TL)</button>
           <button class="seg-btn" id="act-scope-all" onclick="setActiviteScope('all')">Tout le service</button>
         </div>
-        <div class="segmented">
+        <div class="segmented" id="activite-mode-bar">
           <button class="seg-btn active" id="act-mode-actes" onclick="setActiviteMode('actes')">Actes & Bio</button>
-          <button class="seg-btn" id="act-mode-cs" onclick="setActiviteMode('cs')">CS & IRM</button>
+          <button class="seg-btn" id="act-mode-cs" onclick="setActiviteMode('cs')">Consultations</button>
           <button class="seg-btn" id="act-mode-both" onclick="setActiviteMode('both')">Tout</button>
           <button class="seg-btn" id="act-mode-todo" onclick="setActiviteMode('todo')">À planifier</button>
         </div>
@@ -1449,7 +1449,7 @@
         <div class="kpi-val" style="color:var(--biopsie)" id="kpi-biopsies">-</div>
         <div class="kpi-lbl">Biopsies</div>
       </div>
-      <div class="kpi-box" id="kpi-box-cs" onclick="openActiviteView('cs', 'cs')">
+      <div class="kpi-box" id="kpi-box-cs" onclick="openActiviteView('cs', 'upcoming')">
         <div class="kpi-val" style="color:var(--cs)" id="kpi-cs">-</div>
         <div class="kpi-lbl">Consult.</div>
       </div>
@@ -2271,7 +2271,13 @@
     function updateKpis() {
       document.getElementById("kpi-actes").textContent = appData.actes.length;
       document.getElementById("kpi-biopsies").textContent = appData.Biopsies.length;
-      document.getElementById("kpi-cs").textContent = appData.Consultations.length;
+      try {
+        const todayIsoCs = dateToIso(new Date());
+        const upcomingCs = getAllTimedEvents().filter(e => e.category === "cs" && e.isoDate && e.isoDate >= todayIsoCs && (activiteScope === "mine" ? e.isMine : true)).length;
+        document.getElementById("kpi-cs").textContent = upcomingCs;
+      } catch (e) {
+        document.getElementById("kpi-cs").textContent = appData.Consultations.length;
+      }
 
       const nonRepAvis = appData.Demandes_avis.filter(a => String(a["Statut Réponse"] || "").toLowerCase().includes("non")).length;
       document.getElementById("kpi-avis").textContent = nonRepAvis > 0 ? `${nonRepAvis} à rép.` : appData.Demandes_avis.length;
@@ -3463,7 +3469,7 @@
 
     function openActiviteView(mode, sub) {
       activiteMode = mode;
-      activiteSub = sub || "all";
+      activiteSub = sub || (mode === "cs" ? "upcoming" : "all");
       switchTab("activite");
       syncActiviteControls();
       renderActiviteTab();
@@ -3471,13 +3477,14 @@
 
     function setActiviteScope(sc) {
       activiteScope = sc;
+      updateKpis();
       syncActiviteControls();
       renderActiviteTab();
     }
 
     function setActiviteMode(mode) {
       activiteMode = mode;
-      activiteSub = "all";
+      activiteSub = mode === "cs" ? "upcoming" : "all";
       syncActiviteControls();
       renderActiviteTab();
     }
@@ -3492,6 +3499,11 @@
       const btnAll = document.getElementById("act-scope-all");
       if (btnMine) btnMine.classList.toggle("scope-active", activiteScope === "mine");
       if (btnAll) btnAll.classList.toggle("scope-active", activiteScope === "all");
+
+      const modeBar = document.getElementById("activite-mode-bar");
+      if (modeBar) {
+        modeBar.style.display = activiteMode === "cs" ? "none" : "flex";
+      }
 
       ["actes", "cs", "both", "todo"].forEach(m => {
         const el = document.getElementById("act-mode-" + m);
@@ -3514,6 +3526,7 @@
       syncActiviteControls();
       const subEl = document.getElementById("activite-subchips");
       const container = document.getElementById("activite-list-container");
+      const todayIso = dateToIso(new Date());
 
       if (activiteMode === "actes") {
         subEl.style.display = "flex";
@@ -3523,15 +3536,37 @@
           <button class="chip ${activiteSub === "biopsie" ? "active" : ""}" onclick="setActiviteSub('biopsie')">Biopsies</button>
         `;
       } else if (activiteMode === "cs") {
+        if (!["upcoming", "done", "todo"].includes(activiteSub)) activiteSub = "upcoming";
         subEl.style.display = "flex";
         subEl.innerHTML = `
-          <button class="chip ${activiteSub === "all" ? "active" : ""}" onclick="setActiviteSub('all')">Tout</button>
-          <button class="chip ${activiteSub === "cs" ? "active" : ""}" onclick="setActiviteSub('cs')">Consultations</button>
-          <button class="chip ${activiteSub === "img" ? "active" : ""}" onclick="setActiviteSub('img')">IRM / TDM / Anesth</button>
+          <button class="chip ${activiteSub === "upcoming" ? "active" : ""}" onclick="setActiviteSub('upcoming')">À venir</button>
+          <button class="chip ${activiteSub === "done" ? "active" : ""}" onclick="setActiviteSub('done')">Réalisées</button>
+          <button class="chip ${activiteSub === "todo" ? "active" : ""}" onclick="setActiviteSub('todo')">À planifier</button>
         `;
       } else {
         subEl.style.display = "none";
         subEl.innerHTML = "";
+      }
+
+      if (activiteMode === "cs" && activiteSub === "todo") {
+        let todoCsPatients = (appData.Data || []).filter(p => {
+          const st = String(p["Statut"] || "").toLowerCase();
+          if (!st.includes("planifier") && !st.includes("irm")) return false;
+          const interv = String(p["Type d'Intervention / Suivi"] || "");
+          const ech = String(p["Échéance / Rendez-vous"] || "");
+          const clean = (interv + " " + ech).replace(/cs\s+anesth\w*/gi, "");
+          return /(télé)?consultation|\bcs\b/i.test(clean);
+        });
+        if (activiteScope === "mine") {
+          todoCsPatients = todoCsPatients.filter(p => {
+            const ref = String(p["Médecin Référent"] || "").toLowerCase();
+            return ref.includes("lefevre") || ref.includes("lefèvre") || /\btl\b/.test(ref);
+          });
+        }
+        container.innerHTML = todoCsPatients.length
+          ? todoCsPatients.map(p => renderMasterPatientCard(p)).join("")
+          : `<div class="empty-state">Aucune consultation à planifier.</div>`;
+        return;
       }
 
       if (activiteMode === "todo") {
@@ -3558,9 +3593,12 @@
         if (activiteSub === "acte") evs = evs.filter(e => e.category === "acte");
         else if (activiteSub === "biopsie") evs = evs.filter(e => e.category === "biopsie");
       } else if (activiteMode === "cs") {
-        evs = evs.filter(e => e.category === "cs" || e.category === "img");
-        if (activiteSub === "cs") evs = evs.filter(e => e.category === "cs");
-        else if (activiteSub === "img") evs = evs.filter(e => e.category === "img");
+        evs = evs.filter(e => e.category === "cs");
+        if (activiteSub === "upcoming") {
+          evs = evs.filter(e => Boolean(e.isoDate && e.isoDate >= todayIso));
+        } else if (activiteSub === "done") {
+          evs = evs.filter(e => Boolean(e.isoDate && e.isoDate < todayIso));
+        }
       }
 
       if (evs.length === 0) {
