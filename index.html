@@ -2012,7 +2012,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v28"; /*__APP_BUILD_ID:v28__*/
+        const CURRENT_BUILD_ID = "v29"; /*__APP_BUILD_ID:v29__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -2229,20 +2229,49 @@
       const k = getSuiviKey(ev);
       const fallbackKey = `${ev.isoDate || "nodate"}_${normName(ev.patient)}`;
       const patNorm = normName(ev.patient);
+      const stored = suiviBlocMap[k] || suiviBlocMap[fallbackKey] || {};
+
+      let patMat = ev.sheetMateriel || "";
+      let patRem = ev.sheetRemarquesSuivi || "";
+      let patAna = ev.sheetAnapath || "";
       let patSuiviCs = ev.sheetSuiviCs || "";
-      if (!patSuiviCs && patNorm) {
-        for (const val of Object.values(suiviBlocMap)) {
-          if (val && normName(val.patient_name) === patNorm && val.suivi_cs) {
-            patSuiviCs = val.suivi_cs;
-            break;
+
+      if (patNorm) {
+        for (const b of (appData.Biopsies || [])) {
+          if (normName(b["Identité Patient"]) === patNorm) {
+            if (!patMat && b["Matériel utilisé"]) patMat = b["Matériel utilisé"];
+            if (!patRem && (b["Remarques (Bloc)"] || b["Remarques & Suivi"])) patRem = b["Remarques (Bloc)"] || b["Remarques & Suivi"];
+            if (!patAna && b["Anatomopathologie"]) patAna = b["Anatomopathologie"];
+            if (!patSuiviCs && b["Suivi (CS de suivi)"]) patSuiviCs = b["Suivi (CS de suivi)"];
           }
         }
+        for (const a of (appData.actes || [])) {
+          if (normName(a["Identité Patient"]) === patNorm) {
+            if (!patMat && a["Matériel utilisé"]) patMat = a["Matériel utilisé"];
+            if (!patRem && (a["Remarques (Bloc)"] || a["Remarques & Suivi"])) patRem = a["Remarques (Bloc)"] || a["Remarques & Suivi"];
+            if (!patSuiviCs && a["Suivi (CS de suivi)"]) patSuiviCs = a["Suivi (CS de suivi)"];
+          }
+        }
+        for (const c of (appData.Consultations || [])) {
+          if (normName(c["Identité Patient"]) === patNorm) {
+            if (!patSuiviCs && c["Remarques de suivi"]) patSuiviCs = c["Remarques de suivi"];
+          }
+        }
+        const patEntries = Object.values(suiviBlocMap)
+          .filter(v => v && normName(v.patient_name) === patNorm)
+          .sort((x, y) => String(y.updated_at || "").localeCompare(String(x.updated_at || "")));
+        for (const val of patEntries) {
+          if (!patMat && val.materiel) patMat = val.materiel;
+          if (!patRem && val.remarques) patRem = val.remarques;
+          if (!patAna && val.anapath) patAna = val.anapath;
+          if (!patSuiviCs && val.suivi_cs) patSuiviCs = val.suivi_cs;
+        }
       }
-      const stored = suiviBlocMap[k] || suiviBlocMap[fallbackKey] || {};
+
       return {
-        materiel: stored.materiel !== undefined && stored.materiel !== "" ? stored.materiel : (ev.sheetMateriel || ""),
-        remarques: stored.remarques !== undefined && stored.remarques !== "" ? stored.remarques : (ev.sheetRemarquesSuivi || ""),
-        anapath: stored.anapath !== undefined && stored.anapath !== "" ? stored.anapath : (ev.sheetAnapath || ""),
+        materiel: stored.materiel !== undefined && stored.materiel !== "" ? stored.materiel : patMat,
+        remarques: stored.remarques !== undefined && stored.remarques !== "" ? stored.remarques : patRem,
+        anapath: stored.anapath !== undefined && stored.anapath !== "" ? stored.anapath : patAna,
         suivi_cs: stored.suivi_cs !== undefined && stored.suivi_cs !== "" ? stored.suivi_cs : patSuiviCs,
         updated_at: stored.updated_at || ""
       };
@@ -2286,40 +2315,43 @@
         suivi_cs,
         updated_at: new Date().toISOString()
       };
+      const patNorm = normName(meta.patient);
+      if (patNorm) {
+        for (const vMap of Object.values(suiviBlocMap)) {
+          if (vMap && normName(vMap.patient_name) === patNorm) {
+            vMap.materiel = materiel;
+            vMap.remarques = remarques;
+            vMap.anapath = anapath;
+            vMap.suivi_cs = suivi_cs;
+            vMap.updated_at = entry.updated_at;
+          }
+        }
+      }
       suiviBlocMap[suiviKey] = entry;
       try {
         localStorage.setItem(STORAGE_SUIVI_KEY, JSON.stringify(suiviBlocMap));
       } catch (e) {}
 
-      // Mettre à jour en mémoire dans appData.actes, appData.Biopsies et appData.Consultations
-      if (meta.category === "cs") {
-        for (const r of (appData.Consultations || [])) {
-          if ((meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === normName(meta.patient)) {
-            r["Remarques de suivi"] = suivi_cs;
-          }
-        }
+      // Mettre à jour en mémoire dans appData.actes, appData.Biopsies et appData.Consultations pour ce patient
+      if (patNorm) {
         for (const r of (appData.actes || [])) {
-          if (normName(r["Identité Patient"]) === normName(meta.patient)) {
+          if ((meta.category === "acte" && meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === patNorm) {
+            r["Matériel utilisé"] = materiel;
+            r["Remarques (Bloc)"] = remarques;
             r["Suivi (CS de suivi)"] = suivi_cs;
           }
         }
         for (const r of (appData.Biopsies || [])) {
-          if (normName(r["Identité Patient"]) === normName(meta.patient)) {
+          if ((meta.category === "biopsie" && meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === patNorm) {
+            r["Matériel utilisé"] = materiel;
+            r["Remarques (Bloc)"] = remarques;
+            r["Anatomopathologie"] = anapath;
             r["Suivi (CS de suivi)"] = suivi_cs;
           }
         }
-      } else {
-        const targetArr = meta.category === "biopsie" ? (appData.Biopsies || []) : (appData.actes || []);
-        for (const r of targetArr) {
-          if ((meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === normName(meta.patient)) {
-            r["Matériel utilisé"] = materiel;
-            r["Remarques (Bloc)"] = remarques;
-            if (meta.category === "biopsie") {
-              r["Anatomopathologie"] = anapath;
-            }
-            if (suivi_cs) {
-              r["Suivi (CS de suivi)"] = suivi_cs;
-            }
+        for (const r of (appData.Consultations || [])) {
+          if ((meta.category === "cs" && meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === patNorm) {
+            r["Remarques de suivi"] = suivi_cs;
           }
         }
       }
@@ -3050,16 +3082,12 @@
     function renderBlocNotesHtml(ev, prefix = "") {
       const sKey = getSuiviKey(ev);
       const sEntry = getSuiviEntry(ev);
-      const isBio = (ev.category === "biopsie");
-      const isCsSuivi = (ev.category === "cs");
-      const hasSaved = isCsSuivi
-        ? Boolean(sEntry.suivi_cs && sEntry.suivi_cs.trim())
-        : Boolean(
-            (sEntry.materiel && sEntry.materiel.trim()) ||
-            (sEntry.remarques && sEntry.remarques.trim()) ||
-            (sEntry.anapath && sEntry.anapath.trim()) ||
-            (sEntry.suivi_cs && sEntry.suivi_cs.trim())
-          );
+      const hasSaved = Boolean(
+        (sEntry.materiel && sEntry.materiel.trim()) ||
+        (sEntry.remarques && sEntry.remarques.trim()) ||
+        (sEntry.anapath && sEntry.anapath.trim()) ||
+        (sEntry.suivi_cs && sEntry.suivi_cs.trim())
+      );
       const safeEvMeta = encodeURIComponent(JSON.stringify({
         row: ev.row || 0,
         patient: ev.patient,
@@ -3070,26 +3098,19 @@
       }));
       const boxDomId = `${prefix}box-${sKey}`;
       const isOpen = openBlocNoteIds.has(boxDomId);
-      const btnText = isCsSuivi ? "Suivi" : "Notes";
       return `
         <div class="bloc-toggle-row" onclick="event.stopPropagation()">
           <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
-            <span>${btnText}</span>
+            <span>Notes</span>
             <span id="${prefix}btnbadge-${sKey}" style="font-size:10px;">${hasSaved ? "✓" : ""}</span>
             <span id="chev-${boxDomId}">${isOpen ? "▾" : "▸"}</span>
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
-          ${isCsSuivi ? `
-            <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Remarques sur le suivi..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
-          ` : `
-            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
-            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
-            ${isBio ? `
-            <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Anatomopathologie..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
-            ` : ""}
-            <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Suivi (CS de suivi)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
-          `}
+          <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
+          <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
+          <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Biopsie / Anatomopathologie..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
+          <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Suivi (CS de suivi)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
           <div class="bloc-save-row" style="justify-content:flex-end; gap:8px;">
             <span class="bloc-save-status" id="${prefix}status-${sKey}"></span>
             <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', true)">OK</button>
@@ -3132,11 +3153,8 @@
       const isGenericCsTitle = ev.category === "cs" && /^(télé)?consultation\s*(spécialisée|de suivi|pré-interventionnelle|\/\s*cs)?$/i.test(String(ev.title || "").trim());
       const mainLine = isGenericCsTitle ? (ev.remarques || ev.title) : ev.title;
       const subLine = isGenericCsTitle ? "" : (ev.remarques || "");
-
-      const isGeste = (ev.category === "acte" || ev.category === "biopsie");
-      const todayIso = dateToIso(new Date());
-      const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
-      const showInlineBlocBox = (isGeste && isBlocDayOrPast && (inSuiviTab || ev.isMine)) || (ev.category === "cs" && inSuiviTab);
+      const safeTitleSlug = normName(ev.title || "").slice(0, 8);
+      const cardPrefix = `${inSuiviTab ? "suivi" : (currentTab || "ev")}-${ev.category || "ev"}-${ev.row || 0}-${safeTitleSlug}-`;
 
       return `
         <div class="event-card type-${ev.category}" onclick="openPatientModal('${safePatientAttr}')">
@@ -3155,7 +3173,7 @@
           ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
           ${subLine ? `<div style="font-size:11px; color:#94A3B8; margin-top:3px;">${subLine}</div>` : ""}
           ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
-          ${showInlineBlocBox ? renderBlocNotesHtml(ev, inSuiviTab ? "suivi-" : "card-") : ""}
+          ${renderBlocNotesHtml(ev, cardPrefix)}
         </div>
       `;
     }
@@ -3843,6 +3861,14 @@
         const isRep = st === "Répondu";
         const safePatientAttr = encodeURIComponent(JSON.stringify({ name: a["Identité Patient"], ipp: a["N° Dossier / IPP"] }));
         const nextStatus = isRep ? "Non répondu" : "Répondu";
+        const avisEv = {
+          row: a._row || 0,
+          patient: a["Identité Patient"] || "",
+          ipp: a["N° Dossier / IPP"] || "",
+          isoDate: parseFrDateToIso(a["Date Demande"]) || "",
+          category: /biopsie/i.test(String(a["Motif de l'avis / Question clinique"] || "") + " " + String(a["Décision & Suite donnée"] || "")) ? "biopsie" : "acte",
+          title: a["Motif de l'avis / Question clinique"] || "Demande d'avis"
+        };
         return `
           <div class="event-card" style="border-left-color:${isRep ? "var(--success)" : "var(--danger)"};">
             <div class="event-top" onclick="openPatientModal('${safePatientAttr}')">
@@ -3862,11 +3888,12 @@
             <div style="font-size:11.5px; color:#86EFAC; margin-top:4px;" onclick="openPatientModal('${safePatientAttr}')">
               <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
             </div>
-            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+            <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
               <button class="btn-icon" onclick="toggleAvisStatus(${a._row}, '${nextStatus}')">
                 ${isRep ? "↩️ Non répondu" : "✅ Marquer Répondu"}
               </button>
             </div>
+            ${renderBlocNotesHtml(avisEv, `avis-${a._row || 0}-`)}
           </div>
         `;
       }).join("");
@@ -4112,6 +4139,15 @@
       const pillClass = st === "Planifié" ? "pill-success" : (st.includes("IRM") ? "pill-warn" : "pill-danger");
       const anticoag = detectAnticoagAlert(`${p["Coordonnées / DDN"]} ${p["Instructions & Remarques Cliniques"]}`);
       const safePatientAttr = encodeURIComponent(JSON.stringify({ name: p["Identité Patient"], ipp: p["N° Dossier / IPP"] }));
+      const patEv = {
+        row: p._row || 0,
+        patient: p["Identité Patient"] || "",
+        ipp: p["N° Dossier / IPP"] || "",
+        isoDate: "",
+        category: /biopsie/i.test(String(p["Type d'Intervention / Suivi"] || "")) ? "biopsie" : "acte",
+        title: p["Type d'Intervention / Suivi"] || ""
+      };
+      const patPrefix = `pat-${currentTab || "doss"}-${p._row || 0}-${normName(patEv.patient).slice(0, 6)}-`;
 
       return `
         <div class="event-card" onclick="openPatientModal('${safePatientAttr}')">
@@ -4125,6 +4161,7 @@
             📅 ${p["Échéance / Rendez-vous"] || "-"}
           </div>
           ${anticoag ? `<div class="alert-anticoag">⚠️ Vigilance Anticoagulant / Antiagrégant</div>` : ""}
+          ${renderBlocNotesHtml(patEv, patPrefix)}
         </div>
       `;
     }
@@ -4182,11 +4219,15 @@
           }).join("")
         : `<div style="font-size:12px; color:var(--text-muted);">${echeance}</div>`;
 
-      const todayIsoModal = dateToIso(new Date());
-      const gesteEvs = allEvs.filter(e => (e.category === "acte" || e.category === "biopsie") && e.isoDate && e.isoDate <= todayIsoModal);
-      const modalBlocHtml = gesteEvs.length > 0
-        ? gesteEvs.map(gEv => renderBlocNotesHtml(gEv, "modal-")).join("")
-        : "";
+      const primaryModalEv = allEvs.find(e => e.category === "biopsie" || e.category === "acte") || allEvs[0] || {
+        row: master._row || 0,
+        patient: name,
+        ipp: ipp,
+        isoDate: "",
+        category: /biopsie/i.test(interv) ? "biopsie" : "acte",
+        title: interv
+      };
+      const modalBlocHtml = renderBlocNotesHtml(primaryModalEv, "modal-");
 
       document.getElementById("modal-body").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;">
@@ -4237,6 +4278,7 @@
 
     function closeModal() {
       document.getElementById("patient-modal").classList.remove("open");
+      renderCurrentTab();
     }
 
     function copyText(txt, btnEl) {
