@@ -2026,7 +2026,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v31"; /*__APP_BUILD_ID:v31__*/
+        const CURRENT_BUILD_ID = "v32"; /*__APP_BUILD_ID:v32__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3852,11 +3852,60 @@
 
     function getDefaultCrModeForCard(ev, prof) {
       const todayIso = dateToIso(new Date());
-      if (currentTab === "suivi" && (suiviFilter === "done" || suiviFilter === "cs_suivi")) return "suivi";
-      if (currentTab === "activite" && activiteSub === "done") return "suivi";
-      if (ev.isoDate && ev.isoDate <= todayIso && (ev.category === "acte" || ev.category === "biopsie")) return "suivi";
+      if (currentTab === "suivi" && suiviFilter === "done") return "crh";
+      if (currentTab === "suivi" && suiviFilter === "cs_suivi") return "suivi";
+      if (currentTab === "activite" && activiteSub === "done" && (activiteMode === "acte" || activiteMode === "biopsie")) return "crh";
+      if (currentTab === "activite" && activiteSub === "done" && activiteMode === "cs") return "suivi";
+      if (ev.isoDate && ev.isoDate <= todayIso && (ev.category === "acte" || ev.category === "biopsie")) return "crh";
       if (/suivi/i.test(String(ev.title || "") + " " + String(ev.catActe || ""))) return "suivi";
       return prof.defaultMode || "preop";
+    }
+
+    function stripTechnicalMaterialForCrh(txt) {
+      if (!txt) return "";
+      return String(txt)
+        .replace(/\b\d+(?:[.,]\d+)?\s*(?:G|Gauge|Fr|French|mm|cm|mL|mg|W|watts?|minutes?|min|sec|secondes?)\b/gi, "")
+        .replace(/\b(?:OsteoCool|IceRod|IceSphere|IceSeed|IceForce|IcePearl|Bonopty|Madison|Laredo|Kyphon|Confidence|Vertecem| Boston\s+Scientific|Medtronic|Stryker|Galil)\b/gi, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+    }
+
+    function findPatientInterventionDateAndAnesth(ev, prof) {
+      const patNorm = normName(ev.patient);
+      let dateHospit = "";
+      if ((ev.category === "acte" || ev.category === "biopsie") && ev.dateStr && /\d{2}\/\d{2}\/\d{4}/.test(ev.dateStr)) {
+        dateHospit = ev.dateStr;
+      }
+      if (!dateHospit && patNorm) {
+        for (const a of (appData.actes || [])) {
+          if (normName(a["Identité Patient"]) === patNorm && /\d{2}\/\d{2}\/\d{4}/.test(String(a["Date"] || ""))) {
+            dateHospit = a["Date"];
+            break;
+          }
+        }
+      }
+      if (!dateHospit && patNorm) {
+        for (const b of (appData.Biopsies || [])) {
+          if (normName(b["Identité Patient"]) === patNorm && /\d{2}\/\d{2}\/\d{4}/.test(String(b["Date"] || ""))) {
+            dateHospit = b["Date"];
+            break;
+          }
+        }
+      }
+      const combined = `${prof.gesteRetenu || ""} ${prof.detailsProcedure || ""} ${ev.title || ""} ${ev.remarques || ""}`.toLowerCase();
+      let anesth = "sous anesthésie locale ou générale selon le protocole retenu";
+      if (/\bag\b|anesthésie générale/i.test(combined)) {
+        anesth = "sous anesthésie générale";
+      } else if (/\bal\b|anesthésie locale|sous locale/i.test(combined)) {
+        anesth = "sous anesthésie locale";
+      }
+      let guidage = "sous guidage scanographique";
+      if (/échograph|\bécho\b/i.test(combined)) {
+        guidage = "sous guidage échographique";
+      } else if (/scopie|allura/i.test(combined)) {
+        guidage = "sous guidage scopique et scanographique";
+      }
+      return { dateHospit, anesth, guidage };
     }
 
     function buildPatientCrText(ev, mode) {
@@ -3864,8 +3913,10 @@
       const sEntry = getSuiviEntry(ev);
       const ageAccord = prof.fem ? "âgée" : "âgé";
       const suiviAccord = prof.fem ? "suivie" : "suivi";
+      const hospitAccord = prof.fem ? "hospitalisée" : "hospitalisé";
       const auPatient = prof.fem ? "à la patiente" : "au patient";
       const lePatient = prof.fem ? "la patiente" : "le patient";
+      const LePatientCap = prof.fem ? "La patiente" : "Le patient";
 
       if (mode === "preop") {
         const extraRem = (sEntry.remarques && sEntry.remarques.trim()) ? ` (${sEntry.remarques.trim()})` : "";
@@ -3887,6 +3938,75 @@
           "Je vous prie de recevoir, Chère Consœur, Cher Confrère, l'assurance de mes sincères salutations.",
           "",
           "Dr Lefèvre"
+        ].join("\n");
+      }
+
+      if (mode === "crh") {
+        // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Zéro matériel technique, paragraphes continus sans gras ni italique, signature Dr T. Lefevre
+        const { dateHospit, anesth, guidage } = findPatientInterventionDateAndAnesth(ev, prof);
+        const ageChunk = (prof.age && !prof.age.includes("À préciser")) ? `, ${prof.age} ans,` : " ([âge à préciser])";
+        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [Date d'hospitalisation à préciser]";
+        const gesteMotif = prof.gesteRealise && !prof.gesteRealise.includes("À préciser")
+          ? prof.gesteRealise
+          : (prof.gesteRetenu || "[geste interventionnel réalisé à préciser]");
+        const terrainClause = (prof.terrain && !prof.terrain.includes("À préciser"))
+          ? ` sur un terrain de ${prof.terrain}`
+          : "";
+        const procDesc = stripTechnicalMaterialForCrh(prof.detailsProcedure || gesteMotif);
+        const isBiopsie = /biopsie/i.test(gesteMotif + " " + procDesc);
+        const isCimento = /cimento|vertébro/i.test(gesteMotif + " " + procDesc);
+        const isThermo = /cryo|radiofréquence|\brf\b|thermo|électrochimio|\bect\b/i.test(gesteMotif + " " + procDesc);
+
+        let controleFinalPhrase = "Le contrôle d'imagerie en fin de procédure confirme le bon déroulement anatomique du geste, sans complication per-opératoire décelable.";
+        if (isBiopsie) {
+          controleFinalPhrase = "Plusieurs prélèvements biopsiques représentatifs ont été réalisés pour analyse anatomopathologique. Le contrôle d'imagerie en fin de procédure ne montre pas de complication hémorragique ni d'anomalie per-opératoire.";
+        } else if (isCimento && isThermo) {
+          controleFinalPhrase = "Le contrôle scanographique final atteste d'une couverture satisfaisante de la lésion par la zone d'ablation et d'un bon remplissage osseux par le ciment, sans fuite extra-osseuse ni complication per-opératoire.";
+        } else if (isCimento) {
+          controleFinalPhrase = "Le contrôle scanographique final atteste d'un remplissage satisfaisant de la lésion osseuse par le ciment, sans fuite extra-osseuse significative ni complication per-opératoire.";
+        } else if (isThermo) {
+          controleFinalPhrase = "Le contrôle d'imagerie final atteste d'une zone de traitement couvrant de façon satisfaisante la cible lésionnelle en respectant les structures nobles adjacentes, sans complication per-opératoire.";
+        }
+
+        const cleanRemCrh = stripTechnicalMaterialForCrh(sEntry.remarques || "");
+        const suitesImmediatesPara = cleanRemCrh
+          ? `Les suites immédiates sont marquées par : ${cleanRemCrh}.`
+          : `Les suites immédiates sont simples, avec une bonne tolérance clinique dès le décours de la procédure et l'absence de déficit sensitivo-moteur.`;
+
+        const consignesList = [];
+        if (/pied|morton|astragale|cheville|tibia|genou|hanche|bassin|cuisse/i.test(gesteMotif + " " + prof.motif)) {
+          consignesList.push("- Reprise de l'appui et de la marche autorisée selon la tolérance douloureuse, avec repos relatif pendant 48 heures");
+        } else {
+          consignesList.push("- Repos relatif pendant 48 heures avec reprise progressive des activités habituelles selon la tolérance douloureuse");
+        }
+        consignesList.push("- Pansement sec au point de ponction pendant 48 heures (retirer ensuite, pas de fils à enlever)");
+        consignesList.push("- Poursuite et adaptation du traitement antalgique selon l'évolution clinique");
+        if (/eliquis|plavix|kard[eé]gic|anticoag/i.test(prof.terrain + " " + prof.detailsProcedure)) {
+          consignesList.push("- Gestion et reprise du traitement antithrombotique selon les consignes médicales et anesthésiques validées");
+        }
+        if (isBiopsie) {
+          consignesList.push("- Consultation dédiée pour remise des résultats anatomopathologiques et suite de la prise en charge");
+        } else {
+          consignesList.push("- Consultation de suivi dédiée en radiologie interventionnelle avec imagerie de contrôle");
+        }
+
+        return [
+          "Chère consœur, cher confrère,",
+          "",
+          `${prof.civiliteNom}${ageChunk} a été ${hospitAccord} ${dateChunk} pour la réalisation de ${gesteMotif}.`,
+          "",
+          `Pour rappel, ${lePatient} présente ${prof.motif}${terrainClause}. Au regard de ${prof.arguments}, l'indication de ${prof.gesteRetenu} à visée ${prof.objectifs} a été retenue. Une information détaillée sur les bénéfices et les risques de la procédure (notamment ${prof.risques}) a été délivrée ${auPatient}, qui a donné son accord.`,
+          "",
+          `L'intervention a été réalisée ${anesth} et ${guidage}. Il a été procédé à ${procDesc}. ${controleFinalPhrase}`,
+          "",
+          suitesImmediatesPara,
+          "",
+          "Suites et consignes :",
+          ...consignesList,
+          "",
+          "Bien confraternellement,",
+          "",
+          "Dr T. Lefevre"
         ].join("\n");
       }
 
@@ -3935,7 +4055,8 @@
         const origHtml = btnEl.getAttribute("data-orig-html") || btnEl.innerHTML;
         if (!btnEl.getAttribute("data-orig-html")) btnEl.setAttribute("data-orig-html", origHtml);
         btnEl.classList.add("copied");
-        btnEl.innerHTML = `<span>✅ ${mode === "preop" ? "CR Pré-op copié" : "CR Suivi copié"}</span>`;
+        const copiedLbl = mode === "preop" ? "CR Pré-op copié" : (mode === "crh" ? "CRH copié" : "CR Suivi copié");
+        btnEl.innerHTML = `<span>✅ ${copiedLbl}</span>`;
         setTimeout(() => {
           btnEl.classList.remove("copied");
           btnEl.innerHTML = origHtml;
@@ -3994,6 +4115,7 @@
         patient: ev.patient,
         ipp: ev.ipp,
         isoDate: ev.isoDate,
+        dateStr: ev.dateStr,
         category: ev.category,
         title: ev.title,
         remarques: ev.remarques,
@@ -4013,6 +4135,9 @@
           </button>
           <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "suivi" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'suivi', this, event)" title="Copier le compte rendu de consultation de suivi">
             <span>📋 CR Suivi</span>
+          </button>
+          <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "crh" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'crh', this, event)" title="Copier le Compte Rendu d'Hospitalisation (CRH)">
+            <span>📋 CRH</span>
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
