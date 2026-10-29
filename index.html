@@ -45,29 +45,16 @@
       -webkit-touch-callout: none;
     }
 
-    html {
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
-      overflow-x: hidden;
-      overflow-y: auto;
-      background: var(--bg);
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      max-width: 100%;
-      overflow-x: clip;
-      overflow-y: visible;
       -webkit-user-select: none;
       user-select: none;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      min-height: 100dvh;
       padding-bottom: calc(146px + var(--safe-bottom));
     }
 
@@ -1919,11 +1906,23 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
+        const CURRENT_BUILD_ID = "v26"; /*__APP_BUILD_ID:v26__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
-          .then(htmlTxt => {
+          .then(async htmlTxt => {
             if (!htmlTxt) return;
+            const buildMatch = htmlTxt.match(/\/\*__APP_BUILD_ID:(v\d+)__\*\//);
+            if (buildMatch && buildMatch[1] && buildMatch[1] !== CURRENT_BUILD_ID) {
+              if ("caches" in window) {
+                try {
+                  const keys = await caches.keys();
+                  await Promise.all(keys.map(k => caches.delete(k)));
+                } catch (_) {}
+              }
+              window.location.reload();
+              return;
+            }
             const rdvMatch = htmlTxt.match(/\/\*__START_PERSONAL_RDVS__\*\/([\s\S]*?)\/\*__END_PERSONAL_RDVS__\*\//);
             if (rdvMatch && rdvMatch[1]) {
               try {
@@ -2040,6 +2039,31 @@
           ptrEl.style.transform = "translate(-50%, -70px)";
         }
         pullDist = 0;
+      }, { passive: true });
+
+      // Garantir le défilement vertical à la molette de souris sur tous les navigateurs / WebViews
+      window.addEventListener("wheel", (e) => {
+        if (e.ctrlKey || e.metaKey || !e.deltaY) return;
+        const modal = document.getElementById("patient-modal");
+        if (modal && modal.classList.contains("open")) {
+          const sheet = modal.querySelector(".modal-sheet");
+          if (sheet) {
+            const before = sheet.scrollTop;
+            const dy = e.deltaY;
+            requestAnimationFrame(() => {
+              if (sheet.scrollTop === before) sheet.scrollTop += dy;
+            });
+          }
+          return;
+        }
+        const beforeY = window.scrollY || document.documentElement.scrollTop || 0;
+        const dy = e.deltaY;
+        requestAnimationFrame(() => {
+          const afterY = window.scrollY || document.documentElement.scrollTop || 0;
+          if (afterY === beforeY) {
+            window.scrollBy(0, dy);
+          }
+        });
       }, { passive: true });
     }
 
