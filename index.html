@@ -295,6 +295,12 @@
       width: 100%;
       margin: 0 auto;
     }
+    @media (min-width: 768px) {
+      .main-content {
+        max-width: 1180px;
+        padding: 12px 20px 32px;
+      }
+    }
 
     /* CONTROLS STACK (NO HORIZONTAL OVERFLOW ON ANY MOBILE SCREEN) */
     .agenda-controls {
@@ -675,7 +681,7 @@
       cursor: pointer;
       min-width: 0;
     }
-    .month-cell.other-month { opacity: 0.3; }
+    .month-cell.other-month { opacity: 0.32; }
     .month-cell.selected {
       border-color: var(--primary);
       box-shadow: 0 0 0 1px var(--primary);
@@ -684,9 +690,24 @@
       border-color: #EF4444 !important;
       background: rgba(239, 68, 68, 0.16) !important;
     }
+    .month-cell-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .month-day-num {
       font-size: 11px;
       font-weight: 700;
+    }
+    .month-desk-cnt {
+      display: none;
+    }
+    .month-desk-vacs {
+      display: none;
+    }
+    .month-desk-evs {
+      display: none;
     }
     .month-vac-tag {
       font-size: 7.5px;
@@ -718,6 +739,91 @@
     .m-dot.cs       { background: var(--cs); }
     .m-dot.img      { background: var(--img); }
     .m-dot.mail-rdv { background: var(--mail-rdv); }
+
+    @media (min-width: 768px) {
+      .month-grid {
+        gap: 6px;
+      }
+      .month-cell {
+        min-height: 122px;
+        padding: 6px 7px;
+        border-radius: 10px;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 4px;
+      }
+      .month-cell:hover {
+        border-color: rgba(56, 189, 248, 0.5);
+        background: rgba(30, 41, 59, 0.85);
+      }
+      .month-cell-top {
+        justify-content: space-between;
+      }
+      .month-day-num {
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .month-vac-tag,
+      .month-dots {
+        display: none !important;
+      }
+      .month-desk-cnt {
+        display: inline-block;
+        font-size: 9.5px;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.16);
+        color: #7DD3FC;
+      }
+      .month-desk-vacs {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding-bottom: 3px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      }
+      .month-desk-vac-line {
+        font-size: 9.5px;
+        font-weight: 600;
+        line-height: 1.2;
+        padding: 2px 5px;
+        border-radius: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .month-desk-evs {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5px;
+        margin-top: 1px;
+      }
+      .month-desk-ev {
+        font-size: 9.5px;
+        line-height: 1.2;
+        padding: 2px 5px;
+        border-radius: 4px;
+        background: rgba(15, 23, 42, 0.72);
+        border-left: 2.5px solid var(--primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #E2E8F0;
+      }
+      .month-desk-ev.type-acte     { border-left-color: var(--acte); background: rgba(244, 63, 94, 0.12); }
+      .month-desk-ev.type-biopsie  { border-left-color: var(--biopsie); background: rgba(168, 85, 247, 0.12); }
+      .month-desk-ev.type-cs       { border-left-color: var(--cs); background: rgba(59, 130, 246, 0.12); }
+      .month-desk-ev.type-img      { border-left-color: var(--img); background: rgba(20, 184, 166, 0.12); }
+      .month-desk-ev.type-mail-rdv { border-left-color: var(--mail-rdv); background: rgba(245, 158, 11, 0.14); }
+      .month-desk-more {
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--primary);
+        text-align: right;
+        padding-right: 2px;
+      }
+    }
 
     /* SEARCH & CHIPS */
     .search-box {
@@ -1906,7 +2012,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v27"; /*__APP_BUILD_ID:v27__*/
+        const CURRENT_BUILD_ID = "v28"; /*__APP_BUILD_ID:v28__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3464,6 +3570,7 @@
           const dow = cellDate.getDay();
 
           let tagHtml = "";
+          let deskVacsHtml = "";
           if (g && g.is_tl) {
             tagHtml = `<div class="month-vac-tag" style="background:rgba(220,38,38,0.35);color:#FCA5A5;">GARDE</div>`;
           } else if (isGeneral && g && g.noms && g.noms.length && (dow === 0 || dow === 6)) {
@@ -3483,12 +3590,52 @@
             }
           }
 
+          if (dow >= 1 && dow <= 5 && cellDate >= new Date(2026, 9, 26)) {
+            const myV = getMyVacationForIso(iso);
+            const amStr = (myV.am || []).join(" / ").replace(/\s*\(.*?\)/g, "");
+            const pmStr = (myV.pm || []).join(" / ").replace(/\s*\(.*?\)/g, "");
+            const amCls = postColorClass(myV.am[0] || "");
+            const pmCls = postColorClass(myV.pm[0] || "");
+            if (amStr === pmStr && amStr) {
+              deskVacsHtml = `<div class="month-desk-vacs"><div class="month-desk-vac-line ${amCls}">${amStr}</div></div>`;
+            } else {
+              deskVacsHtml = `
+                <div class="month-desk-vacs">
+                  ${amStr ? `<div class="month-desk-vac-line ${amCls}">M : ${amStr}</div>` : ""}
+                  ${pmStr ? `<div class="month-desk-vac-line ${pmCls}">AP : ${pmStr}</div>` : ""}
+                </div>
+              `;
+            }
+          } else if (isGeneral && g && g.noms && g.noms.length) {
+            deskVacsHtml = `<div class="month-desk-vacs"><div class="month-desk-vac-line post-sau">Garde : ${g.noms.join("/")}</div></div>`;
+          }
+
+          const deskCntHtml = (g && g.is_tl)
+            ? `<span class="month-desk-cnt" style="background:rgba(239,68,68,0.28);color:#FCA5A5;">GARDE</span>`
+            : (evs.length > 0 ? `<span class="month-desk-cnt">${evs.length} RDV</span>` : "");
+
+          const deskEvsHtml = evs.length > 0
+            ? `<div class="month-desk-evs">
+                ${evs.slice(0, 3).map(e => {
+                  const pLabel = e.category === "mail-rdv" ? e.title : String(e.patient || "").replace(/^(Mme|M\.|Mr|Mlle)\s+/i, "");
+                  const hShort = String(e.horaire || "").replace(":00", "h").replace("h00", "h");
+                  return `<div class="month-desk-ev type-${e.category}"><strong>${hShort}</strong> ${pLabel}</div>`;
+                }).join("")}
+                ${evs.length > 3 ? `<div class="month-desk-more">+${evs.length - 3} autre${evs.length - 3 > 1 ? "s" : ""}</div>` : ""}
+              </div>`
+            : "";
+
           const dotsHtml = evs.slice(0, 6).map(e => `<span class="m-dot ${e.category}"></span>`).join("");
 
           html += `
             <div class="month-cell ${isOtherMonth ? "other-month" : ""} ${iso === selectedIso ? "selected" : ""} ${g && g.is_tl ? "is-tl-garde" : ""}" onclick="selectDayFromMonth('${iso}')">
-              <div class="month-day-num">${cellDate.getDate()}</div>
+              <div class="month-cell-top">
+                <div class="month-day-num">${cellDate.getDate()}</div>
+                ${deskCntHtml}
+              </div>
               ${tagHtml}
+              ${deskVacsHtml}
+              ${deskEvsHtml}
               <div class="month-dots">${dotsHtml}</div>
             </div>
           `;
