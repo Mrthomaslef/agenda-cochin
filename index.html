@@ -59,7 +59,7 @@
       color: var(--text);
       min-height: 100vh;
       min-height: 100dvh;
-      padding-bottom: calc(88px + var(--safe-bottom));
+      padding-bottom: calc(146px + var(--safe-bottom));
     }
 
     /* Autoriser la sélection de texte dans les fiches patients et champs de recherche */
@@ -241,41 +241,56 @@
       50% { opacity: 0.3; }
     }
 
-    /* KPI BAR */
+    /* KPI BAR (DOCKED AT BOTTOM ABOVE MAIN NAV) */
     .kpi-strip {
+      pointer-events: auto;
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 6px;
-      padding: 8px 12px 2px;
-      max-width: 680px;
+      gap: 5px;
       width: 100%;
-      margin: 0 auto;
+      max-width: 500px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 14px;
+      padding: 4px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     }
     .kpi-box {
-      background: rgba(19, 28, 49, 0.75);
-      border: 1px solid var(--border);
+      background: rgba(30, 41, 59, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.14);
       border-radius: 10px;
-      padding: 6px 2px;
+      padding: 4px 2px;
       text-align: center;
       cursor: pointer;
       min-width: 0;
+      transition: all 0.15s ease;
+    }
+    .kpi-box.active {
+      background: rgba(56, 189, 248, 0.20);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
     }
     .kpi-val {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
-      line-height: 1.15;
+      line-height: 1.1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .kpi-lbl {
-      font-size: 9.5px;
+      font-size: 9px;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 1px;
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .kpi-box.active .kpi-lbl {
+      color: #fff;
     }
 
     .main-content {
@@ -951,7 +966,7 @@
       justify-content: space-between;
     }
 
-    /* MODERN FLOATING BOTTOM DOCK */
+    /* MODERN FLOATING BOTTOM DOCK (KPI STRIP + 3 MAIN PAGES) */
     .bottom-nav-wrap {
       position: fixed;
       bottom: 0;
@@ -961,22 +976,24 @@
       padding: 0 10px calc(6px + var(--safe-bottom));
       pointer-events: none;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
     .bottom-nav {
       pointer-events: auto;
       width: 100%;
       max-width: 500px;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.94);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       padding: 4px;
-      gap: 2px;
+      gap: 4px;
     }
     .nav-item {
       border: none;
@@ -987,9 +1004,9 @@
       align-items: center;
       justify-content: center;
       gap: 3px;
-      padding: 6px 2px;
+      padding: 6px 4px;
       border-radius: 13px;
-      font-size: 9.5px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
       position: relative;
@@ -1014,14 +1031,83 @@
     .nav-badge {
       position: absolute;
       top: 2px;
-      right: 16%;
-      background: var(--danger);
+      right: 22%;
+      background: var(--primary-dark);
       color: #fff;
       font-size: 8.5px;
       font-weight: 800;
-      padding: 1px 4px;
+      padding: 1px 5px;
       border-radius: 999px;
       line-height: 1.1;
+    }
+
+    /* BLOC / SUIVI OPÉRATOIRE (MATÉRIEL UTILISÉ & REMARQUES) */
+    .bloc-notes-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      border-radius: 9px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bloc-notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .bloc-field-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94A3B8;
+      margin-bottom: 2px;
+      display: block;
+    }
+    .bloc-input {
+      width: 100%;
+      background: rgba(19, 28, 49, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: inherit;
+      padding: 6px 8px;
+      outline: none;
+      resize: vertical;
+    }
+    .bloc-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3);
+    }
+    .bloc-save-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+    .bloc-save-status {
+      font-size: 10.5px;
+      color: #86EFAC;
+      font-weight: 600;
+    }
+    .bloc-save-btn {
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: rgba(2, 132, 199, 0.28);
+      color: #E0F2FE;
+      border-radius: 7px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .bloc-save-btn:active {
+      transform: scale(0.96);
     }
 
     /* MODAL */
@@ -1197,7 +1283,7 @@
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-icon" onclick="goToday()">2 Nov</button>
+      <button class="btn-icon" onclick="goToday()">Auj.</button>
       <button class="btn-icon btn-sync-arrow" id="btn-sync-arrow" onclick="syncFromCloud(true)" aria-label="Actualiser">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
@@ -1206,30 +1292,6 @@
       </button>
     </div>
   </header>
-
-  <!-- KPI STRIP -->
-  <div class="kpi-strip">
-    <div class="kpi-box" onclick="openActiviteView('actes', 'acte')">
-      <div class="kpi-val" style="color:var(--acte)" id="kpi-actes">-</div>
-      <div class="kpi-lbl">Actes</div>
-    </div>
-    <div class="kpi-box" onclick="openActiviteView('actes', 'biopsie')">
-      <div class="kpi-val" style="color:var(--biopsie)" id="kpi-biopsies">-</div>
-      <div class="kpi-lbl">Biopsies</div>
-    </div>
-    <div class="kpi-box" onclick="openActiviteView('cs', 'all')">
-      <div class="kpi-val" style="color:var(--cs)" id="kpi-cs">-</div>
-      <div class="kpi-lbl">Consult.</div>
-    </div>
-    <div class="kpi-box" onclick="switchTab('avis')">
-      <div class="kpi-val" style="color:var(--img)" id="kpi-avis">-</div>
-      <div class="kpi-lbl">Avis</div>
-    </div>
-    <div class="kpi-box" onclick="switchTab('perso')">
-      <div class="kpi-val" style="color:var(--perso-msg)" id="kpi-perso">-</div>
-      <div class="kpi-lbl">Mails</div>
-    </div>
-  </div>
 
   <main class="main-content">
 
@@ -1305,7 +1367,23 @@
       <div id="perso-list-container"></div>
     </section>
 
-    <!-- TAB 5 : DOSSIERS PATIENTS -->
+    <!-- TAB 5 : SUIVI OPÉRATOIRE & BIOPSIES (DR T. LEFÈVRE) -->
+    <section id="tab-suivi" style="display:none;">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="suivi-search" placeholder="Rechercher patient, IPP, geste, matériel..." oninput="renderSuiviTab()" />
+      </div>
+      <div class="chips-row">
+        <button class="chip active" id="flt-suivi-all" onclick="setSuiviFilter('all')">Mes gestes</button>
+        <button class="chip" id="flt-suivi-done" onclick="setSuiviFilter('done')">Traités / Jour J</button>
+        <button class="chip" id="flt-suivi-upcoming" onclick="setSuiviFilter('upcoming')">À venir</button>
+        <button class="chip" id="flt-suivi-acte" onclick="setSuiviFilter('acte')">Actes</button>
+        <button class="chip" id="flt-suivi-biopsie" onclick="setSuiviFilter('biopsie')">Biopsies</button>
+      </div>
+      <div id="suivi-list-container"></div>
+    </section>
+
+    <!-- TAB 6 : DOSSIERS PATIENTS -->
     <section id="tab-patients" style="display:none;">
       <div class="search-box">
         <span class="search-icon">⌕</span>
@@ -1330,26 +1408,39 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAV DOCK (ICÔNES SVG ÉPURÉES) -->
+  <!-- BOTTOM NAV DOCK (BARRE DES NOMBRES AU-DESSUS + 3 PAGES PRINCIPALES EN BAS) -->
   <div class="bottom-nav-wrap">
+    <div class="kpi-strip">
+      <div class="kpi-box" id="kpi-box-actes" onclick="openActiviteView('actes', 'acte')">
+        <div class="kpi-val" style="color:var(--acte)" id="kpi-actes">-</div>
+        <div class="kpi-lbl">Actes</div>
+      </div>
+      <div class="kpi-box" id="kpi-box-biopsies" onclick="openActiviteView('actes', 'biopsie')">
+        <div class="kpi-val" style="color:var(--biopsie)" id="kpi-biopsies">-</div>
+        <div class="kpi-lbl">Biopsies</div>
+      </div>
+      <div class="kpi-box" id="kpi-box-cs" onclick="openActiviteView('cs', 'all')">
+        <div class="kpi-val" style="color:var(--cs)" id="kpi-cs">-</div>
+        <div class="kpi-lbl">Consult.</div>
+      </div>
+      <div class="kpi-box" id="kpi-box-avis" onclick="switchTab('avis')">
+        <div class="kpi-val" style="color:var(--img)" id="kpi-avis">-</div>
+        <div class="kpi-lbl">Avis</div>
+      </div>
+      <div class="kpi-box" id="kpi-box-perso" onclick="switchTab('perso')">
+        <div class="kpi-val" style="color:var(--perso-msg)" id="kpi-perso">-</div>
+        <div class="kpi-lbl">Mails</div>
+      </div>
+    </div>
     <nav class="bottom-nav">
       <button class="nav-item active" id="nav-agenda" onclick="switchTab('agenda')">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Agenda</span>
       </button>
-      <button class="nav-item" id="nav-activite" onclick="switchTab('activite')">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Actes & CS</span>
-      </button>
-      <button class="nav-item" id="nav-avis" onclick="switchTab('avis')">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        <span>Avis</span>
-        <span class="nav-badge" id="badge-avis-non" style="display:none;">0</span>
-      </button>
-      <button class="nav-item" id="nav-perso" onclick="switchTab('perso')">
-        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        <span>Mails</span>
-        <span class="nav-badge" id="badge-perso-non" style="display:none;">0</span>
+      <button class="nav-item" id="nav-suivi" onclick="switchTab('suivi')">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Suivi</span>
+        <span class="nav-badge" id="badge-suivi-cnt" style="display:none;">0</span>
       </button>
       <button class="nav-item" id="nav-patients" onclick="switchTab('patients')">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -1914,6 +2005,98 @@
     }
 
     const STORAGE_PERSO_KEY = "cochin_ri_perso_status_v3";
+    const STORAGE_SUIVI_KEY = "cochin_ri_suivi_bloc_v1";
+    let suiviFilter = "all";
+    let suiviBlocMap = {};
+
+    function loadSuiviBlocMap(cloudSuivi) {
+      let localMap = {};
+      try {
+        localMap = JSON.parse(localStorage.getItem(STORAGE_SUIVI_KEY) || "{}");
+      } catch (e) {}
+      if (cloudSuivi && typeof cloudSuivi === "object") {
+        suiviBlocMap = Object.assign({}, cloudSuivi, localMap);
+        for (const k of Object.keys(cloudSuivi)) {
+          if (cloudSuivi[k] && (!localMap[k] || (cloudSuivi[k].updated_at && (!localMap[k].updated_at || cloudSuivi[k].updated_at >= localMap[k].updated_at)))) {
+            suiviBlocMap[k] = cloudSuivi[k];
+          }
+        }
+        try {
+          localStorage.setItem(STORAGE_SUIVI_KEY, JSON.stringify(suiviBlocMap));
+        } catch (e) {}
+      } else {
+        suiviBlocMap = localMap;
+      }
+      return suiviBlocMap;
+    }
+
+    function getSuiviKey(ev) {
+      return `${ev.isoDate || "nodate"}_${normName(ev.patient)}_${ev.category || "acte"}`;
+    }
+
+    function getSuiviEntry(ev) {
+      const k = getSuiviKey(ev);
+      if (suiviBlocMap[k]) return suiviBlocMap[k];
+      const fallbackKey = `${ev.isoDate || "nodate"}_${normName(ev.patient)}`;
+      if (suiviBlocMap[fallbackKey]) return suiviBlocMap[fallbackKey];
+      return { materiel: "", remarques: "", updated_at: "" };
+    }
+
+    function escHtmlAttr(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    async function saveSuiviFromDom(suiviKey, encodedMeta, prefix = "") {
+      const matEl = document.getElementById((prefix || "") + "mat-" + suiviKey);
+      const remEl = document.getElementById((prefix || "") + "rem-" + suiviKey);
+      const statusEl = document.getElementById((prefix || "") + "status-" + suiviKey);
+      if (!matEl && !remEl) return;
+      const materiel = matEl ? matEl.value.trim() : "";
+      const remarques = remEl ? remEl.value.trim() : "";
+      let meta = {};
+      try {
+        meta = JSON.parse(decodeURIComponent(encodedMeta));
+      } catch (e) {}
+
+      const entry = {
+        suivi_key: suiviKey,
+        patient_name: meta.patient || "",
+        ipp: meta.ipp || "",
+        iso_date: meta.isoDate || "",
+        category: meta.category || "",
+        title: meta.title || "",
+        materiel,
+        remarques,
+        updated_at: new Date().toISOString()
+      };
+      suiviBlocMap[suiviKey] = entry;
+      try {
+        localStorage.setItem(STORAGE_SUIVI_KEY, JSON.stringify(suiviBlocMap));
+      } catch (e) {}
+
+      if (statusEl) {
+        statusEl.textContent = "✓ Enregistré";
+      }
+      updateKpis();
+
+      const savedPin = localStorage.getItem(STORAGE_PIN_KEY);
+      if (!savedPin) return;
+      try {
+        await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-agenda-pin": savedPin },
+          body: JSON.stringify({
+            pin: savedPin,
+            action: "save_suivi",
+            ...entry
+          })
+        });
+      } catch (e) {}
+    }
 
     function loadPersoWithLocalStatus() {
       let savedMap = {};
@@ -1959,6 +2142,11 @@
     }
 
     function applySheetData(data, syncedAt) {
+      if (data && data.suivi_bloc) {
+        loadSuiviBlocMap(data.suivi_bloc);
+      } else {
+        loadSuiviBlocMap(null);
+      }
       appData = {
         Data: normalizeDataRows(data.Data),
         Demandes_avis: (data.Demandes_avis || []).filter(a => String(a["Identité Patient"] || "").trim() !== ""),
@@ -1983,14 +2171,27 @@
       const nonRepAvis = appData.Demandes_avis.filter(a => String(a["Statut Réponse"] || "").toLowerCase().includes("non")).length;
       document.getElementById("kpi-avis").textContent = nonRepAvis > 0 ? `${nonRepAvis} à rép.` : appData.Demandes_avis.length;
       const bAvis = document.getElementById("badge-avis-non");
-      bAvis.style.display = nonRepAvis > 0 ? "inline-block" : "none";
-      bAvis.textContent = nonRepAvis;
+      if (bAvis) {
+        bAvis.style.display = nonRepAvis > 0 ? "inline-block" : "none";
+        bAvis.textContent = nonRepAvis;
+      }
 
       const nonRepPerso = appData.Questions_perso.filter(q => String(q["Statut"] || "").toLowerCase().includes("non")).length;
       document.getElementById("kpi-perso").textContent = nonRepPerso > 0 ? `${nonRepPerso} à rép.` : appData.Questions_perso.length;
       const bPerso = document.getElementById("badge-perso-non");
-      bPerso.style.display = nonRepPerso > 0 ? "inline-block" : "none";
-      bPerso.textContent = nonRepPerso;
+      if (bPerso) {
+        bPerso.style.display = nonRepPerso > 0 ? "inline-block" : "none";
+        bPerso.textContent = nonRepPerso;
+      }
+
+      const bSuivi = document.getElementById("badge-suivi-cnt");
+      if (bSuivi) {
+        try {
+          const myGestesCnt = getAllTimedEvents().filter(e => (e.category === "acte" || e.category === "biopsie") && e.isMine).length;
+          bSuivi.style.display = myGestesCnt > 0 ? "inline-block" : "none";
+          bSuivi.textContent = myGestesCnt;
+        } catch (e) {}
+      }
     }
 
     function parseFrDateToIso(dStr) {
@@ -2537,7 +2738,43 @@
       return l;
     }
 
-    function renderEventCard(ev, showDate = false) {
+    function renderBlocNotesHtml(ev, prefix = "") {
+      const sKey = getSuiviKey(ev);
+      const sEntry = getSuiviEntry(ev);
+      const todayIso = dateToIso(new Date());
+      const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
+      const hasSaved = Boolean((sEntry.materiel && sEntry.materiel.trim()) || (sEntry.remarques && sEntry.remarques.trim()));
+      const safeEvMeta = encodeURIComponent(JSON.stringify({
+        patient: ev.patient,
+        ipp: ev.ipp,
+        isoDate: ev.isoDate,
+        category: ev.category,
+        title: ev.title
+      }));
+      const statusTxt = hasSaved ? "✓ Enregistré" : (isBlocDayOrPast ? "Jour du bloc — À remplir" : "À venir");
+      return `
+        <div class="bloc-notes-box" onclick="event.stopPropagation()">
+          <div class="bloc-notes-header">
+            <span>🔧 Matériel & Remarques bloc</span>
+            <span class="bloc-save-status" id="${prefix}status-${sKey}">${statusTxt}</span>
+          </div>
+          <div>
+            <label class="bloc-field-lbl">Matériel utilisé</label>
+            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Ex : Sonde cryo, trocart 11G, aiguille biopsie, ciment..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')" />
+          </div>
+          <div>
+            <label class="bloc-field-lbl">Remarques & Suivi post-geste</label>
+            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Ex : Déroulement, contrôle TDM, suites, anapath ou CS à prévoir..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">${escHtmlAttr(sEntry.remarques)}</textarea>
+          </div>
+          <div class="bloc-save-row">
+            <span style="font-size:9.5px; color:var(--text-muted);">Synchronisé dans Suivi</span>
+            <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">Enregistrer</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEventCard(ev, showDate = false, inSuiviTab = false) {
       if (ev.category === "mail-rdv") {
         const shortDocRdv = formatShortDoc(ev.medecin);
         return `
@@ -2572,6 +2809,13 @@
       const mainLine = isGenericCsTitle ? (ev.remarques || ev.title) : ev.title;
       const subLine = isGenericCsTitle ? "" : (ev.remarques || "");
 
+      const isGeste = (ev.category === "acte" || ev.category === "biopsie");
+      const todayIso = dateToIso(new Date());
+      const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
+      const sEntry = isGeste ? getSuiviEntry(ev) : null;
+      const hasSavedSuivi = Boolean(sEntry && ((sEntry.materiel && sEntry.materiel.trim()) || (sEntry.remarques && sEntry.remarques.trim())));
+      const showInlineBlocBox = isGeste && (inSuiviTab || (ev.isMine && (isBlocDayOrPast || hasSavedSuivi)));
+
       return `
         <div class="event-card type-${ev.category}" onclick="openPatientModal('${safePatientAttr}')">
           <div class="event-top">
@@ -2589,6 +2833,7 @@
           ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
           ${subLine ? `<div style="font-size:11px; color:#94A3B8; margin-top:3px;">${subLine}</div>` : ""}
           ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
+          ${showInlineBlocBox ? renderBlocNotesHtml(ev, inSuiviTab ? "suivi-" : "card-") : ""}
         </div>
       `;
     }
@@ -3368,6 +3613,63 @@
         : `<div class="empty-state">Aucun rendez-vous dans ce filtre.</div>`;
     }
 
+    // SUIVI OPÉRATOIRE & BIOPSIES (DR T. LEFÈVRE)
+    function setSuiviFilter(flt) {
+      suiviFilter = flt;
+      ["all", "done", "upcoming", "acte", "biopsie"].forEach(k => {
+        const el = document.getElementById("flt-suivi-" + k);
+        if (el) el.classList.toggle("active", k === flt);
+      });
+      renderSuiviTab();
+    }
+
+    function renderSuiviTab() {
+      const container = document.getElementById("suivi-list-container");
+      if (!container) return;
+      const q = ((document.getElementById("suivi-search") || {}).value || "").toLowerCase().trim();
+      const todayIso = dateToIso(new Date());
+
+      let evs = getAllTimedEvents().filter(e => {
+        if (e.category !== "acte" && e.category !== "biopsie") return false;
+        const entry = getSuiviEntry(e);
+        const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()));
+        return e.isMine || hasNotes;
+      });
+
+      if (suiviFilter === "done") {
+        evs = evs.filter(e => {
+          const entry = getSuiviEntry(e);
+          const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()));
+          return (e.isoDate && e.isoDate <= todayIso) || hasNotes;
+        });
+      } else if (suiviFilter === "upcoming") {
+        evs = evs.filter(e => {
+          const entry = getSuiviEntry(e);
+          const hasNotes = Boolean((entry.materiel && entry.materiel.trim()) || (entry.remarques && entry.remarques.trim()));
+          return (!e.isoDate || e.isoDate > todayIso) && !hasNotes;
+        });
+      } else if (suiviFilter === "acte") {
+        evs = evs.filter(e => e.category === "acte");
+      } else if (suiviFilter === "biopsie") {
+        evs = evs.filter(e => e.category === "biopsie");
+      }
+
+      if (q) {
+        evs = evs.filter(e => {
+          const entry = getSuiviEntry(e);
+          const hay = `${e.patient} ${e.ipp} ${e.title} ${e.remarques} ${entry.materiel} ${entry.remarques}`.toLowerCase();
+          return hay.includes(q);
+        });
+      }
+
+      if (evs.length === 0) {
+        container.innerHTML = `<div class="empty-state">Aucun patient traité ou biopsié dans ce filtre.</div>`;
+        return;
+      }
+
+      container.innerHTML = evs.map(ev => renderEventCard(ev, true, true)).join("");
+    }
+
     // PATIENTS
     function setPatientFilter(flt) {
       patientFilter = flt;
@@ -3453,6 +3755,11 @@
           }).join("")
         : `<div style="font-size:12px; color:var(--text-muted);">${echeance}</div>`;
 
+      const gesteEvs = allEvs.filter(e => e.category === "acte" || e.category === "biopsie");
+      const modalBlocHtml = gesteEvs.length > 0
+        ? gesteEvs.map(gEv => renderBlocNotesHtml(gEv, "modal-")).join("")
+        : "";
+
       document.getElementById("modal-body").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;">
           <div>
@@ -3473,6 +3780,8 @@
           ${phoneMatch ? `<a class="action-btn" href="tel:${phoneMatch[0].replace(/[^0-9+]/g, '')}">📞 Appeler</a>` : ""}
           ${emailMatch ? `<a class="action-btn" href="mailto:${emailMatch[0]}">✉️ Email</a>` : ""}
         </div>
+
+        ${modalBlocHtml ? `<div style="margin-bottom:10px;">${modalBlocHtml}</div>` : ""}
 
         <div class="detail-block">
           <div class="detail-label">Indication & Geste</div>
@@ -3509,22 +3818,38 @@
       setTimeout(() => { btnEl.innerHTML = orig; }, 1400);
     }
 
+    function updateBottomKpiActiveState() {
+      const kActes = document.getElementById("kpi-box-actes");
+      const kBio = document.getElementById("kpi-box-biopsies");
+      const kCs = document.getElementById("kpi-box-cs");
+      const kAvis = document.getElementById("kpi-box-avis");
+      const kPerso = document.getElementById("kpi-box-perso");
+      if (kActes) kActes.classList.toggle("active", currentTab === "activite" && activiteMode === "actes" && activiteSub === "acte");
+      if (kBio) kBio.classList.toggle("active", currentTab === "activite" && activiteMode === "actes" && activiteSub === "biopsie");
+      if (kCs) kCs.classList.toggle("active", currentTab === "activite" && activiteMode === "cs");
+      if (kAvis) kAvis.classList.toggle("active", currentTab === "avis");
+      if (kPerso) kPerso.classList.toggle("active", currentTab === "perso");
+    }
+
     function switchTab(tab) {
       currentTab = tab;
-      ["agenda", "activite", "avis", "perso", "patients"].forEach(t => {
+      ["agenda", "activite", "avis", "perso", "suivi", "patients"].forEach(t => {
         const sec = document.getElementById("tab-" + t);
         const nav = document.getElementById("nav-" + t);
         if (sec) sec.style.display = t === tab ? "block" : "none";
         if (nav) nav.classList.toggle("active", t === tab);
       });
+      updateBottomKpiActiveState();
       renderCurrentTab();
     }
 
     function renderCurrentTab() {
+      updateBottomKpiActiveState();
       if (currentTab === "agenda") renderCalendar();
       else if (currentTab === "activite") renderActiviteTab();
       else if (currentTab === "avis") renderAvisTab();
       else if (currentTab === "perso") renderPersoTab();
+      else if (currentTab === "suivi") renderSuiviTab();
       else if (currentTab === "patients") renderPatientsTab();
     }
 
@@ -3533,6 +3858,7 @@
         navigator.serviceWorker.register("./sw.js").catch(() => {});
       }
       initPullToRefresh();
+      loadSuiviBlocMap(null);
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible" && localStorage.getItem(STORAGE_PIN_KEY)) {
           syncFromCloud(false);
