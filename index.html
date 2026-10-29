@@ -802,10 +802,49 @@
       color: var(--text-muted);
     }
     .ws-num {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 800;
       color: var(--text);
       line-height: 1.1;
+      white-space: nowrap;
+    }
+    .ws-mon {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-left: 1px;
+    }
+    .ws-day.active .ws-mon {
+      color: var(--primary);
+    }
+    .ws-month-sep {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 7px;
+      padding: 4px 3px;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .day-strip-month-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: capitalize;
+      padding: 0 4px 3px;
+      letter-spacing: 0.02em;
     }
     .ws-vac {
       font-size: 7.5px;
@@ -2393,9 +2432,10 @@
 
     function navigatePeriod(delta) {
       if (calendarView === "day" || calendarView === "week") {
-        // En mode Jour comme en mode Semaine, les flèches < et > permettent de changer de semaine (+7j / -7j)
-        selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + delta * 7, 12, 0, 0);
-        renderCalendar({ scrollStrip: true });
+        // En mode Jour comme en mode Semaine, les flèches < et > permettent de changer de semaine (+7j / -7j) en se calant sur le lundi de la semaine
+        const curMon = getMondayOf(selectedDate);
+        selectedDate = new Date(curMon.getFullYear(), curMon.getMonth(), curMon.getDate() + delta * 7, 12, 0, 0);
+        renderCalendar({ scrollStrip: true, alignMonday: true });
       } else {
         selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + delta, 1, 12, 0, 0);
         renderCalendar();
@@ -2576,6 +2616,7 @@
       const maxDate = selectedDate > endDay ? new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + 14, 12, 0, 0) : endDay;
 
       let cellsHtml = "";
+      let prevMonthIdx = -1;
       const cur = new Date(minDate.getTime());
       while (cur <= maxDate) {
         const iso = dateToIso(cur);
@@ -2584,29 +2625,67 @@
         const tag = getShortVacTagForDay(iso, cur);
         const dowLbl = cur.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
         const dayNum = cur.getDate();
-        const monthShort = dayNum === 1 ? " " + cur.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "") : "";
+        const curMonthIdx = cur.getMonth();
+        const monthShort = cur.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "");
+        const monthFull = cur.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+
+        if (curMonthIdx !== prevMonthIdx) {
+          cellsHtml += `<div class="ws-month-sep">${monthShort}</div>`;
+          prevMonthIdx = curMonthIdx;
+        }
 
         cellsHtml += `
-          <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" id="ws-day-${iso}" onclick="selectDayFromWeekStrip('${iso}')">
+          <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
             <span class="ws-dow">${dowLbl}</span>
-            <span class="ws-num">${dayNum}${monthShort}</span>
+            <span class="ws-num">${dayNum}<span class="ws-mon">${monthShort}</span></span>
             <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
             <span class="ws-cnt">${evCnt > 0 ? evCnt + " RDV" : "·"}</span>
           </div>
         `;
         cur.setDate(cur.getDate() + 1);
       }
-      stripContainer.innerHTML = `<div class="day-strip-scroll" id="day-strip-scroll">${cellsHtml}</div>`;
+      const initialMonthFull = selectedDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+      stripContainer.innerHTML = `
+        <div class="day-strip-month-header">
+          <span id="day-strip-visible-month">📅 ${initialMonthFull}</span>
+        </div>
+        <div class="day-strip-scroll" id="day-strip-scroll" onscroll="updateDayStripVisibleMonth()">${cellsHtml}</div>
+      `;
       const newDayScroll = document.getElementById("day-strip-scroll");
       if (newDayScroll) {
         if (prevDayScrollLeft !== null && !(opts && opts.scrollStrip)) {
           newDayScroll.scrollLeft = prevDayScrollLeft;
         } else {
-          const activeDayEl = document.getElementById("ws-day-" + selIso);
-          if (activeDayEl) {
-            newDayScroll.scrollLeft = Math.max(0, activeDayEl.offsetLeft - (newDayScroll.clientWidth - activeDayEl.offsetWidth) / 2);
+          const targetIso = (opts && opts.alignMonday) ? activeMonIso : getMondayOf(selectedDate) ? dateToIso(getMondayOf(selectedDate)) : selIso;
+          const monEl = document.getElementById("ws-day-" + targetIso) || document.getElementById("ws-day-" + selIso);
+          if (monEl) {
+            newDayScroll.scrollLeft = Math.max(0, monEl.offsetLeft - 2);
           }
         }
+        updateDayStripVisibleMonth();
+      }
+    }
+
+    function updateDayStripVisibleMonth() {
+      const sc = document.getElementById("day-strip-scroll");
+      const lbl = document.getElementById("day-strip-visible-month");
+      if (!sc || !lbl) return;
+      const leftEdge = sc.scrollLeft + 10;
+      const rightEdge = sc.scrollLeft + sc.clientWidth - 10;
+      const days = sc.querySelectorAll(".ws-day");
+      let firstM = "";
+      let lastM = "";
+      for (const d of days) {
+        const dLeft = d.offsetLeft;
+        const dRight = dLeft + d.offsetWidth;
+        if (dRight >= leftEdge && dLeft <= rightEdge) {
+          const m = d.getAttribute("data-month") || "";
+          if (!firstM) firstM = m;
+          lastM = m;
+        }
+      }
+      if (firstM && lastM) {
+        lbl.textContent = firstM === lastM ? `📅 ${firstM}` : `📅 ${firstM} – ${lastM}`;
       }
     }
 
