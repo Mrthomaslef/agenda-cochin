@@ -1240,6 +1240,28 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3);
     }
+    .mat-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+    .mat-chip {
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(30, 41, 59, 0.85);
+      color: #BAE6FD;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .mat-chip:hover, .mat-chip:active {
+      background: rgba(56, 189, 248, 0.22);
+      border-color: var(--primary);
+      color: #fff;
+    }
     .bloc-save-row {
       display: flex;
       align-items: center;
@@ -4304,11 +4326,51 @@
       }
     }
 
+    function getMaterialChoicesForEvent(ev, prof) {
+      const ctx = `${ev.title || ""} ${ev.remarques || ""} ${prof.gesteRetenu || ""} ${prof.gesteRealise || ""} ${prof.motif || ""}`.toLowerCase();
+      if (ev.category === "biopsie" || /^biopsie/i.test(String(ev.title || "").trim()) || /biopsie/i.test(ctx)) {
+        return ["14G", "18G", "Bonopty 13G", "Laredo 11G", "Madison 13G", "Tru-Cut 14G", "Tru-Cut 16G", "Tru-Cut 18G"];
+      }
+      if (/morton/i.test(ctx)) {
+        return ["Ice seed Cx 10", "Ice seed CX 175", "Ice seed", "30s 5% 3 min 30%", "30s 5% 2min30 30%", "30s 5% 4 min 30%", "30s 5% 3min 20%"];
+      }
+      if (/\bect\b|électrochimio/i.test(ctx)) {
+        return ["18G 20cm 20mm", "17G 16cm 40mm", "17G 16cm 20mm", "17G 12cm 30mm", "17G 12cm 20mm", "15G 16cm 30mm", "15G 16cm 20mm", "EPSA"];
+      }
+      if (/desmo[ïi]de|cryo/i.test(ctx)) {
+        return ["Ice Force", "Ice Rod", "V probe 2.4", "V probe 3.8", "RS 17", "Cycle 10-10", "Ice seed Cx 10"];
+      }
+      if (/ostéome\s+ostéo[ïi]de|\boo\b|chondroblastome|ostéoblastome/i.test(ctx)) {
+        return ["Covidien 10-150", "Covidien 7-150", "Covidien 20-150", "Covidien 7-140", "Covidien 7-100", "6 min 90°", "6 min 85°", "6min 80°", "3-3min 90°", "carbodissection épidurale", "hydrodissection intra-articulaire"];
+      }
+      if (/rfna|génicul|neurolyse|rhizolyse|test\s+anesth|fémoro/i.test(ctx)) {
+        return ["Venom 20G", "90sx 80°", "60sx2 60°", "120sx2 42°"];
+      }
+      if (/cimento|vertébro|vissage|sacroplastie|osteocool/i.test(ctx)) {
+        return ["Vertébroplastie", "Vissage cimenté (Scanner)", "Vissage cimenté (Scopie Allura)", "Vissage + cryo", "OsteoCool", "Covidien 10-150"];
+      }
+      return ["Covidien 10-150", "Covidien 7-150", "Ice Force", "Ice Rod", "V probe 2.4", "Ice seed Cx 10", "Venom 20G", "18G 20cm 20mm", "14G", "18G"];
+    }
+
+    function appendMaterialChoice(inputDomId, choiceText, sKey, safeEvMeta, prefix, clickEv) {
+      if (clickEv) clickEv.stopPropagation();
+      const el = document.getElementById(inputDomId);
+      if (!el) return;
+      const cur = el.value.trim();
+      if (!cur) {
+        el.value = choiceText;
+      } else if (!cur.toLowerCase().includes(choiceText.toLowerCase())) {
+        el.value = `${cur} • ${choiceText}`;
+      }
+      saveSuiviFromDom(sKey, safeEvMeta, prefix, false);
+    }
+
     function renderBlocNotesHtml(ev, prefix = "") {
       const sKey = getSuiviKey(ev);
       const sEntry = getSuiviEntry(ev);
       const prof = inferPatientCrProfile(ev);
       const defMode = getDefaultCrModeForCard(ev, prof);
+      const matChoices = getMaterialChoicesForEvent(ev, prof);
       const hasSaved = Boolean(
         (sEntry.materiel && sEntry.materiel.trim()) ||
         (sEntry.remarques && sEntry.remarques.trim()) ||
@@ -4327,7 +4389,13 @@
         catActe: ev.catActe
       }));
       const boxDomId = `${prefix}box-${sKey}`;
+      const matInputId = `${prefix}mat-${sKey}`;
+      const matListId = `${prefix}matlist-${sKey}`;
       const isOpen = openBlocNoteIds.has(boxDomId);
+      const chipsHtml = matChoices.map(c =>
+        `<button type="button" class="mat-chip" onclick="appendMaterialChoice('${matInputId}', '${escHtmlAttr(c)}', '${sKey}', '${safeEvMeta}', '${prefix}', event)">+ ${escHtmlAttr(c)}</button>`
+      ).join("");
+      const datalistHtml = `<datalist id="${matListId}">${matChoices.map(c => `<option value="${escHtmlAttr(c)}"></option>`).join("")}</datalist>`;
       return `
         <div class="bloc-toggle-row" onclick="event.stopPropagation()">
           <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
@@ -4346,7 +4414,9 @@
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
-          <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé (interne, non inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
+          <div class="mat-chips-row">${chipsHtml}</div>
+          <input type="text" class="bloc-input" id="${matInputId}" list="${matListId}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé (interne, non inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
+          ${datalistHtml}
           <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques, complications ou consignes (inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
           <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Biopsie / Anatomopathologie (inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
           <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Suivi clinique & recommandations CS (inclus au CR)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
