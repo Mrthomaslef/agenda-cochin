@@ -1042,15 +1042,47 @@
     }
 
     /* BLOC / SUIVI OPÉRATOIRE (MATÉRIEL UTILISÉ & REMARQUES) */
-    .bloc-notes-box {
-      margin-top: 8px;
-      padding: 8px 10px;
-      background: rgba(15, 23, 42, 0.72);
-      border: 1px solid rgba(56, 189, 248, 0.28);
-      border-radius: 9px;
+    .bloc-toggle-row {
+      margin-top: 7px;
       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .bloc-toggle-btn {
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(15, 23, 42, 0.8);
+      color: #BAE6FD;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .bloc-toggle-btn.has-saved {
+      border-color: rgba(34, 197, 94, 0.45);
+      background: rgba(20, 83, 45, 0.25);
+      color: #86EFAC;
+    }
+    .bloc-toggle-btn:active {
+      transform: scale(0.97);
+    }
+    .bloc-notes-box {
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      border-radius: 9px;
+      display: none;
       flex-direction: column;
       gap: 6px;
+    }
+    .bloc-notes-box.open {
+      display: flex;
     }
     .bloc-notes-header {
       display: flex;
@@ -2054,7 +2086,7 @@
         .replace(/>/g, "&gt;");
     }
 
-    async function saveSuiviFromDom(suiviKey, encodedMeta, prefix = "") {
+    async function saveSuiviFromDom(suiviKey, encodedMeta, prefix = "", closeAfter = false) {
       const matEl = document.getElementById((prefix || "") + "mat-" + suiviKey);
       const remEl = document.getElementById((prefix || "") + "rem-" + suiviKey);
       const anaEl = document.getElementById((prefix || "") + "ana-" + suiviKey);
@@ -2096,6 +2128,21 @@
             r["Anatomopathologie"] = anapath;
           }
         }
+      }
+
+      const hasAny = Boolean(materiel || remarques || anapath);
+      const boxDomId = (prefix || "") + "box-" + suiviKey;
+      const btnEl = document.getElementById("btn-" + boxDomId);
+      const badgeEl = document.getElementById((prefix || "") + "btnbadge-" + suiviKey);
+      if (btnEl) btnEl.classList.toggle("has-saved", hasAny);
+      if (badgeEl) badgeEl.textContent = hasAny ? "✓" : "";
+
+      if (closeAfter) {
+        const boxEl = document.getElementById(boxDomId);
+        const chevEl = document.getElementById("chev-" + boxDomId);
+        if (boxEl) boxEl.classList.remove("open");
+        if (chevEl) chevEl.textContent = "▸";
+        openBlocNoteIds.delete(boxDomId);
       }
 
       if (statusEl) {
@@ -2771,6 +2818,23 @@
       return l;
     }
 
+    const openBlocNoteIds = new Set();
+
+    function toggleBlocNotes(boxDomId, ev) {
+      if (ev) ev.stopPropagation();
+      const boxEl = document.getElementById(boxDomId);
+      const chevEl = document.getElementById("chev-" + boxDomId);
+      if (!boxEl) return;
+      const isOpen = boxEl.classList.toggle("open");
+      if (isOpen) {
+        openBlocNoteIds.add(boxDomId);
+        if (chevEl) chevEl.textContent = "▾";
+      } else {
+        openBlocNoteIds.delete(boxDomId);
+        if (chevEl) chevEl.textContent = "▸";
+      }
+    }
+
     function renderBlocNotesHtml(ev, prefix = "") {
       const sKey = getSuiviKey(ev);
       const sEntry = getSuiviEntry(ev);
@@ -2790,30 +2854,40 @@
         category: ev.category,
         title: ev.title
       }));
+      const boxDomId = `${prefix}box-${sKey}`;
+      const isOpen = openBlocNoteIds.has(boxDomId);
       const statusTxt = hasSaved ? "✓ GSheet synchronisé" : (isBlocDayOrPast ? "Jour du bloc — À remplir" : "À venir");
+      const btnLabel = isBio ? "🔬 Matériel, Suivi & Anapath" : "🔧 Matériel & Remarques";
       return `
-        <div class="bloc-notes-box" onclick="event.stopPropagation()">
+        <div class="bloc-toggle-row" onclick="event.stopPropagation()">
+          <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
+            <span>${btnLabel}</span>
+            <span id="${prefix}btnbadge-${sKey}" style="font-size:10px; opacity:0.9;">${hasSaved ? "✓" : ""}</span>
+            <span id="chev-${boxDomId}">${isOpen ? "▾" : "▸"}</span>
+          </button>
+        </div>
+        <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
           <div class="bloc-notes-header">
-            <span>🔧 ${isBio ? "Biopsie : Matériel, Suivi & Anapath" : "Bloc : Matériel & Remarques"}</span>
+            <span>${btnLabel}</span>
             <span class="bloc-save-status" id="${prefix}status-${sKey}">${statusTxt}</span>
           </div>
           <div>
             <label class="bloc-field-lbl">Matériel utilisé (Col. K GSheet)</label>
-            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="${isBio ? "Ex : Trocart 11G/14G, aiguille coaxiale..." : "Ex : Sonde cryo IceSphere, trocart, ciment..."}" onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')" />
+            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="${isBio ? "Ex : Trocart 11G/14G, aiguille coaxiale..." : "Ex : Sonde cryo IceSphere, trocart, ciment..."}" onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
           </div>
           <div>
             <label class="bloc-field-lbl">Remarques & Suivi (Col. L GSheet)</label>
-            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Ex : Déroulement du geste, contrôle TDM, suites..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">${escHtmlAttr(sEntry.remarques)}</textarea>
+            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Ex : Déroulement du geste, contrôle TDM, suites..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
           </div>
           ${isBio ? `
           <div>
             <label class="bloc-field-lbl" style="color:#E9D5FF;">🔬 Anatomopathologie (Col. M GSheet Biopsies)</label>
-            <textarea rows="2" class="bloc-input" style="border-color:rgba(168,85,247,0.4);" id="${prefix}ana-${sKey}" placeholder="Résultat anapath, histologie, confrontation..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">${escHtmlAttr(sEntry.anapath)}</textarea>
+            <textarea rows="2" class="bloc-input" style="border-color:rgba(168,85,247,0.4);" id="${prefix}ana-${sKey}" placeholder="Résultat anapath, histologie, confrontation..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
           </div>
           ` : ""}
           <div class="bloc-save-row">
             <span style="font-size:9.5px; color:var(--text-muted);">Remplit directement l'onglet ${isBio ? "Biopsies" : "actes"} du GSheet</span>
-            <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}')">Enregistrer</button>
+            <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', true)">Enregistrer</button>
           </div>
         </div>
       `;
