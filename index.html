@@ -1390,8 +1390,8 @@
     <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP) -->
     <section id="tab-perso" style="display:none;">
       <div class="chips-row">
-        <button class="chip active" id="flt-perso-all" onclick="setPersoFilter('all')">Tous</button>
-        <button class="chip" id="flt-perso-non" onclick="setPersoFilter('Non répondu')">À répondre</button>
+        <button class="chip active" id="flt-perso-non" onclick="setPersoFilter('Non répondu')">À répondre</button>
+        <button class="chip" id="flt-perso-all" onclick="setPersoFilter('all')">Tous</button>
         <button class="chip" id="flt-perso-oui" onclick="setPersoFilter('Répondu')">Répondu</button>
         <button class="chip" id="flt-perso-live" onclick="setPersoFilter('Live.fr')">Live.fr</button>
         <button class="chip" id="flt-perso-aphp" onclick="setPersoFilter('AP-HP')">AP-HP</button>
@@ -1459,7 +1459,7 @@
         <div class="kpi-val" style="color:var(--img)" id="kpi-avis">-</div>
         <div class="kpi-lbl">Avis</div>
       </div>
-      <div class="kpi-box" id="kpi-box-perso" onclick="switchTab('perso')">
+      <div class="kpi-box" id="kpi-box-perso" onclick="openPersoView('Non répondu')">
         <div class="kpi-val" style="color:var(--perso-msg)" id="kpi-perso">-</div>
         <div class="kpi-lbl">Mails</div>
       </div>
@@ -1826,7 +1826,7 @@
 
     let actesFilter = "all";
     let avisFilter = "all";
-    let persoFilter = "all";
+    let persoFilter = "Non répondu";
     let csFilter = "all";
     let patientFilter = "all";
 
@@ -3631,6 +3631,11 @@
     }
 
     // ONGLET QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP)
+    function openPersoView(flt = "Non répondu") {
+      setPersoFilter(flt);
+      switchTab("perso");
+    }
+
     function setPersoFilter(flt) {
       persoFilter = flt;
       document.getElementById("flt-perso-all").classList.toggle("active", flt === "all");
