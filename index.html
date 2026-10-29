@@ -1408,9 +1408,7 @@
       <div class="chips-row">
         <button class="chip active" id="flt-suivi-done" onclick="setSuiviFilter('done')">Traités</button>
         <button class="chip" id="flt-suivi-upcoming" onclick="setSuiviFilter('upcoming')">À venir</button>
-        <button class="chip" id="flt-suivi-all" onclick="setSuiviFilter('all')">Tous</button>
-        <button class="chip" id="flt-suivi-acte" onclick="setSuiviFilter('acte')">Actes</button>
-        <button class="chip" id="flt-suivi-biopsie" onclick="setSuiviFilter('biopsie')">Biopsies</button>
+        <button class="chip" id="flt-suivi-cs_suivi" onclick="setSuiviFilter('cs_suivi')">CS de suivi</button>
       </div>
       <div id="suivi-list-container"></div>
     </section>
@@ -2069,11 +2067,22 @@
     function getSuiviEntry(ev) {
       const k = getSuiviKey(ev);
       const fallbackKey = `${ev.isoDate || "nodate"}_${normName(ev.patient)}`;
+      const patNorm = normName(ev.patient);
+      let patSuiviCs = ev.sheetSuiviCs || "";
+      if (!patSuiviCs && patNorm) {
+        for (const val of Object.values(suiviBlocMap)) {
+          if (val && normName(val.patient_name) === patNorm && val.suivi_cs) {
+            patSuiviCs = val.suivi_cs;
+            break;
+          }
+        }
+      }
       const stored = suiviBlocMap[k] || suiviBlocMap[fallbackKey] || {};
       return {
         materiel: stored.materiel !== undefined && stored.materiel !== "" ? stored.materiel : (ev.sheetMateriel || ""),
         remarques: stored.remarques !== undefined && stored.remarques !== "" ? stored.remarques : (ev.sheetRemarquesSuivi || ""),
         anapath: stored.anapath !== undefined && stored.anapath !== "" ? stored.anapath : (ev.sheetAnapath || ""),
+        suivi_cs: stored.suivi_cs !== undefined && stored.suivi_cs !== "" ? stored.suivi_cs : patSuiviCs,
         updated_at: stored.updated_at || ""
       };
     }
@@ -2090,11 +2099,13 @@
       const matEl = document.getElementById((prefix || "") + "mat-" + suiviKey);
       const remEl = document.getElementById((prefix || "") + "rem-" + suiviKey);
       const anaEl = document.getElementById((prefix || "") + "ana-" + suiviKey);
+      const scsEl = document.getElementById((prefix || "") + "scs-" + suiviKey);
       const statusEl = document.getElementById((prefix || "") + "status-" + suiviKey);
-      if (!matEl && !remEl && !anaEl) return;
+      if (!matEl && !remEl && !anaEl && !scsEl) return;
       const materiel = matEl ? matEl.value.trim() : "";
       const remarques = remEl ? remEl.value.trim() : "";
       const anapath = anaEl ? anaEl.value.trim() : "";
+      const suivi_cs = scsEl ? scsEl.value.trim() : "";
       let meta = {};
       try {
         meta = JSON.parse(decodeURIComponent(encodedMeta));
@@ -2111,6 +2122,7 @@
         materiel,
         remarques,
         anapath,
+        suivi_cs,
         updated_at: new Date().toISOString()
       };
       suiviBlocMap[suiviKey] = entry;
@@ -2118,19 +2130,40 @@
         localStorage.setItem(STORAGE_SUIVI_KEY, JSON.stringify(suiviBlocMap));
       } catch (e) {}
 
-      // Mettre à jour en mémoire dans appData.actes ou appData.Biopsies
-      const targetArr = meta.category === "biopsie" ? (appData.Biopsies || []) : (appData.actes || []);
-      for (const r of targetArr) {
-        if ((meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === normName(meta.patient)) {
-          r["Matériel utilisé"] = materiel;
-          r["Remarques & Suivi"] = remarques;
-          if (meta.category === "biopsie") {
-            r["Anatomopathologie"] = anapath;
+      // Mettre à jour en mémoire dans appData.actes, appData.Biopsies et appData.Consultations
+      if (meta.category === "cs") {
+        for (const r of (appData.Consultations || [])) {
+          if ((meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === normName(meta.patient)) {
+            r["Remarques de suivi"] = suivi_cs;
+          }
+        }
+        for (const r of (appData.actes || [])) {
+          if (normName(r["Identité Patient"]) === normName(meta.patient)) {
+            r["Suivi (CS de suivi)"] = suivi_cs;
+          }
+        }
+        for (const r of (appData.Biopsies || [])) {
+          if (normName(r["Identité Patient"]) === normName(meta.patient)) {
+            r["Suivi (CS de suivi)"] = suivi_cs;
+          }
+        }
+      } else {
+        const targetArr = meta.category === "biopsie" ? (appData.Biopsies || []) : (appData.actes || []);
+        for (const r of targetArr) {
+          if ((meta.row && r._row === meta.row) || normName(r["Identité Patient"]) === normName(meta.patient)) {
+            r["Matériel utilisé"] = materiel;
+            r["Remarques (Bloc)"] = remarques;
+            if (meta.category === "biopsie") {
+              r["Anatomopathologie"] = anapath;
+            }
+            if (suivi_cs) {
+              r["Suivi (CS de suivi)"] = suivi_cs;
+            }
           }
         }
       }
 
-      const hasAny = Boolean(materiel || remarques || anapath);
+      const hasAny = Boolean(materiel || remarques || anapath || suivi_cs);
       const boxDomId = (prefix || "") + "box-" + suiviKey;
       const btnEl = document.getElementById("btn-" + boxDomId);
       const badgeEl = document.getElementById((prefix || "") + "btnbadge-" + suiviKey);
@@ -2638,8 +2671,9 @@
           lieu: a["Lieu / Modalité"],
           remarques: a["Instructions & Remarques"],
           sheetMateriel: a["Matériel utilisé"] || "",
-          sheetRemarquesSuivi: a["Remarques & Suivi"] || "",
+          sheetRemarquesSuivi: a["Remarques (Bloc)"] || a["Remarques & Suivi"] || "",
           sheetAnapath: "",
+          sheetSuiviCs: a["Suivi (CS de suivi)"] || "",
           isMine: res.isMine
         });
       }
@@ -2661,8 +2695,9 @@
           lieu: b["Lieu / Modalité"],
           remarques: b["Instructions & Remarques"],
           sheetMateriel: b["Matériel utilisé"] || "",
-          sheetRemarquesSuivi: b["Remarques & Suivi"] || "",
+          sheetRemarquesSuivi: b["Remarques (Bloc)"] || b["Remarques & Suivi"] || "",
           sheetAnapath: b["Anatomopathologie"] || "",
+          sheetSuiviCs: b["Suivi (CS de suivi)"] || "",
           isMine: res.isMine
         });
       }
@@ -2672,6 +2707,7 @@
         const isTele = String(c["Type d'acte / Consultation"] || "").toLowerCase().includes("télé");
         const res = resolveEventWithPlanning(c["Médecin en charge"], c["Type d'acte / Consultation"], c["Lieu / Modalité"], iso, c["Horaire"], "cs", c["Instructions & Remarques"], c["Identité Patient"]);
         events.push({
+          row: c._row || 0,
           category: "cs",
           badgeLabel: isTele ? "Télécs" : "Consult",
           isoDate: iso,
@@ -2683,6 +2719,8 @@
           title: c["Type d'acte / Consultation"],
           lieu: c["Lieu / Modalité"],
           remarques: c["Instructions & Remarques"],
+          sheetSuiviCs: c["Remarques de suivi"] || "",
+          catActe: c["Catégorie d'acte"] || "",
           isMine: res.isMine
         });
       }
@@ -2840,11 +2878,15 @@
       const sKey = getSuiviKey(ev);
       const sEntry = getSuiviEntry(ev);
       const isBio = (ev.category === "biopsie");
-      const hasSaved = Boolean(
-        (sEntry.materiel && sEntry.materiel.trim()) ||
-        (sEntry.remarques && sEntry.remarques.trim()) ||
-        (sEntry.anapath && sEntry.anapath.trim())
-      );
+      const isCsSuivi = (ev.category === "cs");
+      const hasSaved = isCsSuivi
+        ? Boolean(sEntry.suivi_cs && sEntry.suivi_cs.trim())
+        : Boolean(
+            (sEntry.materiel && sEntry.materiel.trim()) ||
+            (sEntry.remarques && sEntry.remarques.trim()) ||
+            (sEntry.anapath && sEntry.anapath.trim()) ||
+            (sEntry.suivi_cs && sEntry.suivi_cs.trim())
+          );
       const safeEvMeta = encodeURIComponent(JSON.stringify({
         row: ev.row || 0,
         patient: ev.patient,
@@ -2855,20 +2897,26 @@
       }));
       const boxDomId = `${prefix}box-${sKey}`;
       const isOpen = openBlocNoteIds.has(boxDomId);
+      const btnText = isCsSuivi ? "Suivi" : "Notes";
       return `
         <div class="bloc-toggle-row" onclick="event.stopPropagation()">
           <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
-            <span>Notes</span>
+            <span>${btnText}</span>
             <span id="${prefix}btnbadge-${sKey}" style="font-size:10px;">${hasSaved ? "✓" : ""}</span>
             <span id="chev-${boxDomId}">${isOpen ? "▾" : "▸"}</span>
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
-          <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
-          <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
-          ${isBio ? `
-          <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Anatomopathologie..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
-          ` : ""}
+          ${isCsSuivi ? `
+            <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Remarques sur le suivi..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
+          ` : `
+            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
+            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
+            ${isBio ? `
+            <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Anatomopathologie..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
+            ` : ""}
+            <textarea rows="2" class="bloc-input" id="${prefix}scs-${sKey}" placeholder="Suivi (CS de suivi)..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.suivi_cs)}</textarea>
+          `}
           <div class="bloc-save-row" style="justify-content:flex-end; gap:8px;">
             <span class="bloc-save-status" id="${prefix}status-${sKey}"></span>
             <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', true)">OK</button>
@@ -2915,7 +2963,7 @@
       const isGeste = (ev.category === "acte" || ev.category === "biopsie");
       const todayIso = dateToIso(new Date());
       const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
-      const showInlineBlocBox = isGeste && isBlocDayOrPast && (inSuiviTab || ev.isMine);
+      const showInlineBlocBox = (isGeste && isBlocDayOrPast && (inSuiviTab || ev.isMine)) || (ev.category === "cs" && inSuiviTab);
 
       return `
         <div class="event-card type-${ev.category}" onclick="openPatientModal('${safePatientAttr}')">
@@ -3727,7 +3775,7 @@
 
     function setSuiviFilter(flt) {
       suiviFilter = flt;
-      ["all", "done", "upcoming", "acte", "biopsie"].forEach(k => {
+      ["done", "upcoming", "cs_suivi"].forEach(k => {
         const el = document.getElementById("flt-suivi-" + k);
         if (el) el.classList.toggle("active", k === flt);
       });
@@ -3747,30 +3795,52 @@
       if (!container) return;
       const q = ((document.getElementById("suivi-search") || {}).value || "").toLowerCase().trim();
       const todayIso = dateToIso(new Date());
+      const allTimed = getAllTimedEvents();
 
-      let evs = getAllTimedEvents().filter(e => (e.category === "acte" || e.category === "biopsie") && e.isMine);
-
-      if (suiviFilter === "done") {
-        // Strictement basé sur la date : un patient ne peut être dans Traités que si la date du bloc est arrivée ou passée
-        evs = evs.filter(e => Boolean(e.isoDate && e.isoDate <= todayIso));
-      } else if (suiviFilter === "upcoming") {
-        evs = evs.filter(e => !e.isoDate || e.isoDate > todayIso);
-      } else if (suiviFilter === "acte") {
-        evs = evs.filter(e => e.category === "acte");
-      } else if (suiviFilter === "biopsie") {
-        evs = evs.filter(e => e.category === "biopsie");
+      let evs = [];
+      if (suiviFilter === "cs_suivi") {
+        // CS de suivi des patients traités par Dr T. Lefèvre (ou CS de suivi explicitement rattachée à un patient traité)
+        const myGestesByPat = {};
+        for (const g of allTimed) {
+          if ((g.category === "acte" || g.category === "biopsie") && g.isMine && g.isoDate) {
+            const pNorm = normName(g.patient);
+            if (pNorm && (!myGestesByPat[pNorm] || g.isoDate < myGestesByPat[pNorm])) {
+              myGestesByPat[pNorm] = g.isoDate;
+            }
+          }
+        }
+        evs = allTimed.filter(e => {
+          if (e.category !== "cs") return false;
+          const pNorm = normName(e.patient);
+          const gesteIso = myGestesByPat[pNorm];
+          if (gesteIso && e.isoDate && e.isoDate > gesteIso) return true;
+          if (e.isMine && String(e.catActe || "").toLowerCase().includes("cs de suivi")) return true;
+          return false;
+        });
+      } else {
+        evs = allTimed.filter(e => (e.category === "acte" || e.category === "biopsie") && e.isMine);
+        if (suiviFilter === "done") {
+          // Strictement basé sur la date : un patient ne peut être dans Traités que si la date du bloc est arrivée ou passée
+          evs = evs.filter(e => Boolean(e.isoDate && e.isoDate <= todayIso));
+        } else if (suiviFilter === "upcoming") {
+          evs = evs.filter(e => !e.isoDate || e.isoDate > todayIso);
+        }
       }
 
       if (q) {
         evs = evs.filter(e => {
           const entry = getSuiviEntry(e);
-          const hay = `${e.patient} ${e.ipp} ${e.title} ${e.remarques} ${entry.materiel} ${entry.remarques} ${entry.anapath}`.toLowerCase();
+          const hay = `${e.patient} ${e.ipp} ${e.title} ${e.remarques} ${entry.materiel} ${entry.remarques} ${entry.anapath} ${entry.suivi_cs}`.toLowerCase();
           return hay.includes(q);
         });
       }
 
       if (evs.length === 0) {
-        container.innerHTML = `<div class="empty-state">${suiviFilter === "done" ? "Aucun patient traité à ce jour." : "Aucun patient dans ce filtre."}</div>`;
+        const emptyMsg =
+          suiviFilter === "done" ? "Aucun patient traité à ce jour." :
+          suiviFilter === "cs_suivi" ? "Aucune CS de suivi programmée pour vos patients traités." :
+          "Aucun geste programmé à venir.";
+        container.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
         return;
       }
 
@@ -3788,10 +3858,11 @@
         curBucket.items.push(ev);
       }
 
+      const unitWord = suiviFilter === "cs_suivi" ? "CS" : "geste";
       container.innerHTML = dayGroups.map(g => `
         <div class="week-group-header">
           <span>📅 ${g.label}</span>
-          <span class="pill pill-cs">${g.items.length} geste${g.items.length > 1 ? "s" : ""}</span>
+          <span class="pill pill-cs">${g.items.length} ${unitWord}${g.items.length > 1 && unitWord === "geste" ? "s" : ""}</span>
         </div>
         ${g.items.map(ev => renderEventCard(ev, false, true)).join("")}
       `).join("");
