@@ -767,7 +767,6 @@
       gap: 6px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x proximity;
       padding: 2px 2px 8px;
       margin-bottom: 4px;
       scrollbar-width: none;
@@ -777,7 +776,6 @@
     .ws-day {
       min-width: 56px;
       flex-shrink: 0;
-      scroll-snap-align: center;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 11px;
@@ -787,7 +785,6 @@
       align-items: center;
       gap: 2px;
       cursor: pointer;
-      transition: all 0.15s ease;
     }
     .ws-day.active {
       border-color: var(--primary);
@@ -2396,10 +2393,11 @@
       if (calendarView === "day" || calendarView === "week") {
         // En mode Jour comme en mode Semaine, les flèches < et > permettent de changer de semaine (+7j / -7j)
         selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + delta * 7, 12, 0, 0);
+        renderCalendar({ scrollStrip: true });
       } else {
         selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + delta, 1, 12, 0, 0);
+        renderCalendar();
       }
-      renderCalendar();
     }
 
     function goToday() {
@@ -2408,7 +2406,11 @@
         ? new Date(2026, 10, 2, 12, 0, 0)
         : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
       switchTab("agenda");
-      setCalendarView("day");
+      calendarView = "day";
+      document.getElementById("view-btn-day").classList.add("active");
+      document.getElementById("view-btn-week").classList.remove("active");
+      document.getElementById("view-btn-month").classList.remove("active");
+      renderCalendar({ scrollStrip: true });
     }
 
     function getMondayOf(d) {
@@ -2469,7 +2471,7 @@
       return { lbl: def.short, cls: def.color };
     }
 
-    function renderWeekStripBar(allEvents) {
+    function renderWeekStripBar(allEvents, opts) {
       const stripContainer = document.getElementById("week-strip-container");
       if (!stripContainer) return;
       if (calendarView === "month") {
@@ -2482,6 +2484,9 @@
 
       // En mode SEMAINE : afficher les cases résumées de chaque semaine (défilables et cliquables)
       if (calendarView === "week") {
+        const existingWeekScroll = document.getElementById("weeks-selector-scroll");
+        const prevWeekScrollLeft = existingWeekScroll ? existingWeekScroll.scrollLeft : null;
+
         const startMon = new Date(2026, 9, 26, 12, 0, 0);
         const weeksList = [];
         for (let w = 0; w < 18; w++) {
@@ -2544,16 +2549,24 @@
           `;
         }
         stripContainer.innerHTML = `<div class="weeks-selector-row" id="weeks-selector-scroll">${cardsHtml}</div>`;
-        setTimeout(() => {
-          const activeEl = document.getElementById("wsc-" + activeMonIso);
-          if (activeEl && activeEl.scrollIntoView) {
-            activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+        const newWeekScroll = document.getElementById("weeks-selector-scroll");
+        if (newWeekScroll) {
+          if (prevWeekScrollLeft !== null && !(opts && opts.scrollStrip)) {
+            newWeekScroll.scrollLeft = prevWeekScrollLeft;
+          } else {
+            const activeEl = document.getElementById("wsc-" + activeMonIso);
+            if (activeEl) {
+              newWeekScroll.scrollLeft = Math.max(0, activeEl.offsetLeft - (newWeekScroll.clientWidth - activeEl.offsetWidth) / 2);
+            }
           }
-        }, 20);
+        }
         return;
       }
 
-      // En mode JOUR : Barre des jours défilable horizontalement (de -14j à +45j autour de la semaine ou du 26 oct au 31 janv)
+      // En mode JOUR : Barre des jours défilable horizontalement (reste exactement en place au clic sur un jour)
+      const existingDayScroll = document.getElementById("day-strip-scroll");
+      const prevDayScrollLeft = existingDayScroll ? existingDayScroll.scrollLeft : null;
+
       const selIso = dateToIso(selectedDate);
       const startDay = new Date(2026, 9, 26, 12, 0, 0);
       const endDay = new Date(2027, 1, 7, 12, 0, 0);
@@ -2582,27 +2595,32 @@
         cur.setDate(cur.getDate() + 1);
       }
       stripContainer.innerHTML = `<div class="day-strip-scroll" id="day-strip-scroll">${cellsHtml}</div>`;
-      setTimeout(() => {
-        const activeDayEl = document.getElementById("ws-day-" + selIso);
-        if (activeDayEl && activeDayEl.scrollIntoView) {
-          activeDayEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      const newDayScroll = document.getElementById("day-strip-scroll");
+      if (newDayScroll) {
+        if (prevDayScrollLeft !== null && !(opts && opts.scrollStrip)) {
+          newDayScroll.scrollLeft = prevDayScrollLeft;
+        } else {
+          const activeDayEl = document.getElementById("ws-day-" + selIso);
+          if (activeDayEl) {
+            newDayScroll.scrollLeft = Math.max(0, activeDayEl.offsetLeft - (newDayScroll.clientWidth - activeDayEl.offsetWidth) / 2);
+          }
         }
-      }, 20);
+      }
     }
 
     function selectWeekFromSummary(monIso) {
       const [y, m, d] = monIso.split("-").map(Number);
       selectedDate = new Date(y, m - 1, d, 12, 0, 0);
-      renderCalendar();
+      renderCalendar({ scrollStrip: false });
     }
 
     function selectDayFromWeekStrip(iso) {
       const [y, m, d] = iso.split("-").map(Number);
       selectedDate = new Date(y, m - 1, d, 12, 0, 0);
-      renderCalendar();
+      renderCalendar({ scrollStrip: false });
     }
 
-    function renderCalendar() {
+    function renderCalendar(opts) {
       renderMyGardesStrip();
       const container = document.getElementById("calendar-container");
       const titleEl = document.getElementById("period-title");
@@ -2610,7 +2628,7 @@
       const allEvents = filterEventsByScope(getAllTimedEvents());
       const isGeneral = (agendaScope === "all");
 
-      renderWeekStripBar(allEvents);
+      renderWeekStripBar(allEvents, opts);
 
       if (calendarView === "day") {
         const iso = dateToIso(selectedDate);
