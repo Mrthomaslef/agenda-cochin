@@ -1698,10 +1698,8 @@
     let calendarView = "day";
     let agendaScope = "mine"; // 'mine' (Mon agenda) | 'all' (Agenda général)
 
-    let selectedDate = new Date();
-    if (selectedDate < new Date(2026, 10, 2)) {
-      selectedDate = new Date(2026, 10, 2, 12, 0, 0);
-    }
+    const _initNow = new Date();
+    let selectedDate = new Date(_initNow.getFullYear(), _initNow.getMonth(), _initNow.getDate(), 12, 0, 0);
 
     let actesFilter = "all";
     let avisFilter = "all";
@@ -2624,15 +2622,13 @@
 
     function goToday() {
       const now = new Date();
-      selectedDate = now < new Date(2026, 10, 2)
-        ? new Date(2026, 10, 2, 12, 0, 0)
-        : new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+      selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
       switchTab("agenda");
       calendarView = "day";
       document.getElementById("view-btn-day").classList.add("active");
       document.getElementById("view-btn-week").classList.remove("active");
       document.getElementById("view-btn-month").classList.remove("active");
-      renderCalendar({ scrollStrip: true });
+      renderCalendar({ scrollStrip: true, alignMonday: true });
     }
 
     function getMondayOf(d) {
@@ -2685,6 +2681,7 @@
       if (dow === 0 || dow === 6) return { lbl: "WE", cls: "post-libre" };
       const myV = getMyVacationForIso(iso);
       const firstPost = (myV.am[0] || "").toLowerCase();
+      if (firstPost.includes("pitié") || firstPost.includes("pitie")) return { lbl: "Pitié", cls: "post-libre" };
       if (firstPost.includes("férié")) return { lbl: "Férié", cls: "post-libre" };
       if (firstPost.includes("libéral") || firstPost.includes("jdp")) return { lbl: "JDP/GSH", cls: "post-liberal" };
       if (firstPost.includes("masterclass")) return { lbl: "Master.", cls: "post-staff" };
