@@ -1,4 +1,4 @@
-const CACHE_NAME = "cochin-ri-pwa-v10";
+const CACHE_NAME = "cochin-ri-pwa-v11";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,10 +29,16 @@ self.addEventListener("fetch", event => {
     return;
   }
   event.respondWith(
-    fetch(req)
+    fetch(req, req.url.includes("_t=") ? { cache: "no-store" } : undefined)
       .then(res => {
         const clone = res.clone();
-        caches.open(CACHE_NAME).then(c => c.put(req, clone));
+        caches.open(CACHE_NAME).then(c => {
+          c.put(req, clone);
+          if (req.url.includes("index.html?_t=")) {
+            c.put("./index.html", res.clone());
+            c.put("./", res.clone());
+          }
+        });
         return res;
       })
       .catch(() => caches.match(req))

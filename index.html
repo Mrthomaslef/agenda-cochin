@@ -1393,7 +1393,7 @@
     };
 
     // RDV & Événements personnels extraits de thomaslefevre18@live.fr et thomas-jean.lefevre@aphp.fr
-    const PERSONAL_MAIL_RDVS = [
+    let PERSONAL_MAIL_RDVS = /*__START_PERSONAL_RDVS__*/[
       {
         isoDate: "2026-10-27",
         dateStr: "27/10/2026",
@@ -1524,9 +1524,9 @@
         medecin: "Dr T. Lefèvre",
         remarques: "Mail de Dr Nicolas Lefèvre du 17/10."
       }
-    ];
+    ]/*__END_PERSONAL_RDVS__*/;
 
-    const DEFAULT_QUESTIONS_PERSO = [
+    let DEFAULT_QUESTIONS_PERSO = /*__START_QUESTIONS_PERSO__*/[
       {
         _row: 9,
         "Date": "28/10/2026",
@@ -1670,7 +1670,7 @@
         "Date Réponse / Note": "À confirmer",
         "Email Expéditeur": "Marie.Etlinger@bsci.com"
       }
-    ];
+    ]/*__END_QUESTIONS_PERSO__*/;
 
     let enteredPin = "";
     let currentTab = "agenda";
@@ -1770,11 +1770,41 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const resp = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-agenda-pin": savedPin },
-          body: JSON.stringify({ pin: savedPin, action: "get" })
-        });
+        // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
+        const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
+          .then(r => r.ok ? r.text() : null)
+          .then(htmlTxt => {
+            if (!htmlTxt) return;
+            const rdvMatch = htmlTxt.match(/\/\*__START_PERSONAL_RDVS__\*\/([\s\S]*?)\/\*__END_PERSONAL_RDVS__\*\//);
+            if (rdvMatch && rdvMatch[1]) {
+              try {
+                const parsedRdvs = (new Function("return " + rdvMatch[1]))();
+                if (Array.isArray(parsedRdvs)) PERSONAL_MAIL_RDVS = parsedRdvs;
+              } catch (_) {}
+            }
+            const qMatch = htmlTxt.match(/\/\*__START_QUESTIONS_PERSO__\*\/([\s\S]*?)\/\*__END_QUESTIONS_PERSO__\*\//);
+            if (qMatch && qMatch[1]) {
+              try {
+                const parsedQs = (new Function("return " + qMatch[1]))();
+                if (Array.isArray(parsedQs)) DEFAULT_QUESTIONS_PERSO = parsedQs;
+              } catch (_) {}
+            }
+          })
+          .catch(() => {});
+
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.update().catch(() => {}); }).catch(() => {});
+        }
+
+        // 2. Récupérer en direct les 6 onglets médicaux du Google Sheet + Gardes via Supabase
+        const [resp] = await Promise.all([
+          fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-agenda-pin": savedPin },
+            body: JSON.stringify({ pin: savedPin, action: "get" })
+          }),
+          htmlRefreshPromise
+        ]);
         if (resp.status === 401) {
           localStorage.removeItem(STORAGE_PIN_KEY);
           document.getElementById("lock-screen").classList.remove("hidden");
@@ -1784,6 +1814,10 @@
         if (res.ok && res.data) {
           localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(res));
           applySheetData(res.data, res.synced_at);
+        } else {
+          appData.Questions_perso = loadPersoWithLocalStatus();
+          updateKpis();
+          renderCurrentTab();
         }
       } catch (e) {
       } finally {
