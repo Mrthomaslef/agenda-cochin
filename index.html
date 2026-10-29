@@ -2026,7 +2026,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v33"; /*__APP_BUILD_ID:v33__*/
+        const CURRENT_BUILD_ID = "v34"; /*__APP_BUILD_ID:v34__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3916,7 +3916,36 @@
       const hospitAccord = prof.fem ? "hospitalisée" : "hospitalisé";
       const auPatient = prof.fem ? "à la patiente" : "au patient";
       const lePatient = prof.fem ? "la patiente" : "le patient";
-      const LePatientCap = prof.fem ? "La patiente" : "Le patient";
+
+      const isPureDiagBiopsie = String(prof.objectifs || "").trim() === "diagnostique" || /^biopsie/i.test(String(prof.gesteRetenu || "").trim());
+
+      // Enrichissement ostéoarticulaire systématique : douleurs & impact / retentissement fonctionnel (hors biopsie purement diagnostique)
+      let objEnrichi = prof.objectifs || "antalgique et fonctionnelle";
+      if (!isPureDiagBiopsie && !/fonctionnel/i.test(objEnrichi) && !objEnrichi.includes("À préciser")) {
+        if (objEnrichi === "antalgique") {
+          objEnrichi = "antalgique et fonctionnelle";
+        } else if (/^curative et antalgique$/i.test(objEnrichi)) {
+          objEnrichi = "curative, antalgique et fonctionnelle";
+        } else if (/antalgique/i.test(objEnrichi)) {
+          objEnrichi = objEnrichi.replace(/antalgique/i, "antalgique et fonctionnelle");
+        } else {
+          objEnrichi = `antalgique, fonctionnelle et ${objEnrichi}`;
+        }
+      }
+
+      let argsEnrichis = prof.arguments || "la symptomatologie douloureuse, le retentissement fonctionnel et le bilan d'imagerie";
+      if (!isPureDiagBiopsie && !/fonctionnel|gêne|autonomie|marche/i.test(argsEnrichis) && !argsEnrichis.includes("À préciser")) {
+        if (/doul/i.test(argsEnrichis)) {
+          argsEnrichis = argsEnrichis.replace(/(symptomatologie douloureuse[^,]*|douleurs[^,]*|métatarsalgies[^,]*|gonalgies[^,]*|cervicalgies[^,]*)/i, "$1, le retentissement fonctionnel");
+        } else {
+          argsEnrichis = `la symptomatologie douloureuse, son retentissement fonctionnel et ${argsEnrichis}`;
+        }
+      }
+
+      let benefEnrichis = prof.benefices || "soulagement des douleurs et d'amélioration du retentissement fonctionnel";
+      if (!isPureDiagBiopsie && !/fonctionnel|marche|autonomie|appui/i.test(benefEnrichis) && !benefEnrichis.includes("À préciser")) {
+        benefEnrichis = `${benefEnrichis} et d'amélioration du retentissement fonctionnel`;
+      }
 
       if (mode === "preop") {
         const extraRem = (sEntry.remarques && sEntry.remarques.trim()) ? ` (${sEntry.remarques.trim()})` : "";
@@ -3925,12 +3954,12 @@
           "",
           `Nous avons eu en consultation ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, présentant ${prof.motif}, survenant sur ${prof.terrain}.`,
           "",
-          `Au regard de ${prof.arguments}${extraRem}, une indication de ${prof.gesteRetenu} à visée ${prof.objectifs} a été retenue.`,
+          `Au regard de ${argsEnrichis}${extraRem}, une indication de ${prof.gesteRetenu} à visée ${objEnrichi} a été retenue.`,
           "",
           `Au cours de cette consultation, nous avons expliqué ${auPatient} :`,
           `- les principes de ${prof.principesNom} ;`,
           `- les modalités techniques du geste, réalisé sous guidage radiologique ;`,
-          `- les bénéfices attendus, notamment en termes de ${prof.benefices} ;`,
+          `- les bénéfices attendus, notamment en termes de ${benefEnrichis} ;`,
           `- ainsi que les risques inhérents à la procédure, notamment ${prof.risques}.`,
           "",
           `Les modalités, bénéfices et risques de cette prise en charge ont été expliqués ${auPatient}, qui a bien compris l'ensemble de ces éléments et a donné son accord pour l'intervention.`,
@@ -3942,14 +3971,13 @@
       }
 
       if (mode === "crh") {
-        // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Concis, sans répétition, zéro matériel technique, signature Dr T. Lefevre
+        // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Concis, sans répétition, douleurs & impact fonctionnel, zéro matériel technique, signature Dr T. Lefevre
         const { dateHospit, anesth, guidage } = findPatientInterventionDateAndAnesth(ev, prof);
         const ageChunk = (prof.age && !prof.age.includes("À préciser")) ? `, ${prof.age} ans,` : " ([âge à préciser])";
         const dateChunk = dateHospit ? `le ${dateHospit}` : "le [Date à préciser]";
         const rawGeste = prof.gesteRealise && !prof.gesteRealise.includes("À préciser")
           ? prof.gesteRealise
           : (prof.gesteRetenu || "[geste réalisé à préciser]");
-        // Nettoyer du titre d'entrée les mentions d'anesthésie/guidage déjà dites au paragraphe intervention
         const gesteCourt = rawGeste
           .replace(/\s+sous\s+(?:guidage\s+|contrôle\s+)?(?:scanographique|scanner|échographique|échographie|scopique|anesthésie\s+générale|anesthésie\s+locale|AG|AL)(?:\s+et\s+sous\s+[^,.)]+)?/gi, "")
           .replace(/\s+en\s+HDJ(?:\s+radio\s*B)?/gi, "")
@@ -3982,8 +4010,12 @@
           ? `Les suites immédiates sont marquées par : ${cleanRemCrh}.`
           : `Les suites immédiates sont simples.`;
 
+        const impactCrh = isPureDiagBiopsie
+          ? ""
+          : (/doul/i.test(prof.motif) ? " avec retentissement fonctionnel" : " responsable de douleurs et d'un retentissement fonctionnel");
+
         const consignesList = [
-          "- Repos relatif 48 heures et reprise de l'appui / des activités selon la tolérance douloureuse",
+          "- Repos relatif 48 heures et reprise progressive de l'appui / des activités selon la tolérance douloureuse",
           "- Pansement sec 48 heures (pas de fils à retirer) et traitement antalgique adapté"
         ];
         if (/eliquis|plavix|kard[eé]gic|anticoag/i.test(prof.terrain + " " + (prof.detailsProcedure || ""))) {
@@ -3992,7 +4024,7 @@
         consignesList.push(
           isBiopsie
             ? "- Consultation dédiée pour résultats anatomopathologiques"
-            : "- Consultation de suivi dédiée avec imagerie de contrôle"
+            : "- Consultation de suivi dédiée (évaluation antalgique, fonctionnelle et imagerie de contrôle)"
         );
 
         return [
@@ -4000,7 +4032,7 @@
           "",
           `${prof.civiliteNom}${ageChunk} a été ${hospitAccord} ${dateChunk} pour ${gesteCourt}.`,
           "",
-          `Pour rappel, ${lePatient} présente ${prof.motif}${terrainClause}, justifiant ce geste à visée ${prof.objectifs} réalisé après information sur les bénéfices et les risques et recueil de son accord.`,
+          `Pour rappel, ${lePatient} présente ${prof.motif}${impactCrh}${terrainClause}, justifiant ce geste à visée ${objEnrichi} réalisé après information sur les bénéfices et les risques et recueil de son accord.`,
           "",
           `${deroulementCourt} ${suitesPhrase}`,
           "",
@@ -4014,6 +4046,10 @@
       }
 
       // Mode 2 : Consultation de Suivi
+      let indicInitSuivi = prof.indicationInitiale || "[indication initiale : douleurs et retentissement fonctionnel pré-opératoire à préciser]";
+      if (!isPureDiagBiopsie && !/fonctionnel/i.test(indicInitSuivi) && !indicInitSuivi.includes("À préciser")) {
+        indicInitSuivi += /doul/i.test(indicInitSuivi) ? " avec retentissement fonctionnel" : " responsable de douleurs et d'un retentissement fonctionnel";
+      }
       let detailsProc = prof.detailsProcedure || "[détails de la procédure : niveaux, gestes associés type biopsie à préciser]";
       if (sEntry.materiel && sEntry.materiel.trim()) {
         detailsProc += ` (matériel utilisé : ${sEntry.materiel.trim()})`;
@@ -4028,7 +4064,7 @@
       const evoGlobale = prof.evolutionGlobale || "[favorable / défavorable / stationnaire à préciser]";
       const evoDetails = (sEntry.suivi_cs && sEntry.suivi_cs.trim())
         ? sEntry.suivi_cs.trim()
-        : (prof.evolutionCliniqueDetails || "[évolution de la douleur, autonomie, reprise des activités à préciser]");
+        : (prof.evolutionCliniqueDetails || "[évolution des douleurs et du retentissement fonctionnel : autonomie, mobilité, reprise des activités à préciser]");
       const compCibles = prof.complicationsCibles || "neurologique, infectieuse ou spécifique au geste";
 
       return [
@@ -4036,9 +4072,9 @@
         "",
         `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${prof.gesteRealise}.`,
         "",
-        `Pour rappel, ${lePatient} présentait ${prof.indicationInitiale}. L'intervention a consisté en ${detailsProc}. Le geste a permis ${resTech}, marqué sur le plan procédural par ${partProc}.`,
+        `Pour rappel, ${lePatient} présentait ${indicInitSuivi}. L'intervention a consisté en ${detailsProc}. Le geste a permis ${resTech}, marqué sur le plan procédural par ${partProc}.`,
         "",
-        `Sur le plan clinique, ${lePatient} rapporte une évolution ${evoGlobale} au décours de la procédure, avec ${evoDetails}, sans complication ${compCibles} intercurrente.`,
+        `Sur le plan clinique, ${lePatient} rapporte une évolution ${evoGlobale} au décours de la procédure, tant sur le plan des douleurs que du retentissement fonctionnel (${evoDetails}), sans complication ${compCibles} intercurrente.`,
         "",
         "Je vous prie de recevoir, Chère Consœur, Cher Confrère, l'assurance de mes sincères salutations.",
         "",
