@@ -2026,7 +2026,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v32"; /*__APP_BUILD_ID:v32__*/
+        const CURRENT_BUILD_ID = "v33"; /*__APP_BUILD_ID:v33__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3942,64 +3942,67 @@
       }
 
       if (mode === "crh") {
-        // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Zéro matériel technique, paragraphes continus sans gras ni italique, signature Dr T. Lefevre
+        // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Concis, sans répétition, zéro matériel technique, signature Dr T. Lefevre
         const { dateHospit, anesth, guidage } = findPatientInterventionDateAndAnesth(ev, prof);
         const ageChunk = (prof.age && !prof.age.includes("À préciser")) ? `, ${prof.age} ans,` : " ([âge à préciser])";
-        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [Date d'hospitalisation à préciser]";
-        const gesteMotif = prof.gesteRealise && !prof.gesteRealise.includes("À préciser")
+        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [Date à préciser]";
+        const rawGeste = prof.gesteRealise && !prof.gesteRealise.includes("À préciser")
           ? prof.gesteRealise
-          : (prof.gesteRetenu || "[geste interventionnel réalisé à préciser]");
+          : (prof.gesteRetenu || "[geste réalisé à préciser]");
+        // Nettoyer du titre d'entrée les mentions d'anesthésie/guidage déjà dites au paragraphe intervention
+        const gesteCourt = rawGeste
+          .replace(/\s+sous\s+(?:guidage\s+|contrôle\s+)?(?:scanographique|scanner|échographique|échographie|scopique|anesthésie\s+générale|anesthésie\s+locale|AG|AL)(?:\s+et\s+sous\s+[^,.)]+)?/gi, "")
+          .replace(/\s+en\s+HDJ(?:\s+radio\s*B)?/gi, "")
+          .trim();
+
         const terrainClause = (prof.terrain && !prof.terrain.includes("À préciser"))
           ? ` sur un terrain de ${prof.terrain}`
           : "";
-        const procDesc = stripTechnicalMaterialForCrh(prof.detailsProcedure || gesteMotif);
-        const isBiopsie = /biopsie/i.test(gesteMotif + " " + procDesc);
-        const isCimento = /cimento|vertébro/i.test(gesteMotif + " " + procDesc);
-        const isThermo = /cryo|radiofréquence|\brf\b|thermo|électrochimio|\bect\b/i.test(gesteMotif + " " + procDesc);
+        const procContext = `${rawGeste} ${prof.detailsProcedure || ""}`;
+        const isBiopsie = /biopsie/i.test(procContext);
+        const isCimento = /cimento|vertébro/i.test(procContext);
+        const isVissage = /vissage|ostéosynthèse/i.test(procContext);
+        const isThermo = /cryo|radiofréquence|\brf\b|thermo|électrochimio|\bect\b|alcoolisation/i.test(procContext);
 
-        let controleFinalPhrase = "Le contrôle d'imagerie en fin de procédure confirme le bon déroulement anatomique du geste, sans complication per-opératoire décelable.";
+        let deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un contrôle d'imagerie final satisfaisant et sans complication per-opératoire.`;
         if (isBiopsie) {
-          controleFinalPhrase = "Plusieurs prélèvements biopsiques représentatifs ont été réalisés pour analyse anatomopathologique. Le contrôle d'imagerie en fin de procédure ne montre pas de complication hémorragique ni d'anomalie per-opératoire.";
-        } else if (isCimento && isThermo) {
-          controleFinalPhrase = "Le contrôle scanographique final atteste d'une couverture satisfaisante de la lésion par la zone d'ablation et d'un bon remplissage osseux par le ciment, sans fuite extra-osseuse ni complication per-opératoire.";
+          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, permettant la réalisation de prélèvements biopsiques ciblés sans complication per-opératoire.`;
+        } else if (isThermo && (isCimento || isVissage)) {
+          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec une couverture satisfaisante de la lésion et une bonne stabilisation osseuse au contrôle final, sans complication per-opératoire.`;
         } else if (isCimento) {
-          controleFinalPhrase = "Le contrôle scanographique final atteste d'un remplissage satisfaisant de la lésion osseuse par le ciment, sans fuite extra-osseuse significative ni complication per-opératoire.";
+          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un remplissage satisfaisant par le ciment au contrôle final, sans fuite extra-osseuse ni complication per-opératoire.`;
+        } else if (isVissage) {
+          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec un bon positionnement de l'ostéosynthèse au contrôle final et sans complication per-opératoire.`;
         } else if (isThermo) {
-          controleFinalPhrase = "Le contrôle d'imagerie final atteste d'une zone de traitement couvrant de façon satisfaisante la cible lésionnelle en respectant les structures nobles adjacentes, sans complication per-opératoire.";
+          deroulementCourt = `L'intervention s'est déroulée ${anesth} et ${guidage}, avec une couverture satisfaisante de la cible au contrôle final dans le respect des structures adjacentes, sans complication per-opératoire.`;
         }
 
         const cleanRemCrh = stripTechnicalMaterialForCrh(sEntry.remarques || "");
-        const suitesImmediatesPara = cleanRemCrh
+        const suitesPhrase = cleanRemCrh
           ? `Les suites immédiates sont marquées par : ${cleanRemCrh}.`
-          : `Les suites immédiates sont simples, avec une bonne tolérance clinique dès le décours de la procédure et l'absence de déficit sensitivo-moteur.`;
+          : `Les suites immédiates sont simples.`;
 
-        const consignesList = [];
-        if (/pied|morton|astragale|cheville|tibia|genou|hanche|bassin|cuisse/i.test(gesteMotif + " " + prof.motif)) {
-          consignesList.push("- Reprise de l'appui et de la marche autorisée selon la tolérance douloureuse, avec repos relatif pendant 48 heures");
-        } else {
-          consignesList.push("- Repos relatif pendant 48 heures avec reprise progressive des activités habituelles selon la tolérance douloureuse");
+        const consignesList = [
+          "- Repos relatif 48 heures et reprise de l'appui / des activités selon la tolérance douloureuse",
+          "- Pansement sec 48 heures (pas de fils à retirer) et traitement antalgique adapté"
+        ];
+        if (/eliquis|plavix|kard[eé]gic|anticoag/i.test(prof.terrain + " " + (prof.detailsProcedure || ""))) {
+          consignesList.push("- Reprise du traitement antithrombotique selon le protocole validé");
         }
-        consignesList.push("- Pansement sec au point de ponction pendant 48 heures (retirer ensuite, pas de fils à enlever)");
-        consignesList.push("- Poursuite et adaptation du traitement antalgique selon l'évolution clinique");
-        if (/eliquis|plavix|kard[eé]gic|anticoag/i.test(prof.terrain + " " + prof.detailsProcedure)) {
-          consignesList.push("- Gestion et reprise du traitement antithrombotique selon les consignes médicales et anesthésiques validées");
-        }
-        if (isBiopsie) {
-          consignesList.push("- Consultation dédiée pour remise des résultats anatomopathologiques et suite de la prise en charge");
-        } else {
-          consignesList.push("- Consultation de suivi dédiée en radiologie interventionnelle avec imagerie de contrôle");
-        }
+        consignesList.push(
+          isBiopsie
+            ? "- Consultation dédiée pour résultats anatomopathologiques"
+            : "- Consultation de suivi dédiée avec imagerie de contrôle"
+        );
 
         return [
           "Chère consœur, cher confrère,",
           "",
-          `${prof.civiliteNom}${ageChunk} a été ${hospitAccord} ${dateChunk} pour la réalisation de ${gesteMotif}.`,
+          `${prof.civiliteNom}${ageChunk} a été ${hospitAccord} ${dateChunk} pour ${gesteCourt}.`,
           "",
-          `Pour rappel, ${lePatient} présente ${prof.motif}${terrainClause}. Au regard de ${prof.arguments}, l'indication de ${prof.gesteRetenu} à visée ${prof.objectifs} a été retenue. Une information détaillée sur les bénéfices et les risques de la procédure (notamment ${prof.risques}) a été délivrée ${auPatient}, qui a donné son accord.`,
+          `Pour rappel, ${lePatient} présente ${prof.motif}${terrainClause}, justifiant ce geste à visée ${prof.objectifs} réalisé après information sur les bénéfices et les risques et recueil de son accord.`,
           "",
-          `L'intervention a été réalisée ${anesth} et ${guidage}. Il a été procédé à ${procDesc}. ${controleFinalPhrase}`,
-          "",
-          suitesImmediatesPara,
+          `${deroulementCourt} ${suitesPhrase}`,
           "",
           "Suites et consignes :",
           ...consignesList,
