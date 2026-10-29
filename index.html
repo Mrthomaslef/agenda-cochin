@@ -1406,9 +1406,9 @@
         <input type="text" class="search-input" id="suivi-search" placeholder="Rechercher patient, IPP, geste, matériel..." oninput="renderSuiviTab()" />
       </div>
       <div class="chips-row">
-        <button class="chip active" id="flt-suivi-all" onclick="setSuiviFilter('all')">Mes gestes</button>
-        <button class="chip" id="flt-suivi-done" onclick="setSuiviFilter('done')">Traités / Jour J</button>
+        <button class="chip active" id="flt-suivi-done" onclick="setSuiviFilter('done')">Traités</button>
         <button class="chip" id="flt-suivi-upcoming" onclick="setSuiviFilter('upcoming')">À venir</button>
+        <button class="chip" id="flt-suivi-all" onclick="setSuiviFilter('all')">Tous</button>
         <button class="chip" id="flt-suivi-acte" onclick="setSuiviFilter('acte')">Actes</button>
         <button class="chip" id="flt-suivi-biopsie" onclick="setSuiviFilter('biopsie')">Biopsies</button>
       </div>
@@ -1469,7 +1469,7 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Agenda</span>
       </button>
-      <button class="nav-item" id="nav-suivi" onclick="switchTab('suivi')">
+      <button class="nav-item" id="nav-suivi" onclick="openSuiviTab()">
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Suivi</span>
         <span class="nav-badge" id="badge-suivi-cnt" style="display:none;">0</span>
@@ -2038,7 +2038,7 @@
 
     const STORAGE_PERSO_KEY = "cochin_ri_perso_status_v3";
     const STORAGE_SUIVI_KEY = "cochin_ri_suivi_bloc_v1";
-    let suiviFilter = "all";
+    let suiviFilter = "done";
     let suiviBlocMap = {};
 
     function loadSuiviBlocMap(cloudSuivi) {
@@ -2838,8 +2838,6 @@
     function renderBlocNotesHtml(ev, prefix = "") {
       const sKey = getSuiviKey(ev);
       const sEntry = getSuiviEntry(ev);
-      const todayIso = dateToIso(new Date());
-      const isBlocDayOrPast = Boolean(ev.isoDate && ev.isoDate <= todayIso);
       const isBio = (ev.category === "biopsie");
       const hasSaved = Boolean(
         (sEntry.materiel && sEntry.materiel.trim()) ||
@@ -2856,38 +2854,23 @@
       }));
       const boxDomId = `${prefix}box-${sKey}`;
       const isOpen = openBlocNoteIds.has(boxDomId);
-      const statusTxt = hasSaved ? "✓ GSheet synchronisé" : (isBlocDayOrPast ? "Jour du bloc — À remplir" : "À venir");
-      const btnLabel = isBio ? "🔬 Matériel, Suivi & Anapath" : "🔧 Matériel & Remarques";
       return `
         <div class="bloc-toggle-row" onclick="event.stopPropagation()">
           <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
-            <span>${btnLabel}</span>
-            <span id="${prefix}btnbadge-${sKey}" style="font-size:10px; opacity:0.9;">${hasSaved ? "✓" : ""}</span>
+            <span>Notes</span>
+            <span id="${prefix}btnbadge-${sKey}" style="font-size:10px;">${hasSaved ? "✓" : ""}</span>
             <span id="chev-${boxDomId}">${isOpen ? "▾" : "▸"}</span>
           </button>
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
-          <div class="bloc-notes-header">
-            <span>${btnLabel}</span>
-            <span class="bloc-save-status" id="${prefix}status-${sKey}">${statusTxt}</span>
-          </div>
-          <div>
-            <label class="bloc-field-lbl">Matériel utilisé (Col. K GSheet)</label>
-            <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="${isBio ? "Ex : Trocart 11G/14G, aiguille coaxiale..." : "Ex : Sonde cryo IceSphere, trocart, ciment..."}" onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
-          </div>
-          <div>
-            <label class="bloc-field-lbl">Remarques & Suivi (Col. L GSheet)</label>
-            <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Ex : Déroulement du geste, contrôle TDM, suites..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
-          </div>
+          <input type="text" class="bloc-input" id="${prefix}mat-${sKey}" value="${escHtmlAttr(sEntry.materiel)}" placeholder="Matériel utilisé..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)" />
+          <textarea rows="2" class="bloc-input" id="${prefix}rem-${sKey}" placeholder="Remarques..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.remarques)}</textarea>
           ${isBio ? `
-          <div>
-            <label class="bloc-field-lbl" style="color:#E9D5FF;">🔬 Anatomopathologie (Col. M GSheet Biopsies)</label>
-            <textarea rows="2" class="bloc-input" style="border-color:rgba(168,85,247,0.4);" id="${prefix}ana-${sKey}" placeholder="Résultat anapath, histologie, confrontation..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
-          </div>
+          <textarea rows="2" class="bloc-input" id="${prefix}ana-${sKey}" placeholder="Anatomopathologie..." onchange="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', false)">${escHtmlAttr(sEntry.anapath)}</textarea>
           ` : ""}
-          <div class="bloc-save-row">
-            <span style="font-size:9.5px; color:var(--text-muted);">Remplit directement l'onglet ${isBio ? "Biopsies" : "actes"} du GSheet</span>
-            <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', true)">Enregistrer</button>
+          <div class="bloc-save-row" style="justify-content:flex-end; gap:8px;">
+            <span class="bloc-save-status" id="${prefix}status-${sKey}"></span>
+            <button type="button" class="bloc-save-btn" onclick="saveSuiviFromDom('${sKey}', '${safeEvMeta}', '${prefix}', true)">OK</button>
           </div>
         </div>
       `;
@@ -3738,6 +3721,11 @@
     }
 
     // SUIVI OPÉRATOIRE & BIOPSIES (DR T. LEFÈVRE)
+    function openSuiviTab() {
+      setSuiviFilter("done");
+      switchTab("suivi");
+    }
+
     function setSuiviFilter(flt) {
       suiviFilter = flt;
       ["all", "done", "upcoming", "acte", "biopsie"].forEach(k => {
