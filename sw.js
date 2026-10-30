@@ -2,10 +2,10 @@ const CACHE_NAME = "cochin-ri-pwa-v36";
 const ASSETS = [
   "./",
   "./index.html",
-  "./manifest.json?v=3",
-  "./apple-touch-icon.png?v=3",
-  "./icon-192.png?v=3",
-  "./icon-512.png?v=3"
+  "./manifest.json?v=2",
+  "./apple-touch-icon.png?v=2",
+  "./icon-192.png?v=2",
+  "./icon-512.png?v=2"
 ];
 
 self.addEventListener("install", event => {
@@ -40,7 +40,7 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   const req = event.request;
-  if (req.method !== "GET" || req.url.includes("supabase.co")) {
+  if (req.method !== "GET" || req.url.includes("supabase.co") || req.url.includes("script.google.com") || req.url.includes("googleusercontent.com")) {
     return;
   }
   event.respondWith(
