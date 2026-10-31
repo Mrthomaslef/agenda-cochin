@@ -576,6 +576,8 @@
     .pill-mail-rdv { background: rgba(245, 158, 11, 0.25); color: #FDE68A; }
     .pill-live     { background: rgba(56, 189, 248, 0.2); color: #7DD3FC; }
     .pill-aphp     { background: rgba(168, 85, 247, 0.22); color: #D8B4FE; }
+    .pill-whatsapp { background: rgba(34, 197, 94, 0.22); color: #86EFAC; }
+    .pill-imessage { background: rgba(59, 130, 246, 0.24); color: #93C5FD; }
     .pill-success  { background: rgba(34, 197, 94, 0.2); color: #86EFAC; }
     .pill-danger   { background: rgba(239, 68, 68, 0.22); color: #FCA5A5; }
     .pill-warn     { background: rgba(245, 158, 11, 0.22); color: #FDE68A; }
@@ -1527,12 +1529,14 @@
       <div id="avis-list-container"></div>
     </section>
 
-    <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR & AP-HP) -->
+    <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR, AP-HP, WHATSAPP & IMESSAGE) -->
     <section id="tab-perso" style="display:none;">
       <div class="chips-row">
         <button class="chip active" id="flt-perso-non" onclick="setPersoFilter('Non répondu')">À répondre</button>
         <button class="chip" id="flt-perso-all" onclick="setPersoFilter('all')">Tous</button>
         <button class="chip" id="flt-perso-oui" onclick="setPersoFilter('Répondu')">Répondu</button>
+        <button class="chip" id="flt-perso-whatsapp" onclick="setPersoFilter('WhatsApp')">WhatsApp</button>
+        <button class="chip" id="flt-perso-imessage" onclick="setPersoFilter('iMessage')">iMessage</button>
         <button class="chip" id="flt-perso-live" onclick="setPersoFilter('Live.fr')">Live.fr</button>
         <button class="chip" id="flt-perso-aphp" onclick="setPersoFilter('AP-HP')">AP-HP</button>
       </div>
@@ -1633,9 +1637,9 @@
 
     // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
-      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin", offCochin: false },
+      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • 08h15 Café Albarran • Soir : Marie en demi-garde (23h)", offCochin: false },
       "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
-      "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "", offCochin: false },
+      "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "17h00 : Réunion Internes & Chefs en salle de staff", offCochin: false },
       "2026-11-05": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre (hors Cochin)", offCochin: true },
       "2026-11-06": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
       "2026-11-09": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "IRM"], note: "", offCochin: false },
@@ -1678,7 +1682,7 @@
       5: { am: ["Écho (9h-12h)"], pm: ["IRM (1 sem/2)"], short: "Écho/IRM", color: "post-echo", offCochin: false }
     };
 
-    // RDV & Événements personnels extraits de thomaslefevre18@live.fr et thomas-jean.lefevre@aphp.fr
+    // RDV & Événements personnels extraits de thomaslefevre18@live.fr, thomas-jean.lefevre@aphp.fr, WhatsApp et iMessage
     let PERSONAL_MAIL_RDVS = /*__START_PERSONAL_RDVS__*/[
       {
         isoDate: "2026-10-27",
@@ -1713,6 +1717,16 @@
       {
         isoDate: "2026-11-02",
         dateStr: "02/11/2026",
+        horaire: "08:15",
+        title: "Café de bienvenue & Visite du service (Rentrée Semestre Hiver)",
+        patient: "Accueil Nouveaux Internes & Chefs — Radio B",
+        lieu: "Hôpital Cochin — Pavillon Albarran (08h15 – 08h30)",
+        medecin: "Dr M-P. Talabard, Dr H. Monnier & Équipe Radio B",
+        remarques: "WhatsApp (Planning CCH Hiver 26-27 — Dr M-P. Talabard, 29/10) : RDV à Albarran vers 8h15-30 pour un café de bienvenue et visite du service."
+      },
+      {
+        isoDate: "2026-11-02",
+        dateStr: "02/11/2026",
         horaire: "09:00",
         title: "Prise de poste Assistant Spécialiste & Accueil nouveaux arrivants",
         patient: "Prise de fonction Hôpital Cochin",
@@ -1729,6 +1743,36 @@
         lieu: "Hôpital Cochin — Radiologie B",
         medecin: "Dr M-P. Talabard & Dr T. Lefèvre",
         remarques: "Confirmé par Dr M-P. Talabard le 29/10 à 08h23 : rendez-vous maintenu lundi 02/11 à 15h00."
+      },
+      {
+        isoDate: "2026-11-02",
+        dateStr: "02/11/2026",
+        horaire: "18:30",
+        title: "Organisation familiale : Marie en demi-garde jusqu'à 23h00",
+        patient: "Garde Marie Parizot (jusqu'à 23h)",
+        lieu: "Domicile / Garde Émile",
+        medecin: "Dr T. Lefèvre",
+        remarques: "iMessage de Marie Parizot (26/10) : en demi-garde lundi 02/11 jusqu'à 23h."
+      },
+      {
+        isoDate: "2026-11-04",
+        dateStr: "04/11/2026",
+        horaire: "17:00",
+        title: "Réunion d'accueil Internes / Chefs en salle de staff",
+        patient: "Point de rentrée semestre Hiver 2026-2027",
+        lieu: "Hôpital Cochin — Salle de staff Radio B",
+        medecin: "Dr F. Mihoubi Bouvier, Chefs & Internes",
+        remarques: "WhatsApp (Interne/chef CCH Hiver 26-27 — Dr Fadila Mihoubi Bouvier) : RDV mercredi 4 novembre à 17h en salle de staff."
+      },
+      {
+        isoDate: "2026-11-07",
+        dateStr: "07/11/2026",
+        horaire: "09:00",
+        title: "Organisation familiale : Marie de garde aux urgences (09h00 – 21h00)",
+        patient: "Garde Marie Parizot (09h – 21h)",
+        lieu: "Urgences / Domicile",
+        medecin: "Dr T. Lefèvre",
+        remarques: "iMessage de Marie Parizot (26/10) : garde samedi 07/11 de 9h à 21h aux urgences."
       },
       {
         isoDate: "2026-11-12",
@@ -1789,6 +1833,16 @@
         lieu: "Valence",
         medecin: "Dr T. Lefèvre",
         remarques: "Mail Marie Etlinger (Boston Scientific) & Dr Talabard."
+      },
+      {
+        isoDate: "2026-12-14",
+        dateStr: "14/12/2026",
+        horaire: "08:30",
+        title: "Arrivée d'Amal EL MADANI dans le service & Adaptation du planning",
+        patient: "Service de Radiologie B — Cochin",
+        lieu: "Hôpital Cochin — Radiologie B",
+        medecin: "Pr A. Feydy / Équipe Radio B",
+        remarques: "WhatsApp (AF et Assistants RADIO B COCHIN, 22/10) : Amal EL MADANI arrivera dans le service le 14 décembre — planning adapté en préparation."
       },
       {
         isoDate: "2027-05-13",
@@ -2043,6 +2097,72 @@
         "Statut": "Non répondu",
         "Date Réponse / Note": "À confirmer",
         "Email Expéditeur": "Marie.Etlinger@bsci.com"
+      },
+      {
+        _row: 22,
+        "Date": "29/10/2026",
+        "Boîte Mail": "WhatsApp",
+        "Expéditeur": "Dr Marie-Pauline TALABARD (Planning CCH Hiver 26-27)",
+        "Sujet / Objet": "Café de bienvenue & Visite du service — Lundi 02/11 à 08h15 (Albarran)",
+        "Question / Action demandée": "RDV lundi 2 novembre matin à Albarran vers 8h15–8h30 pour un petit café de bienvenue et une visite du service.",
+        "Statut": "Répondu",
+        "Date Réponse / Note": "Ajouté à l'agenda (Lun. 02/11 à 08h15)",
+        "Email Expéditeur": ""
+      },
+      {
+        _row: 23,
+        "Date": "29/10/2026",
+        "Boîte Mail": "WhatsApp",
+        "Expéditeur": "Dr Fadila MIHOUBI BOUVIER (Chefs 26/27 cochin)",
+        "Sujet / Objet": "Cours Hebdo du mardi V3 — Sujets attribués aux chefs",
+        "Question / Action demandée": "Chaque chef prépare 1 cours de 20–30 min sur le semestre (après le cas des internes du mardi). Ton sujet attribué : « Ce que tu regardes quand tu analyses une PTH en radio, scan et éventuellement IRM, avec les mesures à faire ».",
+        "Statut": "Répondu",
+        "Date Réponse / Note": "Répondu « Top merci » le 29/10 à 12h00",
+        "Email Expéditeur": ""
+      },
+      {
+        _row: 24,
+        "Date": "29/10/2026",
+        "Boîte Mail": "WhatsApp",
+        "Expéditeur": "Dr Marie-Pauline TALABARD (Message privé WhatsApp)",
+        "Sujet / Objet": "Base suivi interventionnel : Neurolyses (Macil) & Cimentoplasties (Hippolyte)",
+        "Question / Action demandée": "Souhaite que les neurolyses de Macil et les cimentoplasties d'Hippolyte soient également intégrées dans la base de suivi interventionnel Cochin pour faciliter les futures publications.",
+        "Statut": "Répondu",
+        "Date Réponse / Note": "Validé le 29/10 à 12h26",
+        "Email Expéditeur": ""
+      },
+      {
+        _row: 25,
+        "Date": "26/10/2026",
+        "Boîte Mail": "iMessage",
+        "Expéditeur": "Marie PARIZOT",
+        "Sujet / Objet": "Planning gardes Marie : Lun. 02/11 (demi-garde 23h) & Sam. 07/11 (9h–21h)",
+        "Question / Action demandée": "Marie est de demi-garde jusqu'à 23h le lundi 02/11 et de garde 9h–21h aux urgences le samedi 07/11.",
+        "Statut": "Répondu",
+        "Date Réponse / Note": "Intégré à l'agenda familial",
+        "Email Expéditeur": ""
+      },
+      {
+        _row: 26,
+        "Date": "22/10/2026",
+        "Boîte Mail": "WhatsApp",
+        "Expéditeur": "Service Radio B (AF et Assistants RADIO B COCHIN)",
+        "Sujet / Objet": "Arrivée d'Amal EL MADANI le 14 décembre 2026",
+        "Question / Action demandée": "Bienvenue à Thomas et Yazid. Amal EL MADANI arrivera dans le service le 14 décembre 2026 (planning adapté en préparation).",
+        "Statut": "Répondu",
+        "Date Réponse / Note": "Noté au 14/12/2026 dans l'agenda",
+        "Email Expéditeur": ""
+      },
+      {
+        _row: 27,
+        "Date": "13/10/2026",
+        "Boîte Mail": "WhatsApp",
+        "Expéditeur": "Dr Hippolyte MONNIER (Planning CCH Hiver 26-27)",
+        "Sujet / Objet": "Tableau des Congés (CA / CF) Hiver 2026–2027",
+        "Question / Action demandée": "Renseigner dès que possible vos congés annuels (CA) et congés formation (CF) sur le Google Sheet partagé (règles : max 2 personnes en même temps, éviter les mardis et vendredis) : https://docs.google.com/spreadsheets/d/10sPMOg9GPXqsSItnUfuYn2Ke0im34p5EEyKk5A0hEF8/edit",
+        "Statut": "Non répondu",
+        "Date Réponse / Note": "À compléter sur le Sheet Planning Absence",
+        "Email Expéditeur": ""
       }
     ]/*__END_QUESTIONS_PERSO__*/;
 
@@ -5608,6 +5728,10 @@
       document.getElementById("flt-perso-oui").classList.toggle("active", flt === "Répondu");
       document.getElementById("flt-perso-live").classList.toggle("active", flt === "Live.fr");
       document.getElementById("flt-perso-aphp").classList.toggle("active", flt === "AP-HP");
+      const btnWa = document.getElementById("flt-perso-whatsapp");
+      if (btnWa) btnWa.classList.toggle("active", flt === "WhatsApp");
+      const btnIm = document.getElementById("flt-perso-imessage");
+      if (btnIm) btnIm.classList.toggle("active", flt === "iMessage");
       renderPersoTab();
     }
 
@@ -5616,7 +5740,7 @@
       let list = appData.Questions_perso || [];
       if (persoFilter === "Non répondu" || persoFilter === "Répondu") {
         list = list.filter(q => String(q["Statut"] || "") === persoFilter);
-      } else if (persoFilter === "Live.fr" || persoFilter === "AP-HP") {
+      } else if (["Live.fr", "AP-HP", "WhatsApp", "iMessage"].includes(persoFilter)) {
         list = list.filter(q => String(q["Boîte Mail"] || "") === persoFilter);
       }
       if (list.length === 0) {
@@ -5628,7 +5752,14 @@
         const st = String(q["Statut"] || "Non répondu");
         const isRep = st === "Répondu";
         const box = String(q["Boîte Mail"] || "Live.fr");
-        const boxPill = box === "AP-HP" ? "pill-aphp" : "pill-live";
+        const boxPill =
+          box === "AP-HP" ? "pill-aphp" :
+          box === "WhatsApp" ? "pill-whatsapp" :
+          box === "iMessage" ? "pill-imessage" : "pill-live";
+        const boxLabel =
+          box === "AP-HP" ? "🏥 AP-HP" :
+          box === "WhatsApp" ? "💬 WhatsApp" :
+          box === "iMessage" ? "💬 iMessage" : "📧 Live.fr";
         const nextStatus = isRep ? "Non répondu" : "Répondu";
         const emailAddr = q["Email Expéditeur"] || "";
         const subj = encodeURIComponent("RE: " + (q["Sujet / Objet"] || ""));
@@ -5637,7 +5768,7 @@
             <div class="event-top">
               <div style="display:flex; gap:6px; align-items:center;">
                 <span class="event-time-badge">📅 ${q["Date"] || "-"}</span>
-                <span class="pill ${boxPill}">${box === "AP-HP" ? "🏥 AP-HP" : "📧 Live.fr"}</span>
+                <span class="pill ${boxPill}">${boxLabel}</span>
               </div>
               <span class="pill ${isRep ? "pill-success" : "pill-danger"}">${isRep ? "Répondu" : "À répondre"}</span>
             </div>
