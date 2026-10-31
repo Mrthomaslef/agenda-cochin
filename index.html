@@ -515,6 +515,58 @@
       color: #FEE2E2;
       font-weight: 700;
     }
+    .garde-banner.is-marie {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.34), rgba(244, 63, 94, 0.26));
+      border: 2px solid #EC4899;
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.35);
+      color: #FCE7F3;
+      font-weight: 800;
+    }
+    .garde-strip-lbl-marie {
+      font-size: 10px;
+      font-weight: 800;
+      color: #FBCFE8;
+      white-space: nowrap;
+      padding: 4px 8px;
+      border-radius: 7px;
+      background: rgba(236, 72, 153, 0.25);
+      border: 1.5px solid #EC4899;
+      flex-shrink: 0;
+    }
+    .garde-chip-marie {
+      border: 1.5px solid #EC4899;
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(190, 24, 93, 0.28));
+      color: #FDF2F8;
+      padding: 4px 9px;
+      border-radius: 7px;
+      font-size: 10.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(236, 72, 153, 0.25);
+    }
+    .garde-chip-marie.active {
+      background: #DB2777;
+      color: #fff;
+      border-color: #F9A8D4;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.55);
+    }
+    .post-marie {
+      background: rgba(236, 72, 153, 0.30);
+      color: #FBCFE8;
+      border: 1px solid #EC4899;
+      font-weight: 800;
+    }
+    .ws-day.is-marie-garde {
+      border: 1.5px solid #EC4899 !important;
+      background: rgba(236, 72, 153, 0.18) !important;
+      box-shadow: 0 0 8px rgba(236, 72, 153, 0.25);
+    }
+    .month-cell.is-marie-garde {
+      border: 1.5px solid #EC4899 !important;
+      background: rgba(236, 72, 153, 0.18) !important;
+    }
 
     /* EVENT CARDS — CLEAN & STREAMLINED */
     .section-label {
@@ -544,6 +596,12 @@
     .event-card.type-cs       { border-left-color: var(--cs); background: linear-gradient(90deg, rgba(59,130,246,0.06) 0%, var(--bg-card) 35%); }
     .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(20,184,166,0.06) 0%, var(--bg-card) 35%); }
     .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(245,158,11,0.10) 0%, var(--bg-card) 45%); }
+    .event-card.type-marie-garde {
+      border: 1.5px solid #EC4899;
+      border-left: 5px solid #EC4899;
+      background: linear-gradient(90deg, rgba(236, 72, 153, 0.24) 0%, rgba(190, 24, 93, 0.12) 60%, var(--bg-card) 100%);
+      box-shadow: 0 2px 12px rgba(236, 72, 153, 0.22);
+    }
 
     .event-top {
       display: flex;
@@ -574,6 +632,7 @@
     .pill-cs       { background: rgba(59, 130, 246, 0.22); color: #93C5FD; }
     .pill-img      { background: rgba(20, 184, 166, 0.22); color: #5EEAD4; }
     .pill-mail-rdv { background: rgba(245, 158, 11, 0.25); color: #FDE68A; }
+    .pill-marie    { background: #DB2777; color: #FFF; border: 1px solid #F9A8D4; font-weight: 800; }
     .pill-live     { background: rgba(56, 189, 248, 0.2); color: #7DD3FC; }
     .pill-aphp     { background: rgba(168, 85, 247, 0.22); color: #D8B4FE; }
     .pill-whatsapp { background: rgba(34, 197, 94, 0.22); color: #86EFAC; }
@@ -743,9 +802,10 @@
     }
     .m-dot.acte     { background: var(--acte); }
     .m-dot.biopsie  { background: var(--biopsie); }
-    .m-dot.cs       { background: var(--cs); }
-    .m-dot.img      { background: var(--img); }
-    .m-dot.mail-rdv { background: var(--mail-rdv); }
+    .m-dot.cs          { background: var(--cs); }
+    .m-dot.img         { background: var(--img); }
+    .m-dot.mail-rdv    { background: var(--mail-rdv); }
+    .m-dot.marie-garde { background: #EC4899; box-shadow: 0 0 4px #EC4899; }
 
     @media (min-width: 768px) {
       .month-grid {
@@ -818,11 +878,12 @@
         text-overflow: ellipsis;
         color: #E2E8F0;
       }
-      .month-desk-ev.type-acte     { border-left-color: var(--acte); background: rgba(244, 63, 94, 0.12); }
-      .month-desk-ev.type-biopsie  { border-left-color: var(--biopsie); background: rgba(168, 85, 247, 0.12); }
-      .month-desk-ev.type-cs       { border-left-color: var(--cs); background: rgba(59, 130, 246, 0.12); }
-      .month-desk-ev.type-img      { border-left-color: var(--img); background: rgba(20, 184, 166, 0.12); }
-      .month-desk-ev.type-mail-rdv { border-left-color: var(--mail-rdv); background: rgba(245, 158, 11, 0.14); }
+      .month-desk-ev.type-acte        { border-left-color: var(--acte); background: rgba(244, 63, 94, 0.12); }
+      .month-desk-ev.type-biopsie     { border-left-color: var(--biopsie); background: rgba(168, 85, 247, 0.12); }
+      .month-desk-ev.type-cs          { border-left-color: var(--cs); background: rgba(59, 130, 246, 0.12); }
+      .month-desk-ev.type-img         { border-left-color: var(--img); background: rgba(20, 184, 166, 0.12); }
+      .month-desk-ev.type-mail-rdv    { border-left-color: var(--mail-rdv); background: rgba(245, 158, 11, 0.14); }
+      .month-desk-ev.type-marie-garde { border-left-color: #EC4899; background: rgba(236, 72, 153, 0.28); color: #FCE7F3; font-weight: 700; }
       .month-desk-more {
         font-size: 9px;
         font-weight: 700;
@@ -2357,7 +2418,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v36"; /*__APP_BUILD_ID:v36__*/
+        const CURRENT_BUILD_ID = "v38"; /*__APP_BUILD_ID:v38__*/
         // 1. Récupérer en parallèle les derniers RDV/Mails perso déployés sur GitHub Pages (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3410,9 +3471,10 @@
         });
       }
       for (const rdv of PERSONAL_MAIL_RDVS) {
+        const isMarieGarde = /marie\s*(parizot)?.*garde|garde.*marie\s*(parizot)?/i.test(`${rdv.title || ""} ${rdv.patient || ""} ${rdv.remarques || ""}`);
         events.push({
-          category: "mail-rdv",
-          badgeLabel: "RDV / Libéral",
+          category: isMarieGarde ? "marie-garde" : "mail-rdv",
+          badgeLabel: isMarieGarde ? "🚨 GARDE MARIE" : "RDV / Libéral",
           isoDate: rdv.isoDate,
           dateStr: rdv.dateStr,
           horaire: rdv.horaire,
@@ -4853,6 +4915,20 @@
     }
 
     function renderEventCard(ev, showDate = false, inSuiviTab = false) {
+      if (ev.category === "marie-garde") {
+        return `
+          <div class="event-card type-marie-garde">
+            <div class="event-top">
+              <span class="event-time-badge" style="background:rgba(236,72,153,0.35); color:#FFF;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+              <span class="pill pill-marie">${ev.badgeLabel}</span>
+            </div>
+            <div class="event-patient" style="color:#FCE7F3; font-size:15px;"><span>🚨 ${ev.title}</span></div>
+            <div class="event-title" style="color:#FBCFE8; font-weight:700;">${ev.patient}</div>
+            ${ev.lieu ? `<div class="event-meta" style="color:#F9A8D4;"><span>📍 ${ev.lieu}</span></div>` : ""}
+            ${ev.remarques ? `<div style="font-size:11.5px; color:#FDF2F8; margin-top:5px; font-weight:600;">${ev.remarques}</div>` : ""}
+          </div>
+        `;
+      }
       if (ev.category === "mail-rdv") {
         const shortDocRdv = formatShortDoc(ev.medecin);
         return `
@@ -4960,42 +5036,106 @@
       return dt;
     }
 
+    const MARIE_GARDES_STATIC = {
+      "2026-11-02": {
+        shortChip: "Lun. 02 nov. (23h)",
+        shortHours: "Jusqu'à 23h",
+        shortTag: "Marie 23h",
+        bannerText: "Demi-garde jusqu'à 23h00 (organisation familiale / Émile)"
+      },
+      "2026-11-07": {
+        shortChip: "Sam. 07 nov. (9h–21h)",
+        shortHours: "09h – 21h",
+        shortTag: "Marie 9-21h",
+        bannerText: "Garde aux urgences de 09h00 à 21h00"
+      }
+    };
+
+    function getAllMarieGardesMap() {
+      const map = Object.assign({}, MARIE_GARDES_STATIC);
+      for (const rdv of (PERSONAL_MAIL_RDVS || [])) {
+        if (!rdv || !rdv.isoDate || map[rdv.isoDate]) continue;
+        const txt = `${rdv.title || ""} ${rdv.patient || ""} ${rdv.remarques || ""}`;
+        if (/marie\s*(parizot)?.*garde|garde.*marie\s*(parizot)?/i.test(txt)) {
+          const [y, m, d] = rdv.isoDate.split("-").map(Number);
+          const dt = new Date(y, m - 1, d, 12, 0, 0);
+          const lbl = dt.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+          map[rdv.isoDate] = {
+            shortChip: `${lbl} (${rdv.horaire || "Garde"})`,
+            shortHours: rdv.horaire || "Garde",
+            shortTag: "Garde Marie",
+            bannerText: rdv.title || rdv.patient || "Garde Marie"
+          };
+        }
+      }
+      return map;
+    }
+
+    function getMarieGardeForIso(isoDate) {
+      if (!isoDate) return null;
+      const map = getAllMarieGardesMap();
+      return map[isoDate] || null;
+    }
+
     function renderMyGardesStrip() {
       const stripEl = document.getElementById("my-gardes-strip");
       if (!stripEl) return;
       const gMap = (appData && appData.gardes) ? appData.gardes : DEFAULT_GARDES_HIVER;
       const myDates = Object.keys(gMap).filter(k => gMap[k] && gMap[k].is_tl).sort();
       const selIso = dateToIso(selectedDate);
+
+      const marieMap = getAllMarieGardesMap();
+      const marieDates = Object.keys(marieMap).sort();
+      const marieChips = marieDates.map(iso => {
+        const mg = marieMap[iso];
+        return `<button class="garde-chip-marie ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">🚨 ${mg.shortChip}</button>`;
+      }).join("");
+
       const chips = myDates.map(iso => {
         const [y, m, d] = iso.split("-").map(Number);
         const dt = new Date(y, m - 1, d, 12, 0, 0);
         const lbl = dt.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
         return `<button class="garde-chip ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">${lbl}</button>`;
       }).join("");
-      stripEl.innerHTML = `<a class="garde-strip-lbl" href="https://docs.google.com/spreadsheets/d/1_XCqFLamiYM02RamAfc1khawt-jU3RG0CUU20x_M_Lw/edit" target="_blank" rel="noopener">Gardes ↗</a>${chips}`;
+
+      stripEl.innerHTML = `<span class="garde-strip-lbl-marie">🚨 Gardes Marie</span>${marieChips}<a class="garde-strip-lbl" href="https://docs.google.com/spreadsheets/d/1_XCqFLamiYM02RamAfc1khawt-jU3RG0CUU20x_M_Lw/edit" target="_blank" rel="noopener">Gardes TL ↗</a>${chips}`;
     }
 
     function renderGardeBannerHtml(iso) {
+      let out = "";
+      const mg = getMarieGardeForIso(iso);
+      if (mg) {
+        out += `
+          <div class="garde-banner is-marie">
+            <span>🚨 <strong>GARDE MARIE</strong> — ${mg.bannerText}</span>
+            <span class="pill pill-marie">${mg.shortHours}</span>
+          </div>
+        `;
+      }
       const g = getGardeForIso(iso);
-      if (!g || !g.noms || g.noms.length === 0) return "";
+      if (!g || !g.noms || g.noms.length === 0) return out;
       if (g.is_tl) {
-        return `
+        out += `
           <div class="garde-banner is-me">
             <span><strong>DE GARDE</strong> (${g.nature})</span>
             <span class="pill pill-danger">TL</span>
           </div>
         `;
+        return out;
       }
-      if (agendaScope === "mine") return "";
-      return `
+      if (agendaScope === "mine") return out;
+      out += `
         <div class="garde-banner">
           <span>Garde (${g.nature}) : <strong>Dr ${g.noms.join(" / ")}</strong></span>
           <span class="pill pill-cs">Garde</span>
         </div>
       `;
+      return out;
     }
 
     function getShortVacTagForDay(iso, dt) {
+      const mg = getMarieGardeForIso(iso);
+      if (mg) return { lbl: mg.shortTag, cls: "post-marie" };
       const g = getGardeForIso(iso);
       if (g && g.is_tl) return { lbl: "Garde", cls: "post-liberal" };
       const dow = dt.getDay();
@@ -5048,6 +5188,7 @@
           let nbGestes = 0;
           let nbCs = 0;
           let hasGarde = false;
+          let nbMarieGardes = 0;
           let hasLiberal = false;
           let hasMaster = false;
 
@@ -5056,6 +5197,7 @@
             const iso = dateToIso(cur);
             const g = getGardeForIso(iso);
             if (g && g.is_tl) hasGarde = true;
+            if (getMarieGardeForIso(iso)) nbMarieGardes++;
             const myV = getMyVacationForIso(iso);
             const vTxt = [...myV.am, ...myV.pm].join(" ").toLowerCase();
             if (vTxt.includes("libéral") || vTxt.includes("jdp") || vTxt.includes("geoffroy")) hasLiberal = true;
@@ -5070,9 +5212,10 @@
 
           const totalRdv = nbGestes + nbCs;
           let badges = "";
+          if (nbMarieGardes > 0) badges += `<span class="wsc-tag pill-marie">🚨 ${nbMarieGardes} Garde${nbMarieGardes > 1 ? "s" : ""} Marie</span>`;
           if (nbGestes > 0) badges += `<span class="wsc-tag pill-acte">${nbGestes} Geste${nbGestes > 1 ? "s" : ""}</span>`;
           if (nbCs > 0) badges += `<span class="wsc-tag pill-cs">${nbCs} CS/Exam</span>`;
-          if (hasGarde) badges += `<span class="wsc-tag pill-danger">Garde</span>`;
+          if (hasGarde) badges += `<span class="wsc-tag pill-danger">Garde TL</span>`;
           if (hasLiberal) badges += `<span class="wsc-tag post-liberal">JDP/GSH</span>`;
           if (hasMaster) badges += `<span class="wsc-tag post-staff">Master.</span>`;
           if (!badges) badges = `<span class="wsc-tag post-libre">Planning std</span>`;
@@ -5118,6 +5261,7 @@
       while (cur <= maxDate) {
         const iso = dateToIso(cur);
         const g = getGardeForIso(iso);
+        const mg = getMarieGardeForIso(iso);
         const evCnt = allEvents.filter(e => e.isoDate === iso).length;
         const tag = getShortVacTagForDay(iso, cur);
         const dowNum = cur.getDay();
@@ -5128,11 +5272,11 @@
         const monthFull = cur.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
         cellsHtml += `
-          <div class="ws-day ${isWe ? "is-weekend" : ""} ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
+          <div class="ws-day ${isWe ? "is-weekend" : ""} ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""} ${mg ? "is-marie-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
             <span class="ws-dow">${dowLbl}</span>
             <span class="ws-num">${dayNum}<span class="ws-mon">${monthShort}</span></span>
             <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
-            <span class="ws-cnt">${evCnt > 0 ? (isWe ? evCnt : evCnt + " RDV") : "·"}</span>
+            <span class="ws-cnt">${mg ? "🚨 Marie" : (evCnt > 0 ? (isWe ? evCnt : evCnt + " RDV") : "·")}</span>
           </div>
         `;
         cur.setDate(cur.getDate() + 1);
@@ -5262,23 +5406,35 @@
           const myVac = getMyVacationForIso(iso);
           const genVac = getGeneralPlanningForIso(iso);
           const g = getGardeForIso(iso);
+          const mg = getMarieGardeForIso(iso);
           const dayEvs = allEvents.filter(e => e.isoDate === iso);
           const dayName = cur.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" });
           const isWeekend = (cur.getDay() === 0 || cur.getDay() === 6);
 
-          if (isWeekend && !isGeneral && !(g && g.is_tl) && dayEvs.length === 0) {
+          if (isWeekend && !isGeneral && !(g && g.is_tl) && !mg && dayEvs.length === 0) {
             continue;
           }
 
-          const gardeBadge = g && g.is_tl
-            ? `<span class="pill pill-danger">DE GARDE</span>`
-            : (isGeneral && g && g.noms && g.noms.length ? `<span class="pill pill-cs">Garde : ${g.noms.join("/")}</span>` : `<span class="pill pill-cs">${dayEvs.length} RDV</span>`);
+          let gardeBadge = `<span class="pill pill-cs">${dayEvs.length} RDV</span>`;
+          if (mg && g && g.is_tl) {
+            gardeBadge = `<span class="pill pill-marie">🚨 MARIE (${mg.shortHours})</span> <span class="pill pill-danger">DE GARDE TL</span>`;
+          } else if (mg) {
+            gardeBadge = `<span class="pill pill-marie">🚨 GARDE MARIE (${mg.shortHours})</span>`;
+          } else if (g && g.is_tl) {
+            gardeBadge = `<span class="pill pill-danger">DE GARDE</span>`;
+          } else if (isGeneral && g && g.noms && g.noms.length) {
+            gardeBadge = `<span class="pill pill-cs">Garde : ${g.noms.join("/")}</span>`;
+          }
+
+          const cardStyle = (g && g.is_tl)
+            ? "border-color:#EF4444;background:rgba(239,68,68,0.08);"
+            : (mg ? "border:1.5px solid #EC4899;background:rgba(236,72,153,0.10);box-shadow:0 0 12px rgba(236,72,153,0.18);" : "");
 
           html += `
-            <div class="week-day-card" style="${g && g.is_tl ? "border-color:#EF4444;background:rgba(239,68,68,0.08);" : ""}">
+            <div class="week-day-card" style="${cardStyle}">
               <div class="week-day-header" onclick="selectDayFromCalendar('${iso}')">
                 <span class="week-day-name">${dayName}</span>
-                ${gardeBadge}
+                <div style="display:flex;gap:4px;align-items:center;">${gardeBadge}</div>
               </div>
               ${!isWeekend ? `
                 <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:${dayEvs.length ? "8px" : "0"};">
@@ -5318,12 +5474,15 @@
           const isOtherMonth = cellDate.getMonth() !== month;
           const evs = allEvents.filter(e => e.isoDate === iso);
           const g = getGardeForIso(iso);
+          const mg = getMarieGardeForIso(iso);
           const dow = cellDate.getDay();
 
           let tagHtml = "";
           let deskVacsHtml = "";
           if (g && g.is_tl) {
             tagHtml = `<div class="month-vac-tag" style="background:rgba(220,38,38,0.35);color:#FCA5A5;">GARDE</div>`;
+          } else if (mg) {
+            tagHtml = `<div class="month-vac-tag post-marie">🚨 ${mg.shortTag}</div>`;
           } else if (isGeneral && g && g.noms && g.noms.length && (dow === 0 || dow === 6)) {
             tagHtml = `<div class="month-vac-tag" style="background:rgba(59,130,246,0.2);color:#93C5FD;">${g.noms[0].slice(0, 6)}</div>`;
           } else if (dow >= 1 && dow <= 5 && cellDate >= new Date(2026, 10, 2)) {
@@ -5363,12 +5522,14 @@
 
           const deskCntHtml = (g && g.is_tl)
             ? `<span class="month-desk-cnt" style="background:rgba(239,68,68,0.28);color:#FCA5A5;">GARDE</span>`
-            : (evs.length > 0 ? `<span class="month-desk-cnt">${evs.length} RDV</span>` : "");
+            : (mg
+                ? `<span class="month-desk-cnt" style="background:#DB2777;color:#FFF;">🚨 MARIE</span>`
+                : (evs.length > 0 ? `<span class="month-desk-cnt">${evs.length} RDV</span>` : ""));
 
           const deskEvsHtml = evs.length > 0
             ? `<div class="month-desk-evs">
                 ${evs.slice(0, 3).map(e => {
-                  const pLabel = e.category === "mail-rdv" ? e.title : String(e.patient || "").replace(/^(Mme|M\.|Mr|Mlle)\s+/i, "");
+                  const pLabel = (e.category === "mail-rdv" || e.category === "marie-garde") ? e.title : String(e.patient || "").replace(/^(Mme|M\.|Mr|Mlle)\s+/i, "");
                   const hShort = String(e.horaire || "").replace(":00", "h").replace("h00", "h");
                   return `<div class="month-desk-ev type-${e.category}"><strong>${hShort}</strong> ${pLabel}</div>`;
                 }).join("")}
@@ -5379,7 +5540,7 @@
           const dotsHtml = evs.slice(0, 6).map(e => `<span class="m-dot ${e.category}"></span>`).join("");
 
           html += `
-            <div class="month-cell ${isOtherMonth ? "other-month" : ""} ${iso === selectedIso ? "selected" : ""} ${g && g.is_tl ? "is-tl-garde" : ""}" onclick="selectDayFromMonth('${iso}')">
+            <div class="month-cell ${isOtherMonth ? "other-month" : ""} ${iso === selectedIso ? "selected" : ""} ${g && g.is_tl ? "is-tl-garde" : ""} ${mg ? "is-marie-garde" : ""}" onclick="selectDayFromMonth('${iso}')">
               <div class="month-cell-top">
                 <div class="month-day-num">${cellDate.getDate()}</div>
                 ${deskCntHtml}
