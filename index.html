@@ -1700,7 +1700,7 @@
     // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
       "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • 08h15 Café Albarran • Soir : Marie en demi-garde (23h)", offCochin: false },
-      "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
+      "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "4 gestes prévus • Chondroblastome (CANTIN B.) en fin de planning", offCochin: false },
       "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "17h00 : Réunion Internes & Chefs en salle de staff", offCochin: false },
       "2026-11-05": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre (hors Cochin)", offCochin: true },
       "2026-11-06": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
@@ -2116,7 +2116,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v39"; /*__APP_BUILD_ID:v39__*/
+        const CURRENT_BUILD_ID = "v40"; /*__APP_BUILD_ID:v40__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
