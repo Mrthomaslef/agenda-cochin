@@ -2116,7 +2116,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v40"; /*__APP_BUILD_ID:v40__*/
+        const CURRENT_BUILD_ID = "v43"; /*__APP_BUILD_ID:v43__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
