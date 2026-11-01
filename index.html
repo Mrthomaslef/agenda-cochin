@@ -1715,7 +1715,7 @@
       },
       "2026-11-13": { am: ["Écho (9h-12h / Yang)"], pm: ["Sans IRM (S2)"], note: "", offCochin: false },
       "2026-11-16": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], note: "", offCochin: false },
-      "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h", offCochin: false },
+      "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h • 🚨 Marie en garde complète", offCochin: false },
       "2026-11-18": { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)", "UCSA"], note: "", offCochin: false },
       "2026-11-19": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre en journée • Garde de nuit Cochin", offCochin: true },
       "2026-11-20": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
@@ -2116,7 +2116,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v43"; /*__APP_BUILD_ID:v43__*/
+        const CURRENT_BUILD_ID = "v44"; /*__APP_BUILD_ID:v44__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -4668,6 +4668,30 @@
         shortHours: "09h – 21h",
         shortTag: "Marie 9-21h",
         bannerText: "Garde aux urgences de 09h00 à 21h00"
+      },
+      "2026-11-17": {
+        shortChip: "Mar. 17 nov. (Garde)",
+        shortHours: "Garde complète",
+        shortTag: "Marie Garde",
+        bannerText: "Garde complète (organisation familiale / Émile)"
+      },
+      "2026-11-21": {
+        shortChip: "Sam. 21 nov. (7h30)",
+        shortHours: "Dès 07h30",
+        shortTag: "Marie 7h30",
+        bannerText: "Formation étudiants à partir de 07h30 (organisation familiale / Émile)"
+      },
+      "2026-12-17": {
+        shortChip: "Jeu. 17 déc. (Garde)",
+        shortHours: "Garde complète",
+        shortTag: "Marie Garde",
+        bannerText: "Garde complète (organisation familiale / Émile)"
+      },
+      "2026-12-23": {
+        shortChip: "Mer. 23 déc. (Demi)",
+        shortHours: "Demi-garde",
+        shortTag: "Marie Demi",
+        bannerText: "Demi-garde (organisation familiale / Émile)"
       }
     };
 
