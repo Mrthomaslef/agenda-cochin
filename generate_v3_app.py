@@ -59,10 +59,10 @@ html_template = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Cochin RI" />
   <meta name="application-name" content="Cochin RI" />
-  <meta name="theme-color" content="#0B1120" />
+  <meta name="theme-color" content="#F8FAFC" />
   <link rel="manifest" href="manifest.json?v=2" />
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2" />
@@ -71,24 +71,24 @@ html_template = """<!DOCTYPE html>
   <title>Cochin RI — Dr T. Lefèvre</title>
   <style>
     :root {
-      --bg: #0B1120;
-      --bg-card: #131C31;
-      --bg-elevated: #1E293B;
-      --border: rgba(148, 163, 184, 0.16);
-      --text: #F8FAFC;
-      --text-muted: #94A3B8;
-      --primary: #38BDF8;
-      --primary-dark: #0284C7;
-      --acte: #F43F5E;       /* Corail vif */
-      --biopsie: #A855F7;    /* Violet Améthyste */
-      --cs: #3B82F6;         /* Bleu Azur */
-      --img: #14B8A6;        /* Turquoise */
-      --mail-rdv: #F59E0B;   /* Ambre Doré */
-      --perso-msg: #EC4899;  /* Rose Magenta */
-      --garde: #EF4444;      /* Rouge Garde */
-      --success: #22C55E;
-      --warning: #F59E0B;
-      --danger: #EF4444;
+      --bg: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-elevated: #F1F5F9;
+      --border: #E2E8F0;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --primary: #0284C7;
+      --primary-dark: #0369A1;
+      --acte: #E11D48;       /* Corail vif */
+      --biopsie: #7C3AED;    /* Violet Améthyste */
+      --cs: #2563EB;         /* Bleu Azur */
+      --img: #0D9488;        /* Turquoise */
+      --mail-rdv: #D97706;   /* Ambre Doré */
+      --perso-msg: #DB2777;  /* Rose Magenta */
+      --garde: #DC2626;      /* Rouge Garde */
+      --success: #16A34A;
+      --warning: #D97706;
+      --danger: #DC2626;
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
@@ -123,7 +123,7 @@ html_template = """<!DOCTYPE html>
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: radial-gradient(circle at 50% 20%, #1E293B 0%, #0B1120 70%);
+      background: radial-gradient(circle at 50% 20%, #E0F2FE 0%, #F8FAFC 70%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -135,6 +135,11 @@ html_template = """<!DOCTYPE html>
       width: 100%;
       max-width: 340px;
       text-align: center;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 22px;
+      padding: 28px 22px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
     }
     .lock-logo {
       width: 68px;
@@ -142,9 +147,9 @@ html_template = """<!DOCTYPE html>
       border-radius: 18px;
       overflow: hidden;
       margin: 0 auto 14px;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      box-shadow: 0 12px 30px rgba(2, 132, 199, 0.4);
-      background: #0B1120;
+      border: 1px solid rgba(2, 132, 199, 0.35);
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2);
+      background: #FFFFFF;
     }
     .lock-logo img {
       width: 100%;
@@ -154,7 +159,8 @@ html_template = """<!DOCTYPE html>
     }
     .lock-title {
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0F172A;
       margin: 0 0 4px;
     }
     .lock-sub {
@@ -174,15 +180,15 @@ html_template = """<!DOCTYPE html>
       height: 52px;
       border-radius: 14px;
       border: 1.5px solid var(--primary);
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--text);
+      background: #F8FAFC;
+      color: #0F172A;
       font-size: 24px;
       font-weight: 700;
       letter-spacing: 8px;
       text-align: center;
       outline: none;
       padding: 0 12px;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
     }
     .pin-kbd-input::placeholder {
       font-size: 14px;
@@ -191,13 +197,13 @@ html_template = """<!DOCTYPE html>
       color: var(--text-muted);
     }
     .pin-kbd-input:focus {
-      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.25);
     }
     .pin-submit-btn {
       height: 46px;
       border-radius: 12px;
-      border: 1px solid var(--primary);
-      background: var(--primary-dark);
+      border: 1px solid var(--primary-dark);
+      background: var(--primary);
       color: #fff;
       font-size: 15px;
       font-weight: 700;
@@ -213,15 +219,16 @@ html_template = """<!DOCTYPE html>
       min-height: 20px;
     }
 
-    /* COMPACT HEADER (OPTIMISÉ DYNAMIC ISLAND / MODE APP STANDALONE) */
+    /* COMPACT HEADER (OPTIMISÉ DYNAMIC ISLAND / MODE APP STANDALONE - THÈME CLAIR) */
     .app-header {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(11, 17, 32, 0.90);
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
       padding: max(10px, calc(var(--safe-top) + 6px)) 14px 8px;
       display: flex;
       align-items: center;
@@ -240,10 +247,10 @@ html_template = """<!DOCTYPE html>
       height: 32px;
       border-radius: 9px;
       overflow: hidden;
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.25);
+      border: 1px solid rgba(2, 132, 199, 0.35);
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.15);
       flex-shrink: 0;
-      background: #0B1120;
+      background: #FFFFFF;
     }
     .brand-badge img {
       width: 100%;
@@ -253,7 +260,8 @@ html_template = """<!DOCTYPE html>
     }
     .brand-text h1 {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0F172A;
       margin: 0;
       letter-spacing: -0.2px;
     }
@@ -270,12 +278,12 @@ html_template = """<!DOCTYPE html>
     }
     .btn-icon {
       border: 1px solid var(--border);
-      background: rgba(30, 41, 59, 0.7);
-      color: var(--text);
+      background: #F8FAFC;
+      color: #0F172A;
       border-radius: 8px;
       padding: 5px 9px;
       font-size: 11.5px;
-      font-weight: 600;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -296,7 +304,7 @@ html_template = """<!DOCTYPE html>
       50% { opacity: 0.3; }
     }
 
-    /* KPI BAR (DOCKED AT BOTTOM ABOVE MAIN NAV) */
+    /* KPI BAR (DOCKED AT BOTTOM ABOVE MAIN NAV - THÈME CLAIR) */
     .kpi-strip {
       pointer-events: auto;
       display: grid;
@@ -304,17 +312,17 @@ html_template = """<!DOCTYPE html>
       gap: 5px;
       width: 100%;
       max-width: 500px;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(148, 163, 184, 0.22);
+      border: 1px solid #CBD5E1;
       border-radius: 14px;
       padding: 4px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.10);
     }
     .kpi-box {
-      background: rgba(30, 41, 59, 0.55);
-      border: 1px solid rgba(148, 163, 184, 0.14);
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
       border-radius: 10px;
       padding: 4px 2px;
       text-align: center;
@@ -323,13 +331,14 @@ html_template = """<!DOCTYPE html>
       transition: all 0.15s ease;
     }
     .kpi-box.active {
-      background: rgba(56, 189, 248, 0.20);
+      background: #E0F2FE;
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+      box-shadow: 0 0 0 1px rgba(2, 132, 199, 0.30);
     }
     .kpi-val {
       font-size: 13px;
       font-weight: 800;
+      color: #0F172A;
       line-height: 1.1;
       white-space: nowrap;
       overflow: hidden;
@@ -339,13 +348,13 @@ html_template = """<!DOCTYPE html>
       font-size: 9px;
       color: var(--text-muted);
       margin-top: 1px;
-      font-weight: 600;
+      font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .kpi-box.active .kpi-lbl {
-      color: #fff;
+      color: #0369A1;
     }
 
     .main-content {
@@ -380,7 +389,7 @@ html_template = """<!DOCTYPE html>
     .segmented {
       display: flex;
       width: 100%;
-      background: var(--bg-card);
+      background: #F1F5F9;
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 2px;
@@ -393,7 +402,7 @@ html_template = """<!DOCTYPE html>
       background: transparent;
       color: var(--text-muted);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 6px 4px;
       border-radius: 8px;
       cursor: pointer;
@@ -403,9 +412,9 @@ html_template = """<!DOCTYPE html>
       transition: all 0.15s ease;
     }
     .seg-btn.active {
-      background: var(--bg-elevated);
-      color: var(--text);
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      background: #FFFFFF;
+      color: #0F172A;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
     }
     .seg-btn.scope-active {
       background: linear-gradient(135deg, #0284C7, #4F46E5);
@@ -423,6 +432,7 @@ html_template = """<!DOCTYPE html>
       padding: 6px 8px;
       margin-bottom: 8px;
       gap: 8px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
     .date-nav-center {
       text-align: center;
@@ -432,7 +442,8 @@ html_template = """<!DOCTYPE html>
     }
     .date-nav-title {
       font-size: 13.5px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0F172A;
       text-transform: capitalize;
       white-space: nowrap;
       overflow: hidden;
@@ -440,7 +451,8 @@ html_template = """<!DOCTYPE html>
     }
     .date-nav-sub {
       font-size: 10.5px;
-      color: #FDE68A;
+      color: #B45309;
+      font-weight: 600;
       margin-top: 1px;
       display: none;
     }
@@ -473,24 +485,24 @@ html_template = """<!DOCTYPE html>
     .garde-strip::-webkit-scrollbar { display: none; }
     .garde-strip-lbl {
       font-size: 10px;
-      font-weight: 700;
-      color: #FCA5A5;
+      font-weight: 800;
+      color: #B91C1C;
       white-space: nowrap;
       padding: 4px 8px;
       border-radius: 7px;
-      background: rgba(239, 68, 68, 0.14);
-      border: 1px solid rgba(239, 68, 68, 0.32);
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
       text-decoration: none;
       flex-shrink: 0;
     }
     .garde-chip {
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      background: rgba(19, 28, 49, 0.85);
-      color: #FECACA;
+      border: 1px solid #FECACA;
+      background: #FFFFFF;
+      color: #B91C1C;
       padding: 4px 8px;
       border-radius: 7px;
       font-size: 10.5px;
-      font-weight: 600;
+      font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
@@ -498,10 +510,10 @@ html_template = """<!DOCTYPE html>
     .garde-chip.active {
       background: #DC2626;
       color: #fff;
-      border-color: #F87171;
+      border-color: #B91C1C;
     }
 
-    /* VACATION CARDS & COLORED POST PILLS */
+    /* VACATION CARDS & COLORED POST PILLS (LIGHT THEME) */
     .vac-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -514,10 +526,11 @@ html_template = """<!DOCTYPE html>
       border-radius: 11px;
       padding: 8px 10px;
       min-width: 0;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
     .vac-period {
       font-size: 9.5px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-muted);
@@ -540,16 +553,17 @@ html_template = """<!DOCTYPE html>
       max-width: 100%;
       overflow-wrap: break-word;
     }
-    /* Varied color palette for hospital & private posts */
-    .post-tdm-achard { background: rgba(6, 182, 212, 0.18); color: #67E8F9; border: 1px solid rgba(6, 182, 212, 0.40); }
-    .post-gestes     { background: rgba(249, 115, 22, 0.20); color: #FDBA74; border: 1px solid rgba(249, 115, 22, 0.40); }
-    .post-cs         { background: rgba(99, 102, 241, 0.20); color: #C7D2FE; border: 1px solid rgba(99, 102, 241, 0.40); }
-    .post-echo       { background: rgba(16, 185, 129, 0.18); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.40); }
-    .post-irm        { background: rgba(168, 85, 247, 0.20); color: #E9D5FF; border: 1px solid rgba(168, 85, 247, 0.40); }
-    .post-sau        { background: rgba(56, 189, 248, 0.16); color: #BAE6FD; border: 1px solid rgba(56, 189, 248, 0.35); }
-    .post-staff      { background: rgba(234, 179, 8, 0.18);  color: #FEF08A; border: 1px solid rgba(234, 179, 8, 0.40); }
-    .post-liberal    { background: rgba(245, 158, 11, 0.24); color: #FDE68A; border: 1px solid rgba(245, 158, 11, 0.50); }
-    .post-libre      { background: rgba(100, 116, 139, 0.14); color: #94A3B8; border: 1px dashed rgba(148, 163, 184, 0.28); }
+    /* High-contrast light palette for hospital & private posts */
+    .post-tdm-achard { background: #ECFEFF; color: #0E7490; border: 1px solid #A5F3FC; }
+    .post-gestes     { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+    .post-cs         { background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; }
+    .post-echo       { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+    .post-irm        { background: #FAF5FF; color: #6D28D9; border: 1px solid #E9D5FF; }
+    .post-sau        { background: #F0F9FF; color: #0369A1; border: 1px solid #BAE6FD; }
+    .post-staff      { background: #FEFCE8; color: #A16207; border: 1px solid #FEF08A; }
+    .post-liberal    { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+    .post-libre      { background: #F1F5F9; color: #475569; border: 1px dashed #CBD5E1; }
+    .post-closed     { background: #FEF2F2; color: #B91C1C; border: 1px dashed #FCA5A5; }
 
     /* GARDE BANNER */
     .garde-banner {
@@ -560,37 +574,38 @@ html_template = """<!DOCTYPE html>
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
-      background: rgba(30, 41, 59, 0.7);
+      background: #F8FAFC;
       border: 1px solid var(--border);
+      color: #0F172A;
     }
     .garde-banner.is-me {
-      background: linear-gradient(135deg, rgba(220, 38, 38, 0.26), rgba(234, 88, 12, 0.20));
+      background: linear-gradient(135deg, #FEF2F2, #FFF7ED);
       border: 1.5px solid #EF4444;
-      color: #FEE2E2;
-      font-weight: 700;
+      color: #991B1B;
+      font-weight: 800;
     }
     .garde-banner.is-marie {
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.34), rgba(244, 63, 94, 0.26));
-      border: 2px solid #EC4899;
-      box-shadow: 0 0 14px rgba(236, 72, 153, 0.35);
-      color: #FCE7F3;
+      background: linear-gradient(135deg, #FDF2F8, #FFF1F2);
+      border: 2px solid #DB2777;
+      box-shadow: 0 2px 10px rgba(219, 39, 119, 0.14);
+      color: #9D174D;
       font-weight: 800;
     }
     .garde-strip-lbl-marie {
       font-size: 10px;
       font-weight: 800;
-      color: #FBCFE8;
+      color: #9D174D;
       white-space: nowrap;
       padding: 4px 8px;
       border-radius: 7px;
-      background: rgba(236, 72, 153, 0.25);
-      border: 1.5px solid #EC4899;
+      background: #FDF2F8;
+      border: 1.5px solid #F472B6;
       flex-shrink: 0;
     }
     .garde-chip-marie {
-      border: 1.5px solid #EC4899;
-      background: linear-gradient(135deg, rgba(236, 72, 153, 0.22), rgba(190, 24, 93, 0.28));
-      color: #FDF2F8;
+      border: 1.5px solid #F472B6;
+      background: #FFFFFF;
+      color: #9D174D;
       padding: 4px 9px;
       border-radius: 7px;
       font-size: 10.5px;
@@ -598,34 +613,31 @@ html_template = """<!DOCTYPE html>
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
-      box-shadow: 0 0 8px rgba(236, 72, 153, 0.25);
     }
     .garde-chip-marie.active {
       background: #DB2777;
       color: #fff;
-      border-color: #F9A8D4;
-      box-shadow: 0 0 12px rgba(236, 72, 153, 0.55);
+      border-color: #BE185D;
     }
     .post-marie {
-      background: rgba(236, 72, 153, 0.30);
-      color: #FBCFE8;
-      border: 1px solid #EC4899;
+      background: #FDF2F8;
+      color: #9D174D;
+      border: 1px solid #F472B6;
       font-weight: 800;
     }
     .ws-day.is-marie-garde {
-      border: 1.5px solid #EC4899 !important;
-      background: rgba(236, 72, 153, 0.18) !important;
-      box-shadow: 0 0 8px rgba(236, 72, 153, 0.25);
+      border: 1.5px solid #DB2777 !important;
+      background: #FDF2F8 !important;
     }
     .month-cell.is-marie-garde {
-      border: 1.5px solid #EC4899 !important;
-      background: rgba(236, 72, 153, 0.18) !important;
+      border: 1.5px solid #DB2777 !important;
+      background: #FDF2F8 !important;
     }
 
-    /* EVENT CARDS — CLEAN & STREAMLINED */
+    /* EVENT CARDS — CLEAN & STREAMLINED (LIGHT THEME) */
     .section-label {
       font-size: 10.5px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-muted);
@@ -644,17 +656,17 @@ html_template = """<!DOCTYPE html>
       cursor: pointer;
       width: 100%;
       overflow-wrap: break-word;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     }
-    .event-card.type-acte     { border-left-color: var(--acte); background: linear-gradient(90deg, rgba(244,63,94,0.06) 0%, var(--bg-card) 35%); }
-    .event-card.type-biopsie  { border-left-color: var(--biopsie); background: linear-gradient(90deg, rgba(168,85,247,0.06) 0%, var(--bg-card) 35%); }
-    .event-card.type-cs       { border-left-color: var(--cs); background: linear-gradient(90deg, rgba(59,130,246,0.06) 0%, var(--bg-card) 35%); }
-    .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(20,184,166,0.06) 0%, var(--bg-card) 35%); }
-    .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(245,158,11,0.10) 0%, var(--bg-card) 45%); }
+    .event-card.type-acte     { border-left-color: var(--acte); background: linear-gradient(90deg, rgba(225,29,72,0.04) 0%, #FFFFFF 35%); }
+    .event-card.type-biopsie  { border-left-color: var(--biopsie); background: linear-gradient(90deg, rgba(124,58,237,0.04) 0%, #FFFFFF 35%); }
+    .event-card.type-cs       { border-left-color: var(--cs); background: linear-gradient(90deg, rgba(37,99,235,0.04) 0%, #FFFFFF 35%); }
+    .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(13,148,136,0.04) 0%, #FFFFFF 35%); }
+    .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(217,119,6,0.06) 0%, #FFFFFF 45%); }
     .event-card.type-marie-garde {
-      border: 1.5px solid #EC4899;
-      border-left: 5px solid #EC4899;
-      background: linear-gradient(90deg, rgba(236, 72, 153, 0.24) 0%, rgba(190, 24, 93, 0.12) 60%, var(--bg-card) 100%);
-      box-shadow: 0 2px 12px rgba(236, 72, 153, 0.22);
+      border: 1.5px solid #F472B6;
+      border-left: 5px solid #DB2777;
+      background: linear-gradient(90deg, #FDF2F8 0%, #FFFFFF 100%);
     }
 
     .event-top {
@@ -666,38 +678,40 @@ html_template = """<!DOCTYPE html>
     }
     .event-time-badge {
       font-size: 11px;
-      font-weight: 700;
-      color: #E2E8F0;
-      background: rgba(255, 255, 255, 0.06);
+      font-weight: 800;
+      color: #0F172A;
+      background: #F1F5F9;
+      border: 1px solid #E2E8F0;
       padding: 2px 7px;
       border-radius: 5px;
     }
     .pill {
       font-size: 9.5px;
-      font-weight: 700;
+      font-weight: 800;
       padding: 2px 7px;
       border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.3px;
       white-space: nowrap;
     }
-    .pill-acte     { background: rgba(244, 63, 94, 0.2); color: #FDA4AF; }
-    .pill-biopsie  { background: rgba(168, 85, 247, 0.22); color: #D8B4FE; }
-    .pill-cs       { background: rgba(59, 130, 246, 0.22); color: #93C5FD; }
-    .pill-img      { background: rgba(20, 184, 166, 0.22); color: #5EEAD4; }
-    .pill-mail-rdv { background: rgba(245, 158, 11, 0.25); color: #FDE68A; }
-    .pill-marie    { background: #DB2777; color: #FFF; border: 1px solid #F9A8D4; font-weight: 800; }
-    .pill-live     { background: rgba(56, 189, 248, 0.2); color: #7DD3FC; }
-    .pill-aphp     { background: rgba(168, 85, 247, 0.22); color: #D8B4FE; }
-    .pill-whatsapp { background: rgba(34, 197, 94, 0.22); color: #86EFAC; }
-    .pill-imessage { background: rgba(59, 130, 246, 0.24); color: #93C5FD; }
-    .pill-success  { background: rgba(34, 197, 94, 0.2); color: #86EFAC; }
-    .pill-danger   { background: rgba(239, 68, 68, 0.22); color: #FCA5A5; }
-    .pill-warn     { background: rgba(245, 158, 11, 0.22); color: #FDE68A; }
+    .pill-acte     { background: #FFE4E6; color: #BE123C; border: 1px solid #FECDD3; }
+    .pill-biopsie  { background: #F3E8FF; color: #6D28D9; border: 1px solid #E9D5FF; }
+    .pill-cs       { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .pill-img      { background: #CCFBF1; color: #0F766E; border: 1px solid #99F6E4; }
+    .pill-mail-rdv { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
+    .pill-marie    { background: #DB2777; color: #FFF; border: 1px solid #BE185D; font-weight: 800; }
+    .pill-live     { background: #E0F2FE; color: #0369A1; border: 1px solid #BAE6FD; }
+    .pill-aphp     { background: #F3E8FF; color: #6D28D9; border: 1px solid #E9D5FF; }
+    .pill-whatsapp { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .pill-imessage { background: #DBEAFE; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .pill-success  { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .pill-danger   { background: #FEE2E2; color: #B91C1C; border: 1px solid #FECACA; }
+    .pill-warn     { background: #FEF3C7; color: #B45309; border: 1px solid #FDE68A; }
 
     .event-patient {
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0F172A;
       margin: 2px 0;
       display: flex;
       align-items: center;
@@ -707,16 +721,17 @@ html_template = """<!DOCTYPE html>
     .event-ipp {
       font-size: 10.5px;
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      color: var(--primary);
-      background: rgba(56, 189, 248, 0.1);
+      color: #0369A1;
+      background: #E0F2FE;
+      border: 1px solid #BAE6FD;
       padding: 1px 6px;
       border-radius: 5px;
       flex-shrink: 0;
     }
     .event-title {
       font-size: 12px;
-      color: #CBD5E1;
-      font-weight: 500;
+      color: #334155;
+      font-weight: 600;
     }
     .event-meta {
       display: flex;
@@ -732,25 +747,26 @@ html_template = """<!DOCTYPE html>
       align-items: center;
       padding: 1px 6px;
       border-radius: 5px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 10.5px;
-      background: rgba(148, 163, 184, 0.12);
-      color: #E2E8F0;
+      background: #F1F5F9;
+      color: #334155;
+      border: 1px solid #E2E8F0;
     }
     .doc-tag.is-tl {
-      background: rgba(56, 189, 248, 0.16);
-      color: #7DD3FC;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: #E0F2FE;
+      color: #0369A1;
+      border: 1px solid #7DD3FC;
     }
     .alert-anticoag {
       margin-top: 6px;
       padding: 4px 8px;
       border-radius: 6px;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      color: #FCA5A5;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #B91C1C;
       font-size: 10.5px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     /* WEEK VIEW */
@@ -760,6 +776,7 @@ html_template = """<!DOCTYPE html>
       border-radius: 11px;
       padding: 9px 10px;
       margin-bottom: 8px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
     .week-day-header {
       display: flex;
@@ -770,7 +787,8 @@ html_template = """<!DOCTYPE html>
     }
     .week-day-name {
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0F172A;
       text-transform: capitalize;
     }
 
@@ -780,7 +798,7 @@ html_template = """<!DOCTYPE html>
       grid-template-columns: repeat(7, minmax(0, 1fr));
       text-align: center;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text-muted);
       margin-bottom: 4px;
     }
@@ -801,14 +819,15 @@ html_template = """<!DOCTYPE html>
       cursor: pointer;
       min-width: 0;
     }
-    .month-cell.other-month { opacity: 0.32; }
+    .month-cell.other-month { opacity: 0.42; background: #F8FAFC; }
     .month-cell.selected {
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary);
+      box-shadow: 0 0 0 1.5px var(--primary);
+      background: #F0F9FF;
     }
     .month-cell.is-tl-garde {
       border-color: #EF4444 !important;
-      background: rgba(239, 68, 68, 0.16) !important;
+      background: #FEF2F2 !important;
     }
     .month-cell-top {
       width: 100%;
@@ -818,7 +837,8 @@ html_template = """<!DOCTYPE html>
     }
     .month-day-num {
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
+      color: #0F172A;
     }
     .month-desk-cnt {
       display: none;
@@ -859,7 +879,7 @@ html_template = """<!DOCTYPE html>
     .m-dot.cs          { background: var(--cs); }
     .m-dot.img         { background: var(--img); }
     .m-dot.mail-rdv    { background: var(--mail-rdv); }
-    .m-dot.marie-garde { background: #EC4899; box-shadow: 0 0 4px #EC4899; }
+    .m-dot.marie-garde { background: #DB2777; }
 
     @media (min-width: 768px) {
       .month-grid {
@@ -874,8 +894,8 @@ html_template = """<!DOCTYPE html>
         gap: 4px;
       }
       .month-cell:hover {
-        border-color: rgba(56, 189, 248, 0.5);
-        background: rgba(30, 41, 59, 0.85);
+        border-color: #7DD3FC;
+        background: #F8FAFC;
       }
       .month-cell-top {
         justify-content: space-between;
@@ -894,15 +914,15 @@ html_template = """<!DOCTYPE html>
         font-weight: 700;
         padding: 1px 5px;
         border-radius: 999px;
-        background: rgba(56, 189, 248, 0.16);
-        color: #7DD3FC;
+        background: #E0F2FE;
+        color: #0369A1;
       }
       .month-desk-vacs {
         display: flex;
         flex-direction: column;
         gap: 2px;
         padding-bottom: 3px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        border-bottom: 1px solid #E2E8F0;
       }
       .month-desk-vac-line {
         font-size: 9.5px;
@@ -925,19 +945,19 @@ html_template = """<!DOCTYPE html>
         line-height: 1.2;
         padding: 2px 5px;
         border-radius: 4px;
-        background: rgba(15, 23, 42, 0.72);
+        background: #F8FAFC;
         border-left: 2.5px solid var(--primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        color: #E2E8F0;
+        color: #0F172A;
       }
-      .month-desk-ev.type-acte        { border-left-color: var(--acte); background: rgba(244, 63, 94, 0.12); }
-      .month-desk-ev.type-biopsie     { border-left-color: var(--biopsie); background: rgba(168, 85, 247, 0.12); }
-      .month-desk-ev.type-cs          { border-left-color: var(--cs); background: rgba(59, 130, 246, 0.12); }
-      .month-desk-ev.type-img         { border-left-color: var(--img); background: rgba(20, 184, 166, 0.12); }
-      .month-desk-ev.type-mail-rdv    { border-left-color: var(--mail-rdv); background: rgba(245, 158, 11, 0.14); }
-      .month-desk-ev.type-marie-garde { border-left-color: #EC4899; background: rgba(236, 72, 153, 0.28); color: #FCE7F3; font-weight: 700; }
+      .month-desk-ev.type-acte        { border-left-color: var(--acte); background: #FFF1F2; }
+      .month-desk-ev.type-biopsie     { border-left-color: var(--biopsie); background: #FAF5FF; }
+      .month-desk-ev.type-cs          { border-left-color: var(--cs); background: #EFF6FF; }
+      .month-desk-ev.type-img         { border-left-color: var(--img); background: #F0FDFA; }
+      .month-desk-ev.type-mail-rdv    { border-left-color: var(--mail-rdv); background: #FFFBEB; }
+      .month-desk-ev.type-marie-garde { border-left-color: #DB2777; background: #FDF2F8; color: #9D174D; font-weight: 700; }
       .month-desk-more {
         font-size: 9px;
         font-weight: 700;
@@ -985,19 +1005,19 @@ html_template = """<!DOCTYPE html>
     .chip {
       border: 1px solid var(--border);
       background: var(--bg-card);
-      color: var(--text-muted);
+      color: #475569;
       padding: 5px 10px;
       border-radius: 999px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
     }
     .chip.active {
-      background: var(--primary-dark);
+      background: var(--primary);
       color: #fff;
-      border-color: var(--primary);
+      border-color: var(--primary-dark);
     }
 
     /* SCROLLABLE DAYS BAR (BARRE DES JOURS DÉFILABLE) */
@@ -1028,15 +1048,20 @@ html_template = """<!DOCTYPE html>
     }
     .ws-day.is-weekend {
       flex: 0 0 calc((100% - 24px) * 0.11);
-      min-width: 34px;
-      padding: 6px 1px;
-      opacity: 0.88;
+      min-width: 36px;
+      padding: 4px 2px;
+      opacity: 0.94;
+      background: #FFF1F2;
+      border: 1px dashed #FECDD3;
+      justify-content: center;
     }
     .ws-day.is-weekend .ws-dow {
-      font-size: 8px;
+      font-size: 7.5px;
+      color: #BE123C;
     }
     .ws-day.is-weekend .ws-num {
-      font-size: 11.5px;
+      font-size: 10.5px;
+      color: #881337;
     }
     .ws-day.is-weekend .ws-mon {
       display: none;
@@ -1044,16 +1069,72 @@ html_template = """<!DOCTYPE html>
     .ws-day.is-weekend .ws-vac {
       font-size: 7px;
       padding: 1px 2px;
-      max-width: 32px;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: #FFE4E6;
+      color: #BE123C;
+      border-color: #FDA4AF;
+    }
+    .ws-day.is-weekend .ws-cnt {
+      font-size: 6.5px;
+      color: #9F1239;
+      font-weight: 700;
+      line-height: 1;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .v3-week-5col-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .v3-week-5col-cell {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 5px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+      cursor: pointer;
+    }
+    .v3-week-5col-cell.is-garde {
+      border-color: #EF4444;
+      background: #FEF2F2;
+    }
+    .v3-weekend-gardes-bar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .v3-weekend-garde-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: #FFF1F2;
+      border: 1px dashed #FECDD3;
+      cursor: pointer;
+      font-size: 10px;
+      min-width: 0;
     }
     .ws-day.active {
       border-color: var(--primary);
-      background: rgba(56, 189, 248, 0.16);
+      background: #E0F2FE;
       box-shadow: 0 0 0 1px var(--primary);
     }
     .ws-day.is-garde {
       border-color: #EF4444;
-      background: rgba(239, 68, 68, 0.14);
+      background: #FEF2F2;
     }
     .ws-dow {
       font-size: 9px;
@@ -1075,7 +1156,7 @@ html_template = """<!DOCTYPE html>
       margin-left: 1px;
     }
     .ws-day.active .ws-mon {
-      color: var(--primary);
+      color: var(--primary-dark);
     }
     .ws-month-sep {
       display: flex;
@@ -1087,9 +1168,9 @@ html_template = """<!DOCTYPE html>
       font-weight: 800;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--primary);
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--primary-dark);
+      background: #E0F2FE;
+      border: 1px solid #BAE6FD;
       border-radius: 7px;
       padding: 4px 3px;
       flex-shrink: 0;
@@ -1100,8 +1181,8 @@ html_template = """<!DOCTYPE html>
       align-items: center;
       justify-content: space-between;
       font-size: 10.5px;
-      font-weight: 700;
-      color: var(--primary);
+      font-weight: 800;
+      color: var(--primary-dark);
       text-transform: capitalize;
       padding: 0 4px 3px;
       letter-spacing: 0.02em;
@@ -1119,7 +1200,7 @@ html_template = """<!DOCTYPE html>
     .ws-cnt {
       font-size: 8px;
       font-weight: 700;
-      color: var(--primary);
+      color: var(--primary-dark);
     }
 
     /* SELECTEUR DE SEMAINES (CARTES RÉSUMÉES EN MODE SEMAINE) */
@@ -1149,11 +1230,11 @@ html_template = """<!DOCTYPE html>
     }
     .week-sel-card.active {
       border-color: var(--primary);
-      background: rgba(56, 189, 248, 0.14);
+      background: #E0F2FE;
       box-shadow: 0 0 0 1px var(--primary);
     }
     .week-sel-card.has-garde {
-      border-color: rgba(239, 68, 68, 0.65);
+      border-color: #FCA5A5;
     }
     .wsc-title {
       font-size: 11px;
@@ -1176,21 +1257,21 @@ html_template = """<!DOCTYPE html>
       white-space: nowrap;
     }
     .week-group-header {
-      background: rgba(30, 41, 59, 0.85);
+      background: #F1F5F9;
       border: 1px solid var(--border);
       border-left: 3px solid var(--primary);
       border-radius: 9px;
       padding: 6px 11px;
       margin: 12px 0 7px;
       font-size: 11px;
-      font-weight: 700;
-      color: #E2E8F0;
+      font-weight: 800;
+      color: #0F172A;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    /* MODERN FLOATING BOTTOM DOCK (KPI STRIP + 3 MAIN PAGES) */
+    /* MODERN FLOATING BOTTOM DOCK (KPI STRIP + MAIN PAGES - LIGHT THEME) */
     .bottom-nav-wrap {
       position: fixed;
       bottom: 0;
@@ -1208,12 +1289,12 @@ html_template = """<!DOCTYPE html>
       pointer-events: auto;
       width: 100%;
       max-width: 500px;
-      background: rgba(15, 23, 42, 0.94);
+      background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(148, 163, 184, 0.22);
+      border: 1px solid #CBD5E1;
       border-radius: 18px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       padding: 4px;
@@ -1231,7 +1312,7 @@ html_template = """<!DOCTYPE html>
       padding: 6px 4px;
       border-radius: 13px;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       position: relative;
       transition: all 0.15s ease;
@@ -1246,8 +1327,8 @@ html_template = """<!DOCTYPE html>
       stroke-linejoin: round;
     }
     .nav-item.active {
-      color: #fff;
-      background: rgba(56, 189, 248, 0.18);
+      color: #0369A1;
+      background: #E0F2FE;
     }
     .nav-item.active svg {
       stroke: var(--primary);
@@ -1256,7 +1337,7 @@ html_template = """<!DOCTYPE html>
       position: absolute;
       top: 2px;
       right: 22%;
-      background: var(--primary-dark);
+      background: var(--primary);
       color: #fff;
       font-size: 8.5px;
       font-weight: 800;
@@ -1265,7 +1346,7 @@ html_template = """<!DOCTYPE html>
       line-height: 1.1;
     }
 
-    /* BLOC / SUIVI OPÉRATOIRE (MATÉRIEL UTILISÉ & REMARQUES) */
+    /* BLOC / SUIVI OPÉRATOIRE (MATÉRIEL UTILISÉ & REMARQUES - LIGHT THEME) */
     .bloc-toggle-row {
       margin-top: 7px;
       display: flex;
@@ -1275,9 +1356,9 @@ html_template = """<!DOCTYPE html>
       gap: 6px;
     }
     .bloc-toggle-btn {
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      background: rgba(15, 23, 42, 0.8);
-      color: #BAE6FD;
+      border: 1px solid #BAE6FD;
+      background: #F0F9FF;
+      color: #0369A1;
       border-radius: 8px;
       padding: 4px 9px;
       font-size: 10.5px;
@@ -1289,24 +1370,24 @@ html_template = """<!DOCTYPE html>
       transition: all 0.15s ease;
     }
     .bloc-toggle-btn.cr-btn {
-      border-color: rgba(148, 163, 184, 0.3);
-      background: rgba(30, 41, 59, 0.75);
-      color: #CBD5E1;
+      border-color: #CBD5E1;
+      background: #F8FAFC;
+      color: #334155;
     }
     .bloc-toggle-btn.cr-primary {
-      border-color: rgba(99, 102, 241, 0.55);
-      background: rgba(99, 102, 241, 0.18);
-      color: #C7D2FE;
+      border-color: #A5B4FC;
+      background: #EEF2FF;
+      color: #4338CA;
     }
     .bloc-toggle-btn.copied {
-      border-color: rgba(34, 197, 94, 0.65) !important;
-      background: rgba(20, 83, 45, 0.45) !important;
-      color: #86EFAC !important;
+      border-color: #86EFAC !important;
+      background: #DCFCE7 !important;
+      color: #15803D !important;
     }
     .bloc-toggle-btn.has-saved {
-      border-color: rgba(34, 197, 94, 0.45);
-      background: rgba(20, 83, 45, 0.25);
-      color: #86EFAC;
+      border-color: #86EFAC;
+      background: #F0FDF4;
+      color: #15803D;
     }
     .bloc-toggle-btn:active {
       transform: scale(0.97);
@@ -1314,8 +1395,8 @@ html_template = """<!DOCTYPE html>
     .bloc-notes-box {
       margin-top: 6px;
       padding: 8px 10px;
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(56, 189, 248, 0.32);
+      background: #F8FAFC;
+      border: 1px solid #BAE6FD;
       border-radius: 9px;
       display: none;
       flex-direction: column;
@@ -1329,24 +1410,24 @@ html_template = """<!DOCTYPE html>
       align-items: center;
       justify-content: space-between;
       font-size: 10.5px;
-      font-weight: 700;
-      color: var(--primary);
+      font-weight: 800;
+      color: var(--primary-dark);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     .bloc-field-lbl {
       font-size: 10px;
       font-weight: 700;
-      color: #94A3B8;
+      color: #64748B;
       margin-bottom: 2px;
       display: block;
     }
     .bloc-input {
       width: 100%;
-      background: rgba(19, 28, 49, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
       border-radius: 7px;
-      color: var(--text);
+      color: #0F172A;
       font-size: 12px;
       font-family: inherit;
       padding: 6px 8px;
@@ -1355,7 +1436,7 @@ html_template = """<!DOCTYPE html>
     }
     .bloc-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
     }
     .mat-chips-row {
       display: flex;
@@ -1364,20 +1445,20 @@ html_template = """<!DOCTYPE html>
       margin-bottom: 2px;
     }
     .mat-chip {
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      background: rgba(30, 41, 59, 0.85);
-      color: #BAE6FD;
+      border: 1px solid #BAE6FD;
+      background: #FFFFFF;
+      color: #0369A1;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       padding: 2px 7px;
       border-radius: 999px;
       cursor: pointer;
       transition: all 0.12s ease;
     }
     .mat-chip:hover, .mat-chip:active {
-      background: rgba(56, 189, 248, 0.22);
+      background: #E0F2FE;
       border-color: var(--primary);
-      color: #fff;
+      color: #0F172A;
     }
     .bloc-save-row {
       display: flex;
@@ -1387,13 +1468,13 @@ html_template = """<!DOCTYPE html>
     }
     .bloc-save-status {
       font-size: 10.5px;
-      color: #86EFAC;
-      font-weight: 600;
+      color: #15803D;
+      font-weight: 700;
     }
     .bloc-save-btn {
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      background: rgba(2, 132, 199, 0.28);
-      color: #E0F2FE;
+      border: 1px solid var(--primary);
+      background: var(--primary);
+      color: #FFFFFF;
       border-radius: 7px;
       padding: 4px 10px;
       font-size: 11px;
@@ -1404,11 +1485,11 @@ html_template = """<!DOCTYPE html>
       transform: scale(0.96);
     }
 
-    /* MODAL */
+    /* MODAL (LIGHT THEME) */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(4px);
       z-index: 1000;
       display: none;
@@ -1420,21 +1501,22 @@ html_template = """<!DOCTYPE html>
       width: 100%;
       max-width: 640px;
       max-height: 88vh;
-      background: #111827;
+      background: #FFFFFF;
       border-top: 1px solid var(--border);
       border-radius: 22px 22px 0 0;
       padding: 14px 16px calc(22px + var(--safe-bottom));
       overflow-y: auto;
+      box-shadow: 0 -10px 30px rgba(15, 23, 42, 0.15);
     }
     .sheet-handle {
       width: 40px;
       height: 4px;
       border-radius: 999px;
-      background: rgba(148, 163, 184, 0.35);
+      background: #CBD5E1;
       margin: 0 auto 12px;
     }
     .detail-block {
-      background: var(--bg-card);
+      background: #F8FAFC;
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 10px 12px;
@@ -1442,7 +1524,7 @@ html_template = """<!DOCTYPE html>
     }
     .detail-label {
       font-size: 9.5px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       color: var(--text-muted);
       margin-bottom: 3px;
@@ -1450,6 +1532,7 @@ html_template = """<!DOCTYPE html>
     .detail-value {
       font-size: 13px;
       line-height: 1.4;
+      color: #0F172A;
     }
     .quick-actions {
       display: flex;
@@ -1466,7 +1549,7 @@ html_template = """<!DOCTYPE html>
       background: var(--bg-elevated);
       color: var(--text);
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1475,8 +1558,8 @@ html_template = """<!DOCTYPE html>
       cursor: pointer;
     }
     .action-btn.primary {
-      background: var(--primary-dark);
-      border-color: var(--primary);
+      background: var(--primary);
+      border-color: var(--primary-dark);
       color: #fff;
     }
     .empty-state {
@@ -1507,9 +1590,9 @@ html_template = """<!DOCTYPE html>
       width: 38px;
       height: 38px;
       border-radius: 50%;
-      background: rgba(15, 23, 42, 0.94);
-      border: 1px solid rgba(56, 189, 248, 0.45);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+      background: #FFFFFF;
+      border: 1px solid #BAE6FD;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1572,7 +1655,7 @@ html_template = """<!DOCTYPE html>
       </div>
     </div>
     <div class="header-actions">
-      <a class="btn-icon" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener" style="text-decoration:none; border-color:rgba(56,189,248,0.45); color:#7DD3FC;" title="Ouvrir l'Espace Internes & Chefs">🎓/🩺 Espace</a>
+      <a class="btn-icon" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener" style="text-decoration:none; border-color:#7DD3FC; background:#F0F9FF; color:#0369A1;" title="Ouvrir l'Espace Internes & Chefs">🎓/🩺 Espace</a>
       <button class="btn-icon" onclick="goToday()">Auj.</button>
       <button class="btn-icon btn-sync-arrow" id="btn-sync-arrow" onclick="syncFromCloud(true)" aria-label="Actualiser">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -1779,8 +1862,8 @@ html_template = """<!DOCTYPE html>
 
     // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
-      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • 08h15 Café Albarran • Soir : Marie en demi-garde (23h)", offCochin: false },
-      "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "4 gestes prévus • Chondroblastome (CANTIN B.) en fin de planning", offCochin: false },
+      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • RCP Méta-Os (DUBOIS O. & QUENTIN V.) • 15h IGEA • Soir : Marie en demi-garde (23h)", offCochin: false },
+      "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "4 gestes prévus (MARANDET 08h, DENIS 10h30, 3e à conf., CANTIN en fin de planning)", offCochin: false },
       "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "17h00 : Réunion Internes & Chefs en salle de staff", offCochin: false },
       "2026-11-05": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre (hors Cochin)", offCochin: true },
       "2026-11-06": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
@@ -1801,7 +1884,7 @@ html_template = """<!DOCTYPE html>
       "2026-11-20": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
       "2026-11-23": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "TDM Ollier 3"], note: "", offCochin: false },
       "2026-11-24": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
-      "2026-11-25": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["Consultation", "TDM Ollier 4 (SAU)"], note: "", offCochin: false },
+      "2026-11-25": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["Consultation", "TDM Ollier 4 (SAU)"], note: "18h00 HEGP : Réunion PEC Méta Os (Point RI 20 min) + Dîner Coco Brasserie", offCochin: false },
       "2026-11-26": {
         am: ["Formation : Masterclass OsteoCool (Paris)"],
         pm: ["Formation : Masterclass OsteoCool (Paris)"],
@@ -2201,7 +2284,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v48"; /*__APP_BUILD_ID:v48__*/
+        const CURRENT_BUILD_ID = "v51"; /*__APP_BUILD_ID:v51__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -2749,6 +2832,8 @@ html_template = """<!DOCTYPE html>
 
     function postColorClass(label) {
       const l = String(label || "").toLowerCase();
+      if (l.includes("ferme") || l.includes("fermé") || l.includes("maintenance")) return "post-closed";
+      if (l.includes("1/2 journée libre") || l.includes("demi") || l.includes("repos") || l.includes("cong")) return "post-libre";
       if (l.includes("jardin des plantes") || l.includes("jdp") || l.includes("geoffroy") || l.includes("gsh") || l.includes("libéral") || l.includes("clinique du sport")) return "post-liberal";
       if (l.includes("masterclass") || l.includes("formation") || l.includes("staff") || l.includes("anapath") || l.includes("séminaire")) return "post-staff";
       if (l.includes("achard")) return "post-tdm-achard";
@@ -2780,24 +2865,33 @@ html_template = """<!DOCTYPE html>
       return { am: def.am, pm: def.pm, note: "", offCochin: def.offCochin };
     }
 
-    // Maquette hebdomadaire complète du service (Modèle Nov 2026) pour les dates au-delà du tableau hebdomadaire
+    // Maquette hebdomadaire complète du service (Modèle Nov 2026 avec postes fermés et 1/2 journées libres)
     const GENERAL_MAQUETTE_DOW = {
       1: {
         am: [
           { poste: "ECHO", doc: "HAMMOUD" },
           { poste: "GESTES (C)", doc: "HM" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "YA" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
+          { poste: "IRM 3T", doc: "FERMÉ", closed: true },
+          { poste: "IRM 1,5T", doc: "FERMÉ", closed: true },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "TL" },
           { poste: "UCSA", doc: "TL" },
-          { poste: "STAFF", doc: "TL (méta OS)" }
+          { poste: "STAFF", doc: "TL (méta OS)" },
+          { poste: "1/2 journée libre", doc: "SL/MH" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "TL" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "TL" },
           { poste: "TDM OLLIER 3", doc: "YA" },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
           { poste: "IRM", doc: "FEYDY" },
           { poste: "ECHO", doc: "HM" },
-          { poste: "STAFF", doc: "HM (Cirtal/Ewing)" }
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
+          { poste: "STAFF", doc: "HM (Cirtal/Ewing)" },
+          { poste: "1/2 journée libre", doc: "SL/MH" }
         ]
       },
       2: {
@@ -2805,17 +2899,22 @@ html_template = """<!DOCTYPE html>
           { poste: "ECHO", doc: "YA" },
           { poste: "GESTES (C)", doc: "MIHOUBI" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "MH" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "TL" },
           { poste: "IRM 3T", doc: "DRAPE/YANG" },
           { poste: "IRM 1,5T", doc: "AL" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "HM" },
           { poste: "UCSA", doc: "SL" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "HM" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "SL" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "TL" },
+          { poste: "IRM", doc: "FERMÉ", closed: true },
           { poste: "ECHO", doc: "MH" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "INTERNES" },
           { poste: "UCSA", doc: "YA" }
         ]
@@ -2826,17 +2925,23 @@ html_template = """<!DOCTYPE html>
           { poste: "GESTES (C)", doc: "TL" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "YA" },
           { poste: "TDM OLLIER 3", doc: "MH" },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
           { poste: "IRM 3T", doc: "DRAPE/YANG" },
-          { poste: "IRM 1,5T", doc: "MOUTOUNET" }
+          { poste: "IRM 1,5T", doc: "MOUTOUNET" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
+          { poste: "1/2 journée libre", doc: "HM" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "DRAPE" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "TL" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "SEROR/YA" },
           { poste: "IRM", doc: "SL" },
           { poste: "ECHO", doc: "MIHOUBI" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "TL" },
-          { poste: "UCSA", doc: "MH" }
+          { poste: "UCSA", doc: "MH" },
+          { poste: "1/2 journée libre", doc: "HM" }
         ]
       },
       4: {
@@ -2844,17 +2949,24 @@ html_template = """<!DOCTYPE html>
           { poste: "ECHO", doc: "AL/AC" },
           { poste: "GESTES (C)", doc: "RUBINI" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "MH" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "HM" },
-          { poste: "CONSULTATION", doc: "SL" }
+          { poste: "IRM 3T", doc: "FERMÉ", closed: true },
+          { poste: "IRM 1,5T", doc: "FERMÉ", closed: true },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
+          { poste: "CONSULTATION", doc: "SL" },
+          { poste: "1/2 journée libre", doc: "TL/YA" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "SL" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "SL" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "AL/MH" },
           { poste: "IRM", doc: "AC" },
           { poste: "ECHO", doc: "MD" },
           { poste: "ALLURA", doc: "HM" },
-          { poste: "CONSULTATION", doc: "FEYDY" }
+          { poste: "CONSULTATION", doc: "FEYDY" },
+          { poste: "1/2 journée libre", doc: "TL/YA" }
         ]
       },
       5: {
@@ -2862,14 +2974,20 @@ html_template = """<!DOCTYPE html>
           { poste: "ECHO", doc: "TL/YANG" },
           { poste: "GESTES (C)", doc: "MH" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "AC" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
           { poste: "IRM 3T", doc: "HM" },
-          { poste: "IRM 1,5T", doc: "YA" }
+          { poste: "IRM 1,5T", doc: "YA" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "YA" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "HM" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "AC/SL" },
           { poste: "IRM", doc: "TL" },
+          { poste: "ECHO", doc: "FERMÉ", closed: true },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "MH/INTERNES" }
         ]
       }
@@ -2916,15 +3034,28 @@ html_template = """<!DOCTYPE html>
       return { am: [], pm: [] };
     }
 
+    function formatVacationPosteLabel(posteStr) {
+      const s = String(posteStr || "");
+      const up = s.toUpperCase();
+      if (/\\([0-9]/.test(s)) return s;
+      if (up.includes("IRM") && !up.includes("SANS IRM") && !up.includes("JDP")) return `${s} (7h45)`;
+      if (up.includes("ECHO") || up.includes("ÉCHO")) return `${s} (9h)`;
+      if (up.includes("GESTES")) return `${s} (9h)`;
+      if (up.includes("SAU") || up.includes("OLLIER 4")) return `${s} (8h–18h30)`;
+      return s;
+    }
+
     function renderPostPills(items, isGeneral) {
       if (!items || items.length === 0) return `<span class="post-pill post-libre">-</span>`;
       if (!isGeneral) {
-        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${txt}</span>`).join("");
+        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${formatVacationPosteLabel(txt)}</span>`).join("");
       }
       return items.map(it => {
+        const isClosed = Boolean(it.closed || /ferm[eé]|maintenance/i.test(String(it.doc || "")));
         const isMe = /\\bTL\\b|lefevre/i.test(it.doc);
-        const cls = postColorClass(it.poste);
-        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #fff;" : ""}">${it.poste} : <strong>${it.doc}</strong></span>`;
+        const cls = isClosed ? "post-closed" : postColorClass(it.poste);
+        const docIcon = isClosed ? (/maintenance/i.test(it.doc) ? "🔧 " : "🔒 ") : "";
+        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${formatVacationPosteLabel(it.poste)} : <strong>${docIcon}${it.doc}</strong></span>`;
       }).join("");
     }
 
@@ -5376,13 +5507,13 @@ html_template = """<!DOCTYPE html>
         return `
           <div class="event-card type-marie-garde">
             <div class="event-top">
-              <span class="event-time-badge" style="background:rgba(236,72,153,0.35); color:#FFF;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+              <span class="event-time-badge" style="background:#DB2777; color:#FFF; border-color:#BE185D;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
               <span class="pill pill-marie">${ev.badgeLabel}</span>
             </div>
-            <div class="event-patient" style="color:#FCE7F3; font-size:15px;"><span>🚨 ${ev.title}</span></div>
-            <div class="event-title" style="color:#FBCFE8; font-weight:700;">${ev.patient}</div>
-            ${ev.lieu ? `<div class="event-meta" style="color:#F9A8D4;"><span>📍 ${ev.lieu}</span></div>` : ""}
-            ${ev.remarques ? `<div style="font-size:11.5px; color:#FDF2F8; margin-top:5px; font-weight:600;">${ev.remarques}</div>` : ""}
+            <div class="event-patient" style="color:#9D174D; font-size:15px;"><span>🚨 ${ev.title}</span></div>
+            <div class="event-title" style="color:#BE185D; font-weight:700;">${ev.patient}</div>
+            ${ev.lieu ? `<div class="event-meta" style="color:#9D174D;"><span>📍 ${ev.lieu}</span></div>` : ""}
+            ${ev.remarques ? `<div style="font-size:11.5px; color:#831843; margin-top:5px; font-weight:600;">${ev.remarques}</div>` : ""}
           </div>
         `;
       }
@@ -5397,7 +5528,7 @@ html_template = """<!DOCTYPE html>
             <div class="event-patient"><span>${ev.title}</span></div>
             <div class="event-title">${ev.patient}</div>
             ${ev.lieu ? `<div class="event-meta"><span>${ev.lieu}</span>${shortDocRdv ? `<span class="doc-tag">${shortDocRdv}</span>` : ""}</div>` : ""}
-            ${ev.remarques ? `<div style="font-size:11px; color:#FDE68A; margin-top:4px;">${ev.remarques}</div>` : ""}
+            ${ev.remarques ? `<div style="font-size:11px; color:#B45309; margin-top:4px; font-weight:600;">${ev.remarques}</div>` : ""}
           </div>
         `;
       }
@@ -5437,7 +5568,7 @@ html_template = """<!DOCTYPE html>
             ${ev.ipp && ev.ipp !== "Non spécifié" ? `<span class="event-ipp">${ev.ipp}</span>` : ""}
           </div>
           ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
-          ${subLine ? `<div style="font-size:11px; color:#94A3B8; margin-top:3px;">${subLine}</div>` : ""}
+          ${subLine ? `<div style="font-size:11px; color:#64748B; margin-top:3px;">${subLine}</div>` : ""}
           ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
           ${renderBlocNotesHtml(ev, cardPrefix)}
         </div>
@@ -5460,7 +5591,7 @@ html_template = """<!DOCTYPE html>
     function matchInternePostWithChefPost(internePost, chefPost) {
       const ip = String(internePost || "").toUpperCase();
       const cp = String(chefPost || "").toUpperCase();
-      if (!ip || !cp || ip === "REPOS" || ip === "CONGES" || ip === "FERIE" || ip === "COURS") return false;
+      if (!ip || !cp || ip === "REPOS" || ip.includes("LIBRE") || ip === "CONGES" || ip === "FERIE" || ip === "COURS") return false;
       if (ip.includes("ACHARD") && cp.includes("ACHARD")) return true;
       if (ip.includes("GESTES") && cp.includes("GESTES")) return true;
       if (ip.includes("ECHO") && (cp.includes("ECHO") || cp.includes("ÉCHO"))) return true;
@@ -5473,7 +5604,7 @@ html_template = """<!DOCTYPE html>
     function findChefsForInternePost(iso, period, internePost) {
       const gen = getGeneralPlanningForIso(iso);
       const slots = period === "pm" ? (gen.pm || []) : (gen.am || []);
-      const matched = slots.filter(s => matchInternePostWithChefPost(internePost, s.poste)).map(s => s.doc);
+      const matched = slots.filter(s => !s.closed && !/ferm[eé]|maintenance/i.test(String(s.doc || "")) && matchInternePostWithChefPost(internePost, s.poste)).map(s => s.doc);
       return matched.join(" / ");
     }
 
@@ -5485,14 +5616,30 @@ html_template = """<!DOCTYPE html>
       const myVac = getMyVacationForIso(iso);
       const myAm = myVac.am || [];
       const myPm = myVac.pm || [];
+      const closedAm = daySched.closedAm || [];
+      const closedPm = daySched.closedPm || [];
       const rows = (INTERNES_LIST || []).map(intObj => {
         const s = daySched.slots[intObj.id] || { am: "-", pm: "-" };
         const amPairedTL = !myVac.offCochin && myAm.some(p => matchInternePostWithChefPost(s.am, p));
         const pmPairedTL = !myVac.offCochin && myPm.some(p => matchInternePostWithChefPost(s.pm, p));
         const chefAm = findChefsForInternePost(iso, "am", s.am);
         const chefPm = findChefsForInternePost(iso, "pm", s.pm);
-        return { intObj, am: s.am || "-", pm: s.pm || "-", amPairedTL, pmPairedTL, chefAm, chefPm };
+        return {
+          intObj,
+          am: s.am || "-",
+          pm: s.pm || "-",
+          noteAm: s.noteAm || "",
+          notePm: s.notePm || "",
+          isSocle: Boolean(intObj.isSocle || s.isSocle),
+          amPairedTL,
+          pmPairedTL,
+          chefAm,
+          chefPm
+        };
       });
+
+      const closedAmPills = closedAm.map(c => `<span class="post-pill post-closed">🔒 ${c.poste} : ${c.status}</span>`).join("");
+      const closedPmPills = closedPm.map(c => `<span class="post-pill post-closed">🔒 ${c.poste} : ${c.status}</span>`).join("");
 
       if (compactMode) {
         const pairedWithMe = [];
@@ -5500,17 +5647,17 @@ html_template = """<!DOCTYPE html>
           if (r.amPairedTL) pairedWithMe.push(`<strong>${r.intObj.short}</strong> (Matin : ${r.am})`);
           if (r.pmPairedTL) pairedWithMe.push(`<strong>${r.intObj.short}</strong> (AM : ${r.pm})`);
         });
-        const pillsAm = rows.filter(r => r.am && r.am !== "-" && r.am !== "REPOS").map(r =>
-          `<span class="post-pill ${postColorClass(r.am)}" style="${r.amPairedTL ? "box-shadow:0 0 0 1.5px #38BDF8;" : ""}">${r.intObj.short} : ${r.am}${r.chefAm ? ` <span style="opacity:0.75;font-weight:500;">(${r.chefAm})</span>` : ""}</span>`
+        const pillsAm = rows.map(r =>
+          `<span class="post-pill ${postColorClass(r.am)}" style="${r.amPairedTL ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${r.intObj.short}${r.isSocle ? " (Socle)" : ""} : ${formatVacationPosteLabel(r.am)}${r.chefAm ? ` <span style="opacity:0.8;font-weight:600;">(${r.chefAm})</span>` : ""}${r.noteAm && r.noteAm.includes("Macil") ? ` <strong style="color:#0369A1;">[+Macil MH]</strong>` : ""}</span>`
         ).join("");
-        const pillsPm = rows.filter(r => r.pm && r.pm !== "-" && r.pm !== "REPOS").map(r =>
-          `<span class="post-pill ${postColorClass(r.pm)}" style="${r.pmPairedTL ? "box-shadow:0 0 0 1.5px #38BDF8;" : ""}">${r.intObj.short} : ${r.pm}${r.chefPm ? ` <span style="opacity:0.75;font-weight:500;">(${r.chefPm})</span>` : ""}</span>`
+        const pillsPm = rows.map(r =>
+          `<span class="post-pill ${postColorClass(r.pm)}" style="${r.pmPairedTL ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${r.intObj.short}${r.isSocle ? " (Socle)" : ""} : ${formatVacationPosteLabel(r.pm)}${r.chefPm ? ` <span style="opacity:0.8;font-weight:600;">(${r.chefPm})</span>` : ""}</span>`
         ).join("");
 
         return `
-          <div class="vac-card" style="margin-bottom:10px; border-color:rgba(56,189,248,0.28); background:rgba(15,23,42,0.75);">
+          <div class="vac-card" style="margin-bottom:10px; border-color:#BAE6FD; background:#F8FAFC;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
-              <div class="vac-period" style="margin:0; color:#7DD3FC;">🎓 Planning des 6 Internes DES ${pairedWithMe.length ? `• Binôme TL : ${pairedWithMe.join(", ")}` : ""}</div>
+              <div class="vac-period" style="margin:0; color:#0369A1;">🎓 Planning des 6 Internes DES (dont Noé Phase Socle) ${pairedWithMe.length ? `• Binôme TL : ${pairedWithMe.join(", ")}` : ""}</div>
               <div style="display:flex; gap:6px; align-items:center;">
                 <button class="bloc-toggle-btn" style="padding:2px 7px; font-size:10px;" onclick="setAgendaScope('internes')">Vue détaillée</button>
                 <a class="bloc-toggle-btn" style="padding:2px 7px; font-size:10px; text-decoration:none;" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener">Espace Internes & Chefs ↗</a>
@@ -5518,12 +5665,12 @@ html_template = """<!DOCTYPE html>
             </div>
             <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:7px;">
               <div>
-                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Matin (Internes)</div>
-                <div class="post-pills">${pillsAm || `<span class="post-pill post-libre">-</span>`}</div>
+                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Matin (IRM 7h45 • TDM SAU 8h • Écho/Poste C 9h)</div>
+                <div class="post-pills">${pillsAm}${closedAmPills}</div>
               </div>
               <div>
-                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Après-midi (Internes)</div>
-                <div class="post-pills">${pillsPm || `<span class="post-pill post-libre">-</span>`}</div>
+                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Après-midi (TDM SAU fin 18h30)</div>
+                <div class="post-pills">${pillsPm}${closedPmPills}</div>
               </div>
             </div>
           </div>
@@ -5531,30 +5678,44 @@ html_template = """<!DOCTYPE html>
       }
 
       return `
-        <div class="vac-card" style="margin-bottom:10px; border-color:rgba(56,189,248,0.4);">
+        <div class="vac-card" style="margin-bottom:10px; border-color:#7DD3FC; background:#FFFFFF;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
             <div>
-              <div style="font-size:13px; font-weight:800; color:#F8FAFC;">🎓 Planning des Internes DES & Binômes Chefs</div>
-              <div style="font-size:11px; color:var(--text-muted);">6 Internes DES Radiologie B • Semestre d'Hiver 2026–2027</div>
+              <div style="font-size:13px; font-weight:800; color:#0F172A;">🎓 Planning des 6 Internes DES & Binômes Chefs</div>
+              <div style="font-size:11px; color:var(--text-muted);">Horaires : IRM dès 07h45 • TDM SAU 08h00–18h30 • Écho & Poste C dès 09h00 • Noé GRANDVAL (Phase Socle : Urgences TDM SAU)</div>
             </div>
             <a class="bloc-toggle-btn" style="text-decoration:none;" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener">Ouvrir Espace Internes & Chefs ↗</a>
           </div>
+          ${(closedAm.length || closedPm.length) ? `
+            <div style="margin-bottom:8px; padding:7px 9px; border-radius:8px; background:#FEF2F2; border:1px dashed #FCA5A5;">
+              <div style="font-size:10px; font-weight:800; color:#B91C1C; text-transform:uppercase; margin-bottom:4px;">🔒 Vacations fermées ce jour</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <div><span style="font-size:9.5px; font-weight:700; color:#991B1B;">Matin :</span> <div class="post-pills" style="margin-top:2px;">${closedAmPills || `<span style="font-size:10px; color:#64748B;">Aucune fermeture</span>`}</div></div>
+                <div><span style="font-size:9.5px; font-weight:700; color:#991B1B;">Après-midi :</span> <div class="post-pills" style="margin-top:2px;">${closedPmPills || `<span style="font-size:10px; color:#64748B;">Aucune fermeture</span>`}</div></div>
+              </div>
+            </div>
+          ` : ""}
           <div style="display:flex; flex-direction:column; gap:6px;">
             ${rows.map(r => `
-              <div style="display:grid; grid-template-columns: 120px 1fr 1fr; gap:6px; align-items:center; padding:6px 8px; border-radius:8px; background:rgba(30,41,59,0.55); border:1px solid ${(r.amPairedTL || r.pmPairedTL) ? "rgba(56,189,248,0.5)" : "var(--border)"};">
+              <div style="display:grid; grid-template-columns: 135px 1fr 1fr; gap:6px; align-items:center; padding:6px 8px; border-radius:8px; background:${(r.amPairedTL || r.pmPairedTL) ? "#F0F9FF" : "#F8FAFC"}; border:1px solid ${(r.amPairedTL || r.pmPairedTL) ? "#7DD3FC" : "var(--border)"};">
                 <div>
-                  <div style="font-size:12px; font-weight:800; color:#F8FAFC;">${r.intObj.name}</div>
-                  ${(r.amPairedTL || r.pmPairedTL) ? `<span style="font-size:9.5px; color:#38BDF8; font-weight:700;">★ En binôme avec TL</span>` : `<span style="font-size:9.5px; color:var(--text-muted);">Interne DES</span>`}
+                  <div style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                    <span>${r.intObj.name}</span>
+                    ${r.isSocle ? `<span style="font-size:8.5px; padding:1px 5px; border-radius:99px; background:#E0F2FE; color:#0369A1; border:1px solid #7DD3FC; font-weight:800;">SOCLE</span>` : ""}
+                  </div>
+                  ${(r.amPairedTL || r.pmPairedTL) ? `<span style="font-size:9.5px; color:#0284C7; font-weight:700;">★ En binôme avec TL</span>` : `<span style="font-size:9.5px; color:var(--text-muted);">${r.isSocle ? "DES Phase Socle" : "Interne DES"}</span>`}
                 </div>
                 <div>
                   <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:2px;">Matin</div>
-                  <span class="post-pill ${postColorClass(r.am)}">${r.am}</span>
-                  ${r.chefAm ? `<div style="font-size:10px; color:#94A3B8; margin-top:2px;">🩺 Chef : <strong>${r.chefAm}</strong></div>` : ""}
+                  <span class="post-pill ${postColorClass(r.am)}">${formatVacationPosteLabel(r.am)}</span>
+                  ${r.chefAm ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🩺 Chef : <strong>${r.chefAm}</strong></div>` : ""}
+                  ${r.noteAm ? `<div style="font-size:9.5px; color:#0369A1; font-weight:700; margin-top:2px;">🤝 ${r.noteAm}</div>` : ""}
                 </div>
                 <div>
                   <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:2px;">Après-midi</div>
-                  <span class="post-pill ${postColorClass(r.pm)}">${r.pm}</span>
-                  ${r.chefPm ? `<div style="font-size:10px; color:#94A3B8; margin-top:2px;">🩺 Chef : <strong>${r.chefPm}</strong></div>` : ""}
+                  <span class="post-pill ${postColorClass(r.pm)}">${formatVacationPosteLabel(r.pm)}</span>
+                  ${r.chefPm ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🩺 Chef : <strong>${r.chefPm}</strong></div>` : ""}
+                  ${r.notePm ? `<div style="font-size:9.5px; color:#0369A1; font-weight:700; margin-top:2px;">🤝 ${r.notePm}</div>` : ""}
                 </div>
               </div>
             `).join("")}
@@ -5724,12 +5885,20 @@ html_template = """<!DOCTYPE html>
     }
 
     function getShortVacTagForDay(iso, dt) {
-      const mg = getMarieGardeForIso(iso);
-      if (mg) return { lbl: mg.shortTag, cls: "post-marie" };
-      const g = getGardeForIso(iso);
-      if (g && g.is_tl) return { lbl: "Garde", cls: "post-liberal" };
       const dow = dt.getDay();
-      if (dow === 0 || dow === 6) return { lbl: "WE", cls: "post-libre" };
+      const mg = getMarieGardeForIso(iso);
+      const g = getGardeForIso(iso);
+      if (dow === 0 || dow === 6) {
+        if (g && g.is_tl) return { lbl: "🚨 TL", cls: "post-liberal" };
+        if (mg) return { lbl: "🚨 Marie", cls: "post-marie" };
+        if (g && g.noms && g.noms.length) {
+          const shortG = g.noms[0].replace(/^Dr\s+/i, "").split(" ")[0];
+          return { lbl: `🚨 ${shortG}`, cls: "post-liberal" };
+        }
+        return { lbl: "Garde", cls: "post-libre" };
+      }
+      if (mg) return { lbl: mg.shortTag, cls: "post-marie" };
+      if (g && g.is_tl) return { lbl: "Garde", cls: "post-liberal" };
       const myV = getMyVacationForIso(iso);
       const firstPost = (myV.am[0] || "").toLowerCase();
       if (firstPost.includes("pitié") || firstPost.includes("pitie")) return { lbl: "Pitié", cls: "post-libre" };
@@ -5836,7 +6005,7 @@ html_template = """<!DOCTYPE html>
         return;
       }
 
-      // En mode JOUR : Barre des jours défilable horizontalement (reste exactement en place au clic sur un jour)
+      // En mode JOUR : Barre des jours défilable horizontalement (Lundi -> Vendredi en grand + Samedi/Dimanche en petit avec juste les gardes)
       const existingDayScroll = document.getElementById("day-strip-scroll");
       const prevDayScrollLeft = existingDayScroll ? existingDayScroll.scrollLeft : null;
 
@@ -5861,14 +6030,28 @@ html_template = """<!DOCTYPE html>
         const monthShort = cur.toLocaleDateString("fr-FR", { month: "short" }).replace(".", "");
         const monthFull = cur.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
-        cellsHtml += `
-          <div class="ws-day ${isWe ? "is-weekend" : ""} ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""} ${mg ? "is-marie-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
-            <span class="ws-dow">${dowLbl}</span>
-            <span class="ws-num">${dayNum}<span class="ws-mon">${monthShort}</span></span>
-            <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
-            <span class="ws-cnt">${mg ? "🚨 Marie" : (evCnt > 0 ? (isWe ? evCnt : evCnt + " RDV") : "·")}</span>
-          </div>
-        `;
+        if (isWe) {
+          const weSub = (mg && g && g.is_tl)
+            ? "Marie+TL"
+            : (mg ? "🚨 Marie" : (g && g.noms && g.noms.length > 1 ? g.noms[1].split(" ")[0] : ""));
+          cellsHtml += `
+            <div class="ws-day is-weekend ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""} ${mg ? "is-marie-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')" title="Garde ${dowLbl} ${dayNum} : ${g && g.noms ? g.noms.join(" / ") : "—"}">
+              <span class="ws-dow">${dowLbl}</span>
+              <span class="ws-num">${dayNum}</span>
+              <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
+              ${weSub ? `<span class="ws-cnt">${weSub}</span>` : ""}
+            </div>
+          `;
+        } else {
+          cellsHtml += `
+            <div class="ws-day ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""} ${mg ? "is-marie-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')">
+              <span class="ws-dow">${dowLbl}</span>
+              <span class="ws-num">${dayNum}<span class="ws-mon">${monthShort}</span></span>
+              <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
+              <span class="ws-cnt">${mg ? "🚨 Marie" : (evCnt > 0 ? evCnt + " RDV" : "·")}</span>
+            </div>
+          `;
+        }
         cur.setDate(cur.getDate() + 1);
       }
       const initialMonthFull = selectedDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
@@ -5958,21 +6141,31 @@ html_template = """<!DOCTYPE html>
         const genVac = getGeneralPlanningForIso(iso);
         const dayEvents = allEvents.filter(e => e.isoDate === iso);
         const isInternesScope = (agendaScope === "internes");
+        const isWeekendDay = (selectedDate.getDay() === 0 || selectedDate.getDay() === 6);
 
         let html = `
           ${renderGardeBannerHtml(iso)}
-          ${isInternesScope ? renderInternesBlockForDay(iso, false) : ""}
-          <div class="vac-grid">
-            <div class="vac-card">
-              <div class="vac-period">${isGeneral || isInternesScope ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
-              <div class="post-pills">${renderPostPills((isGeneral || isInternesScope) ? genVac.am : myVac.am, (isGeneral || isInternesScope))}</div>
+          ${!isWeekendDay ? `
+            ${isInternesScope ? renderInternesBlockForDay(iso, false) : ""}
+            <div class="vac-grid">
+              <div class="vac-card">
+                <div class="vac-period">${isGeneral || isInternesScope ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
+                <div class="post-pills">${renderPostPills((isGeneral || isInternesScope) ? genVac.am : myVac.am, (isGeneral || isInternesScope))}</div>
+              </div>
+              <div class="vac-card">
+                <div class="vac-period">${isGeneral || isInternesScope ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
+                <div class="post-pills">${renderPostPills((isGeneral || isInternesScope) ? genVac.pm : myVac.pm, (isGeneral || isInternesScope))}</div>
+              </div>
             </div>
-            <div class="vac-card">
-              <div class="vac-period">${isGeneral || isInternesScope ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
-              <div class="post-pills">${renderPostPills((isGeneral || isInternesScope) ? genVac.pm : myVac.pm, (isGeneral || isInternesScope))}</div>
+            ${!isInternesScope ? renderInternesBlockForDay(iso, true) : ""}
+          ` : `
+            <div class="vac-card" style="background:#FFF1F2;border-color:#FECDD3;margin-bottom:8px;">
+              <div class="vac-period" style="color:#BE123C;">🚨 Week-end — Permanence des soins & Gardes uniquement</div>
+              <div style="font-size:12px;color:#881337;font-weight:700;">
+                Garde Imagerie Cochin : Dr ${(getGardeForIso(iso) && getGardeForIso(iso).noms && getGardeForIso(iso).noms.length) ? getGardeForIso(iso).noms.join(" / ") : "Non renseigné"}
+              </div>
             </div>
-          </div>
-          ${!isInternesScope ? renderInternesBlockForDay(iso, true) : ""}
+          `}
           <div class="section-label">
             <span>${(isGeneral || isInternesScope) ? "Patients du service" : "Patients & RDV"} (${dayEvents.length})</span>
           </div>
@@ -5986,15 +6179,62 @@ html_template = """<!DOCTYPE html>
 
       } else if (calendarView === "week") {
         const mon = getMondayOf(selectedDate);
+        const fri = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 4, 12, 0, 0);
+        const sat = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 5, 12, 0, 0);
         const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6, 12, 0, 0);
-        titleEl.textContent = `Semaine du ${mon.getDate()}/${mon.getMonth() + 1} au ${sun.getDate()}/${sun.getMonth() + 1}/${sun.getFullYear()}`;
+        titleEl.textContent = `Semaine du ${mon.getDate()}/${mon.getMonth() + 1} au ${fri.getDate()}/${fri.getMonth() + 1} (+ WE ${sat.getDate()}-${sun.getDate()}/${sun.getMonth() + 1})`;
         subEl.textContent = "";
         subEl.style.display = "none";
 
-        let html = "";
         const isInternesScope = (agendaScope === "internes");
 
-        for (let i = 0; i < 7; i++) {
+        // 1. Vue synthétique mobile Lundi -> Vendredi (5 colonnes côte à côte) + Samedi/Dimanche en petit avec juste les gardes
+        let fiveColsHtml = "";
+        for (let i = 0; i < 5; i++) {
+          const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
+          const iso = dateToIso(cur);
+          const g = getGardeForIso(iso);
+          const mg = getMarieGardeForIso(iso);
+          const tag = getShortVacTagForDay(iso, cur);
+          const dayEvs = allEvents.filter(e => e.isoDate === iso);
+          const dowShort = cur.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
+          fiveColsHtml += `
+            <div class="v3-week-5col-cell ${g && g.is_tl ? "is-garde" : ""}" onclick="selectDayFromCalendar('${iso}')">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:9px;font-weight:800;text-transform:uppercase;color:var(--text-muted);">${dowShort}</span>
+                <span style="font-size:11px;font-weight:800;color:var(--text);">${cur.getDate()}</span>
+              </div>
+              <span class="ws-vac ${tag.cls}" style="width:100%;text-align:center;font-size:8px;padding:2px 2px;">${tag.lbl}</span>
+              ${g && g.noms && g.noms.length ? `<div style="font-size:7.5px;color:#BE123C;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🚨 ${g.is_tl ? "Garde TL" : g.noms[0]}</div>` : ""}
+              ${mg ? `<div style="font-size:7.5px;color:#BE185D;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🚨 Marie</div>` : ""}
+              <div style="font-size:8px;color:var(--text-muted);text-align:center;">${dayEvs.length > 0 ? `${dayEvs.length} RDV` : "·"}</div>
+            </div>
+          `;
+        }
+
+        const satIso = dateToIso(sat);
+        const sunIso = dateToIso(sun);
+        const gSat = getGardeForIso(satIso);
+        const gSun = getGardeForIso(sunIso);
+        const mgSat = getMarieGardeForIso(satIso);
+        const mgSun = getMarieGardeForIso(sunIso);
+
+        let html = `
+          <div class="v3-week-5col-grid">${fiveColsHtml}</div>
+          <div class="v3-weekend-gardes-bar">
+            <div class="v3-weekend-garde-pill" onclick="selectDayFromCalendar('${satIso}')">
+              <span style="font-weight:800;color:#9F1239;">SAM. ${sat.getDate()}/${sat.getMonth() + 1}</span>
+              <span style="font-weight:700;color:#BE123C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🚨 Garde : ${gSat && gSat.noms && gSat.noms.length ? "Dr " + gSat.noms.join("/") : "—"}${mgSat ? " • 🚨 Marie" : ""}</span>
+            </div>
+            <div class="v3-weekend-garde-pill" onclick="selectDayFromCalendar('${sunIso}')">
+              <span style="font-weight:800;color:#9F1239;">DIM. ${sun.getDate()}/${sun.getMonth() + 1}</span>
+              <span style="font-weight:700;color:#BE123C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🚨 Garde : ${gSun && gSun.noms && gSun.noms.length ? "Dr " + gSun.noms.join("/") : "—"}${mgSun ? " • 🚨 Marie" : ""}</span>
+            </div>
+          </div>
+        `;
+
+        // 2. Cartes détaillées du Lundi au Vendredi uniquement (les Samedi et Dimanche sont affichés en petit avec juste les gardes)
+        for (let i = 0; i < 5; i++) {
           const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
           const iso = dateToIso(cur);
           const myVac = getMyVacationForIso(iso);
@@ -6003,11 +6243,6 @@ html_template = """<!DOCTYPE html>
           const mg = getMarieGardeForIso(iso);
           const dayEvs = allEvents.filter(e => e.isoDate === iso);
           const dayName = cur.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" });
-          const isWeekend = (cur.getDay() === 0 || cur.getDay() === 6);
-
-          if (isWeekend && !isGeneral && !isInternesScope && !(g && g.is_tl) && !mg && dayEvs.length === 0) {
-            continue;
-          }
 
           let gardeBadge = `<span class="pill pill-cs">${dayEvs.length} RDV</span>`;
           if (mg && g && g.is_tl) {
@@ -6030,15 +6265,13 @@ html_template = """<!DOCTYPE html>
                 <span class="week-day-name">${dayName}</span>
                 <div style="display:flex;gap:4px;align-items:center;">${gardeBadge}</div>
               </div>
-              ${!isWeekend ? `
-                ${isInternesScope ? renderInternesBlockForDay(iso, false) : `
-                  <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
-                    <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
-                    <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
-                  </div>
-                  ${renderInternesBlockForDay(iso, true)}
-                `}
-              ` : ""}
+              ${isInternesScope ? renderInternesBlockForDay(iso, false) : `
+                <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
+                  <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
+                  <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+                </div>
+                ${renderInternesBlockForDay(iso, true)}
+              `}
               ${dayEvs.map(ev => renderEventCard(ev, false)).join("")}
             </div>
           `;
@@ -6370,13 +6603,13 @@ html_template = """<!DOCTYPE html>
               <span>${a["Identité Patient"] || "-"}</span>
               <span class="event-ipp">${a["N° Dossier / IPP"] && a["N° Dossier / IPP"] !== "Non spécifié" ? a["N° Dossier / IPP"] : ""}</span>
             </div>
-            <div style="font-size:11.5px; color:var(--primary); font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="font-size:11.5px; color:var(--primary); font-weight:700;" onclick="openPatientModal('${safePatientAttr}')">
               ${a["Médecin Demandeur (Service)"] || "-"}
             </div>
-            <div style="font-size:12px; color:#E2E8F0; margin-top:4px;" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="font-size:12px; color:#334155; margin-top:4px; font-weight:500;" onclick="openPatientModal('${safePatientAttr}')">
               ${a["Motif de l'avis / Question clinique"] || ""}
             </div>
-            <div style="font-size:11.5px; color:#86EFAC; margin-top:4px;" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="font-size:11.5px; color:#15803D; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
               <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
             </div>
             <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -6507,10 +6740,10 @@ html_template = """<!DOCTYPE html>
             <div class="event-patient">
               <span>${q["Sujet / Objet"] || "-"}</span>
             </div>
-            <div style="font-size:11.5px; color:var(--primary); font-weight:600;">
+            <div style="font-size:11.5px; color:var(--primary); font-weight:700;">
               De : ${q["Expéditeur"] || "-"}
             </div>
-            <div style="font-size:12.5px; color:#E2E8F0; margin-top:5px;">
+            <div style="font-size:12.5px; color:#334155; margin-top:5px; font-weight:500;">
               ${q["Question / Action demandée"] || ""}
             </div>
             ${q["Date Réponse / Note"] ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">📌 ${q["Date Réponse / Note"]}</div>` : ""}
@@ -6942,22 +7175,22 @@ html_template = """<!DOCTYPE html>
           const canCall = rawTel.length >= 10;
           const isDectOnly = (item.phone || "").toUpperCase().includes("DECT");
           html += `
-            <div style="background:rgba(30,41,59,0.78); border:1px solid rgba(148,163,184,0.16); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; box-shadow:0 1px 2px rgba(15,23,42,0.03);">
               <div style="min-width:0; flex:1;">
-                <div style="font-size:13px; font-weight:700; color:#f8fafc; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <div style="font-size:13px; font-weight:700; color:#0F172A; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <span>${esc(item.name)}</span>
-                  ${item.custom ? `<span style="font-size:9px; padding:1px 6px; border-radius:99px; background:rgba(16,185,129,0.2); color:#34d399;">Perso</span>` : ``}
+                  ${item.custom ? `<span style="font-size:9px; padding:1px 6px; border-radius:99px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">Perso</span>` : ``}
                 </div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(item.role || "")}</div>
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
                 ${canCall
-                  ? `<a href="tel:${rawTel}" style="text-decoration:none; background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px; display:inline-flex; align-items:center; gap:5px;">📞 ${esc(item.phone)}</a>`
-                  : `<span style="background:rgba(245,158,11,0.16); border:1px solid rgba(245,158,11,0.38); color:#fbbf24; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px;">📟 ${esc(item.phone)}</span>`
+                  ? `<a href="tel:${rawTel}" style="text-decoration:none; background:#F0F9FF; border:1px solid #7DD3FC; color:#0369A1; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px; display:inline-flex; align-items:center; gap:5px;">📞 ${esc(item.phone)}</a>`
+                  : `<span style="background:#FFFBEB; border:1px solid #FCD34D; color:#B45309; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px;">📟 ${esc(item.phone)}</span>`
                 }
                 <div style="display:flex; align-items:center; gap:6px;">
-                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#cbd5e1; background:rgba(15,23,42,0.75); padding:2px 7px; border-radius:6px; border:1px solid rgba(148,163,184,0.2);">${isDectOnly ? 'Interne' : 'Poste / DECT'} : <strong style="color:#f8fafc;">${esc(item.short)}</strong></span>` : ``}
-                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:#f87171; font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
+                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#475569; background:#F1F5F9; padding:2px 7px; border-radius:6px; border:1px solid #CBD5E1;">${isDectOnly ? 'Interne' : 'Poste / DECT'} : <strong style="color:#0F172A;">${esc(item.short)}</strong></span>` : ``}
+                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:#DC2626; font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
                 </div>
               </div>
             </div>`;
@@ -6971,7 +7204,7 @@ html_template = """<!DOCTYPE html>
       const body = document.getElementById("modal-body");
       if (!body) return;
       body.innerHTML = `
-        <div style="font-size:16px; font-weight:800; color:#f8fafc; margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
+        <div style="font-size:16px; font-weight:800; color:#0F172A; margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Nom / Salle / Correspondant *</label>
