@@ -26,6 +26,7 @@ from build_internes_data import (
     WEBHOOK_URL,
     assert_zero_patient_data,
     build_full_dataset,
+    push_to_prod_github,
     sync_initial_state_to_cloud,
 )
 
@@ -780,7 +781,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         font-size: 13.5px;
       }
       .brand-sub {
-        font-size: 10.5px;
+        display: none;
+      }
+      .brand > div:not(.brand-logo) {
+        display: none;
+      }
+      .header-actions {
+        gap: 5px;
+        min-width: 0;
+      }
+      .header-actions .btn {
+        padding: 6px 8px;
+        font-size: 11.5px;
+        white-space: nowrap;
       }
       .summary-strip {
         padding: 8px 10px;
@@ -846,13 +859,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         padding: 1px 2px;
       }
       table.planning-table.week-5col th.col-poste {
-        width: 58px;
+        width: 54px;
       }
       table.planning-table.week-5col th,
       table.planning-table.week-5col td {
-        padding: 4px 2.5px;
+        padding: 4px 2px;
         font-size: 9.5px;
-        word-break: break-word;
+        word-break: normal;
+        overflow-wrap: anywhere;
+        hyphens: auto;
       }
       table.planning-table.week-5col th {
         font-size: 9.5px;
@@ -872,20 +887,41 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         font-size: 7.5px !important;
         line-height: 1.05;
       }
+      /* Prénoms toujours sur une seule ligne : badge pleine largeur, tags masqués */
       table.planning-table.week-5col .interne-badge {
-        font-size: 9px;
-        padding: 1.5px 3px;
-        gap: 2.5px;
-        margin: 1px 1px 1px 0;
+        display: flex;
+        font-size: 8.5px;
+        padding: 2px 2px;
+        gap: 2px;
+        margin: 0 0 2px 0;
         max-width: 100%;
-        white-space: normal;
-        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+      }
+      table.planning-table.week-5col .interne-badge > span:first-of-type:not(.drag-grip),
+      table.planning-table.week-5col .interne-badge .drag-grip + span {
+        width: 4px !important;
+        height: 4px !important;
+        flex-shrink: 0;
       }
       table.planning-table.week-5col .interne-badge .tag-sm,
       table.planning-table.week-5col .interne-badge .tag-dj,
-      table.planning-table.week-5col .interne-badge .tag-binome {
-        font-size: 7.5px;
-        padding: 0px 2.5px;
+      table.planning-table.week-5col .interne-badge .tag-binome,
+      table.planning-table.week-5col .interne-badge .drag-grip {
+        display: none;
+      }
+      table.planning-table.week-5col .garde-dr {
+        display: none;
+      }
+      table.planning-table.week-5col .garde-name {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 8.5px;
       }
       .perso-week-grid {
         grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -1155,6 +1191,247 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       outline: 1.5px dashed #D97706;
       outline-offset: -2px;
     }
+
+    /* Pastilles de notification & Espace Chef (Validation Vacances + Jours qui bloquent) */
+    .notif-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #DC2626;
+      color: #FFFFFF;
+      font-size: 10.5px;
+      font-weight: 800;
+      line-height: 1;
+      margin-left: 4px;
+      box-shadow: 0 1px 3px rgba(220, 38, 38, 0.35);
+    }
+
+    .notif-badge.warn {
+      background: #D97706;
+      box-shadow: 0 1px 3px rgba(217, 119, 6, 0.35);
+    }
+
+    .chef-alert-strip {
+      background: linear-gradient(90deg, #FEF2F2 0%, #FFFBEB 100%);
+      border: 1.5px solid #F87171;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chef-dashboard-panel {
+      background: #FFFFFF;
+      border: 2px solid #F59E0B;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.1);
+    }
+
+    .chef-notif-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .chef-alert-strip-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chef-dashboard-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #FDE68A;
+    }
+
+    .chef-notif-section {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 11px;
+      padding: 11px;
+    }
+
+    .chef-notif-section-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .chef-item-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #DC2626;
+      border-radius: 9px;
+      padding: 9px 11px;
+      margin-bottom: 8px;
+    }
+    .chef-item-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .chef-item-card.warn {
+      border-left-color: #F59E0B;
+    }
+
+    .chef-item-card.ok {
+      border-left-color: #16A34A;
+      background: #F0FDF4;
+    }
+
+    .chef-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .chef-item-title {
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .chef-item-desc {
+      font-size: 11.5px;
+      color: #475569;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+
+    .chef-decision-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 6px;
+    }
+
+    .btn-approve {
+      background: #16A34A;
+      border: 1px solid #15803D;
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-approve:hover {
+      background: #15803D;
+      border-color: #166534;
+      color: #FFFFFF;
+    }
+
+    .btn-reject {
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      color: #B91C1C;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-reject:hover {
+      background: #FEE2E2;
+      border-color: #F87171;
+      color: #991B1B;
+    }
+
+    .btn-decide {
+      background: #EFF6FF;
+      border: 1px solid #93C5FD;
+      color: #1D4ED8;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-decide:hover {
+      background: #DBEAFE;
+      border-color: #3B82F6;
+    }
+
+    .day-pill.blocking-day {
+      border-color: #DC2626 !important;
+      background: #FEF2F2;
+    }
+
+    .day-pill .dp-alert {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: #DC2626;
+      border-radius: 4px;
+      padding: 1px 4px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    td.cell-blocking-alert {
+      background: #FEF2F2 !important;
+      outline: 1.5px dashed #DC2626;
+      outline-offset: -2px;
+    }
+
+    .status-pill-pending {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 800;
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FCD34D;
+      white-space: nowrap;
+    }
+    .status-pill-approved {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 800;
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #86EFAC;
+      white-space: nowrap;
+    }
+    .status-pill-rejected {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 800;
+      background: #F1F5F9;
+      color: #64748B;
+      border: 1px solid #CBD5E1;
+      text-decoration: line-through;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -1169,8 +1446,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-sm btn-chef-lock" onclick="toggleChefPlanningMode()" id="chefModeBtn" title="Mode Chef de Planning (code requis)">
-          <span id="chefModeBtnText">🔒 Mode Chef</span>
+        <button class="btn btn-sm btn-chef-lock" onclick="toggleChefPlanningMode()" id="chefModeBtn" title="Espace Chef : validation des vacances & décisions sur les jours qui bloquent">
+          <span id="chefModeBtnText">🔒 Espace Chef</span>
         </button>
         <button class="btn btn-sm" onclick="syncWithCloud(true)" id="syncBtn">
           <span id="syncStatusText">Synchroniser</span>
@@ -1186,7 +1463,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   </header>
 
   <main class="container">
-    <!-- Bandeau Mode Chef de Planning (visible uniquement quand déverrouillé) -->
+    <!-- Bandeau Espace Chef : Notifications Jours qui bloquent & Validation Vacances -->
     <div id="chefPlanningBanner" style="display:none;"></div>
 
     <!-- Bandeau résumé sur 1 ligne -->
@@ -1194,8 +1471,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     <!-- 5 Onglets au texte court et sans icône -->
     <nav class="main-tabs">
-      <button class="tab-btn active" data-tab="planning" onclick="switchTab('planning')">Planning</button>
-      <button class="tab-btn" data-tab="vacances" onclick="switchTab('vacances')">Congés</button>
+      <button class="tab-btn active" data-tab="planning" id="tabBtnPlanning" onclick="switchTab('planning')">Planning</button>
+      <button class="tab-btn" data-tab="vacances" id="tabBtnVacances" onclick="switchTab('vacances')">Congés</button>
       <button class="tab-btn" data-tab="presentations" onclick="switchTab('presentations')">Cours & Cas</button>
       <button class="tab-btn" data-tab="reunions" onclick="switchTab('reunions')">Réunions</button>
       <button class="tab-btn" data-tab="annuaire" onclick="switchTab('annuaire')">Annuaire</button>
@@ -1205,23 +1482,23 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <div id="tabContent"></div>
   </main>
 
-  <!-- Modal : Déverrouillage Mode Chef de Planning (code cocochin) -->
+  <!-- Modal : Déverrouillage Espace Chef (code cocochin) -->
   <div class="modal-backdrop" id="modalChefAuth">
-    <div class="modal-box" style="max-width:400px;">
+    <div class="modal-box" style="max-width:410px;">
       <div class="card-header">
-        <div class="card-title">🔓 Mode Chef de Planning</div>
+        <div class="card-title">🔓 Espace Chef — Validation & Arbitrage</div>
         <button class="btn btn-sm" onclick="closeModal('modalChefAuth')">Fermer</button>
       </div>
       <div class="note-box">
-        Entrez le code d'accès Chef de Planning pour activer le déplacement direct des internes par glisser-déposer (Drag & Drop).
+        Entrez le code Chef pour <strong>valider les vacances des internes</strong>, <strong>arbitrer les jours qui bloquent</strong> et déplacer les internes par glisser-déposer.
       </div>
       <div class="form-group">
-        <label>Code d'accès</label>
+        <label>Code d'accès Chef</label>
         <input
           type="password"
           id="chefCodeInput"
           class="form-control"
-          placeholder="Code chef de planning..."
+          placeholder="Code espace chef..."
           autocomplete="off"
           onkeydown="if(event.key==='Enter') submitChefAuth()"
         />
@@ -1231,7 +1508,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       </div>
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
         <button class="btn" onclick="closeModal('modalChefAuth')">Annuler</button>
-        <button class="btn btn-primary" onclick="submitChefAuth()">Déverrouiller</button>
+        <button class="btn btn-primary" onclick="submitChefAuth()">Ouvrir l'Espace Chef</button>
       </div>
     </div>
   </div>
@@ -1246,7 +1523,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div class="action-choice-grid">
         <button class="choice-btn" onclick="closeModal('modalQuickAdd'); openAbsenceModal();">
           <strong>Poser un congé / RG</strong>
-          <span>Vacances, formation ou repos de garde</span>
+          <span>Soumis à validation dans l'Espace Chef</span>
         </button>
         <button class="choice-btn" onclick="closeModal('modalQuickAdd'); openNextPresentationModal();">
           <strong>S'inscrire à un cours</strong>
@@ -1265,8 +1542,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           <span>Poste interne Cochin, DECT ou secrétariat</span>
         </button>
         <button class="choice-btn" style="background:#FFFBEB; border-color:#FCD34D;" onclick="closeModal('modalQuickAdd'); toggleChefPlanningMode();">
-          <strong style="color:#92400E;">🔓 Mode Chef de Planning</strong>
-          <span>Glisser-déposer les internes (code requis)</span>
+          <strong style="color:#92400E;">🔓 Espace Chef (Validation & Planning)</strong>
+          <span>Valider les vacances & arbitrer les jours bloquants</span>
         </button>
       </div>
     </div>
@@ -1280,15 +1557,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <button class="btn btn-sm" onclick="closeModal('modalAbsence')">Fermer</button>
       </div>
       <div class="note-box">
-        Règle : max 2 internes absents en même temps. Éviter mardi/vendredi pour les jours isolés.
+        Règle : max 2 internes absents en même temps. Éviter mardi/vendredi pour les jours isolés. <strong>Les vacances sont validées par le Chef dans l'Espace Chef.</strong>
       </div>
       <div class="form-group">
         <label>Interne</label>
-        <select id="absInterneSelect" class="form-control"></select>
+        <select id="absInterneSelect" class="form-control" onchange="previewAbsenceRuleWarning()"></select>
       </div>
       <div class="form-group">
         <label>Motif</label>
-        <select id="absTypeSelect" class="form-control">
+        <select id="absTypeSelect" class="form-control" onchange="previewAbsenceRuleWarning()">
           <option value="CA 1">Congés Annuels (CA 1)</option>
           <option value="CA 2">Congés Annuels (CA 2)</option>
           <option value="CF">Congé Formation / Congrès (CF)</option>
@@ -1299,11 +1576,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <div class="form-group">
           <label>Début</label>
-          <input type="date" id="absStartDate" class="form-control" min="2026-11-02" max="2027-05-02" />
+          <input type="date" id="absStartDate" class="form-control" min="2026-11-02" max="2027-05-02" onchange="previewAbsenceRuleWarning()" />
         </div>
         <div class="form-group">
           <label>Fin (incluse)</label>
-          <input type="date" id="absEndDate" class="form-control" min="2026-11-02" max="2027-05-02" />
+          <input type="date" id="absEndDate" class="form-control" min="2026-11-02" max="2027-05-02" onchange="previewAbsenceRuleWarning()" />
         </div>
       </div>
       <div class="form-group">
@@ -1313,7 +1590,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <div id="absRuleWarning" class="note-box" style="display:none;"></div>
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
         <button class="btn" onclick="closeModal('modalAbsence')">Annuler</button>
-        <button class="btn btn-primary" onclick="saveAbsenceForm()">Enregistrer</button>
+        <button class="btn btn-primary" onclick="saveAbsenceForm()">Soumettre la demande</button>
       </div>
     </div>
   </div>
@@ -1370,7 +1647,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <button class="btn btn-sm" onclick="closeModal('modalVacationEdit')">Fermer</button>
       </div>
       <div class="note-box">
-        Règle : 2 demi-offs (1/2 journée libre) par semaine maximum par interne.
+        Règle : 2 demi-offs (1/2 journée libre) par semaine maximum par interne • <strong>Pas de demi-off le mardi après-midi ni le vendredi après-midi</strong>.
       </div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
         <div class="form-group">
@@ -1526,6 +1803,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     let activeDragPayload = null;
     let selectedForMove = null; // { dIso, periodKey, interneId, fromPoste }
     let chefHistoryStack = [];
+    let pendingChefActionCallback = null;
 
     function mergePresentationsList(baseList, savedList) {
       const obsoleteIds = new Set(["boneclub-2026-12-10", "cra-2027-01-29"]);
@@ -1559,14 +1837,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       return Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
     }
 
+    function normalizeAbsencesList(list) {
+      return (list || []).map(a => {
+        if (!a) return a;
+        const copy = Object.assign({}, a);
+        if (!copy.status) copy.status = "pending";
+        return copy;
+      });
+    }
+
     function loadInitialState() {
       const base = JSON.parse(JSON.stringify(INITIAL_DATA));
+      base.absences = normalizeAbsencesList(base.absences);
+      base.chefDecisions = base.chefDecisions || {};
       try {
         const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (raw) {
           const saved = JSON.parse(raw);
-          if (Array.isArray(saved.absences)) base.absences = saved.absences;
+          if (Array.isArray(saved.absences)) base.absences = normalizeAbsencesList(saved.absences);
           if (saved.customVacations) base.customVacations = saved.customVacations;
+          if (saved.chefDecisions) base.chefDecisions = saved.chefDecisions;
           if (Array.isArray(saved.presentations) && saved.presentations.length > 0) {
             base.presentations = mergePresentationsList(base.presentations, saved.presentations);
           }
@@ -1592,6 +1882,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           updatedAt: new Date().toISOString(),
           absences: STATE.absences,
           customVacations: STATE.customVacations || {},
+          chefDecisions: STATE.chefDecisions || {},
           presentations: STATE.presentations,
           meetings: STATE.meetings,
           phoneDirectory: STATE.phoneDirectory || []
@@ -1617,6 +1908,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (p.includes("VACANCES") || p.includes("CA") || p.includes("CF")) return "poste-vac";
       if (p === "RG" || p.includes("REPOS") || p.includes("GARDE") || p.includes("FÉRIÉ")) return "poste-rg";
       if (p.includes("LIBRE")) return "poste-off";
+      if (p.includes("FORMATION") || p.includes("ACCUEIL")) return "poste-cs";
       if (p.includes("IRM")) return "poste-irm";
       if (p.includes("ECHO") || p.includes("ÉCHO")) return "poste-echo";
       if (p.includes("GESTES") || p.includes("ACHARD") || p.includes("ALLURA")) return "poste-gestes";
@@ -1626,6 +1918,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function getPosteHoraire(poste, periodKey) {
       const p = String(poste || "").toUpperCase();
+      if (p.includes("FORMATION") || p.includes("ACCUEIL")) return "08h15 – 12h00";
       if (p.includes("IRM")) {
         return periodKey === "am" ? "dès 07h45" : (periodKey === "pm" ? "dès 07h45 (matin)" : "dès 07h45");
       }
@@ -1639,10 +1932,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     function getPosteWithTimeLabel(poste, periodKey) {
-      const shortName = poste === "1/2 journée libre" ? "Demi-off" : poste;
+      const shortName = poste === "1/2 journée libre" ? "Demi-off" : (poste === "FORMATION / ACCUEIL" ? "Accueil & Formation" : poste);
       const p = String(poste || "").toUpperCase();
       let h = "";
-      if (p.includes("IRM")) h = periodKey === "am" ? "7h45" : "";
+      if (p.includes("FORMATION") || p.includes("ACCUEIL")) h = "08h15–12h00";
+      else if (p.includes("IRM")) h = periodKey === "am" ? "7h45" : "";
       else if (p.includes("ECHO") || p.includes("ÉCHO") || p.includes("GESTES")) h = periodKey === "am" ? "9h00" : "";
       else if (p.includes("SAU") || p.includes("OLLIER 4")) h = periodKey === "am" ? "dès 8h00" : (periodKey === "pm" ? "fin 18h30" : "8h00–18h30");
       return h ? `${shortName} <span style="opacity:0.85; font-weight:600; font-size:10px;">(${h})</span>` : shortName;
@@ -1650,28 +1944,37 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function renderPosteCellLabel(poste, periodKey) {
       let shortName = poste === "1/2 journée libre" ? "Demi-off" : poste;
+      if (shortName === "FORMATION / ACCUEIL") shortName = "ACCUEIL / FORM.";
       if (shortName === "TDM OLLIER DIAG") shortName = "TDM OLLIER";
       if (shortName === "TDM OLLIER 4 (SAU)") shortName = "TDM SAU";
       if (shortName === "TDM ACHARD 1") shortName = "ACHARD 1";
       if (shortName === "CONSULT / LECTURE") shortName = "CS / LECT.";
       const p = String(poste || "").toUpperCase();
       let h = "";
-      if (p.includes("IRM")) h = periodKey === "am" ? "07h45" : "Mat. 07h45";
+      if (p.includes("FORMATION") || p.includes("ACCUEIL")) h = "08h15–12h00";
+      else if (p.includes("IRM")) h = periodKey === "am" ? "07h45" : "Mat. 07h45";
       else if (p.includes("ECHO") || p.includes("ÉCHO")) h = periodKey === "am" ? "09h00" : "Mat. 09h00";
       else if (p.includes("GESTES")) h = periodKey === "am" ? "09h00" : "Mat. 09h00";
       else if (p.includes("SAU") || p.includes("OLLIER 4")) h = periodKey === "am" ? "08h00–18h30" : "fin 18h30";
       else if (p.includes("LECTURE") || p.includes("CONSULT")) h = periodKey === "pm" ? "Mar : Pr Drapé • Ven : CS" : "";
       return `<div style="display:flex; flex-direction:column; align-items:flex-start; gap:1px;">
-        <span class="poste-pill ${getPosteClass(poste)}">${shortName}</span>
+        <span class="poste-pill ${getPosteClass(poste)}">${shortName.replace("/", "/<wbr>")}</span>
         ${h ? `<span class="poste-horaire-sub" style="font-size:9.5px; font-weight:700; color:var(--text-muted); padding-left:1px;">🕒 ${h}</span>` : ""}
       </div>`;
     }
 
     function recomputeScheduleInPlace(st) {
-      const baseSched = INITIAL_DATA.schedule;
+      // Utiliser baseSchedule (sans absences intégrées) pour que le refus ou la suppression d'un congé restaure le poste normal
+      const baseSched = INITIAL_DATA.baseSchedule || INITIAL_DATA.schedule;
       const absLookup = {};
       (st.absences || []).forEach(a => {
-        if (a && a.date && a.interneId) absLookup[a.date + "__" + a.interneId] = a.type || "CA 1";
+        if (!a || !a.date || !a.interneId) return;
+        if (a.status === "rejected") return; // Les vacances refusées par le chef ne bloquent plus le planning
+        absLookup[a.date + "__" + a.interneId] = {
+          type: a.type || "CA 1",
+          status: a.status || "pending",
+          id: a.id
+        };
       });
       const custom = st.customVacations || {};
       const seniorIds = ["gabriel", "marwane", "milan", "nathanael", "oussama"];
@@ -1697,11 +2000,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             let noteAm = origSlot.noteAm || "";
             let notePm = origSlot.notePm || "";
             let note = origSlot.note || noteAm || notePm || "";
+            let absStatus = null;
             const isSocle = Boolean(origSlot.isSocle || (intObj && intObj.isSocle));
 
             if (custom[cKey]) {
+              const [yyC, mmC, ddC] = iso.split("-").map(Number);
+              const jsDayC = new Date(yyC, mmC - 1, ddC).getDay();
               if (custom[cKey].am) am = custom[cKey].am;
-              if (custom[cKey].pm) pm = custom[cKey].pm;
+              if (custom[cKey].pm && !((jsDayC === 2 || jsDayC === 5) && custom[cKey].pm === "1/2 journée libre")) {
+                pm = custom[cKey].pm;
+              }
               if (custom[cKey].note !== undefined) {
                 note = custom[cKey].note;
                 noteAm = custom[cKey].note;
@@ -1709,49 +2017,31 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
 
             if (absLookup[cKey]) {
-              const at = absLookup[cKey];
+              const absInfo = absLookup[cKey];
+              const at = absInfo.type;
               const badge = (at.toLowerCase().includes("garde") || at.toUpperCase() === "RG") ? "RG" : "VACANCES";
               am = badge;
               pm = badge;
-              note = at;
-              noteAm = at;
-              notePm = at;
+              absStatus = absInfo.status || "pending";
+              const statusSuffix = absStatus === "pending" ? " (⏳ À valider chef)" : " (✓ Validé chef)";
+              note = at + statusSuffix;
+              noteAm = at + statusSuffix;
+              notePm = at + statusSuffix;
             }
 
-            dayObj.byInterne[iid] = { am, pm, note, noteAm, notePm, isSocle };
+            dayObj.byInterne[iid] = { am, pm, note, noteAm, notePm, isSocle, absStatus };
           });
 
-          // Garantie systématique : Relecture avec Pr Drapé le Mardi après-midi (jsDay === 2)
-          if (jsDay === 2) {
-            const hasTueCs = Object.keys(dayObj.byInterne).some(iid => dayObj.byInterne[iid].pm === "LECTURE/CS");
-            if (!hasTueCs) {
-              const donorPostes = ["ECHO", "GESTES (C)", "SCAN ACHARD"];
-              let replaced = false;
-              for (const dp of donorPostes) {
-                for (const iid of seniorIds) {
-                  const cKey = iso + "__" + iid;
-                  if (dayObj.byInterne[iid] && dayObj.byInterne[iid].pm === dp && !(custom[cKey] && custom[cKey].pm)) {
-                    dayObj.byInterne[iid].pm = "LECTURE/CS";
-                    dayObj.byInterne[iid].notePm = "Relecture avec Pr Drapé (systématique)";
-                    if (!dayObj.byInterne[iid].note) {
-                      dayObj.byInterne[iid].note = "Relecture avec Pr Drapé (systématique)";
-                    }
-                    replaced = true;
-                    break;
-                  }
-                }
-                if (replaced) break;
-              }
-            }
-          }
+          // Note : Lorsqu'un congé ou RG laisse un poste obligatoire (TDM SAU Matin/PM ou Relecture Pr Drapé le Mardi PM)
+          // sans interne, on ne remplace plus silencieusement en arrière-plan : le jour est signalé comme "Jour qui bloque"
+          // dans l'Espace Chef afin qu'une décision soit prise par le Chef (affectation en 1 clic ou maintien en l'état).
         }
         st.schedule[iso] = dayObj;
       });
 
       // 2. Garantie hebdomadaire : si les demi-offs ne sont pas suffisants (< 2 demi-offs / sem pour un interne présent),
-      //    les autres créneaux ne sont pas obligatoires (hors TDM SAU et hors Relecture Pr Drapé du mardi PM)
+      //    les autres créneaux ne sont pas obligatoires (hors mardi PM, hors vendredi PM et hors TDM SAU)
       const nonMandatoryPriority = [
-        "LECTURE/CS", // Vendredi PM uniquement (Mardi PM protégé)
         "ALLURA",
         "TDM OLLIER DIAG",
         "IRM 1,5T",
@@ -1781,12 +2071,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             for (const candPoste of nonMandatoryPriority) {
               for (let i = activeIsos.length - 1; i >= 0; i--) {
                 const dIso = activeIsos[i];
+                if (dIso === "2026-11-02") continue;
                 const [yy, mm, dd] = dIso.split("-").map(Number);
                 const jsDay = new Date(yy, mm - 1, dd).getDay();
                 const cKey = dIso + "__" + iid;
                 for (const h of ["pm", "am"]) {
-                  // Ne jamais supprimer la Relecture systématique avec Pr Drapé du mardi après-midi
-                  if (jsDay === 2 && h === "pm" && candPoste === "LECTURE/CS") continue;
+                  // Interdiction stricte de demi-off le mardi après-midi (jsDay === 2) et le vendredi après-midi (jsDay === 5)
+                  if (h === "pm" && (jsDay === 2 || jsDay === 5)) continue;
                   // Respecter un choix manuel explicite dans customVacations
                   if (custom[cKey] && custom[cKey][h]) continue;
                   const slot = st.schedule[dIso].byInterne[iid];
@@ -1813,6 +2104,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       Object.keys(st.schedule).forEach(iso => {
         const dayObj = st.schedule[iso];
         if (!dayObj || dayObj.holiday || !dayObj.byInterne) return;
+        const amCounts = {};
+        const pmCounts = {};
+        Object.keys(dayObj.byInterne).forEach(iid => {
+          const sl = dayObj.byInterne[iid];
+          if (sl.am && !["1/2 journée libre", "RG", "VACANCES", "FÉRIÉ", "FORMATION / ACCUEIL"].includes(sl.am)) {
+            amCounts[sl.am] = (amCounts[sl.am] || 0) + 1;
+          }
+          if (sl.pm && !["1/2 journée libre", "RG", "VACANCES", "FÉRIÉ", "FORMATION / ACCUEIL"].includes(sl.pm)) {
+            pmCounts[sl.pm] = (pmCounts[sl.pm] || 0) + 1;
+          }
+        });
         dayObj.am = [];
         dayObj.pm = [];
         Object.keys(dayObj.byInterne).forEach(iid => {
@@ -1824,16 +2126,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             interneId: iid,
             interne: intObj ? intObj.shortName : iid,
             isSocle,
-            binome: isSocle && slot.am === "TDM SAU",
-            note: slot.noteAm || ""
+            binome: isSocle && (amCounts[slot.am] > 1),
+            note: slot.noteAm || "",
+            absStatus: slot.absStatus || null
           });
           dayObj.pm.push({
             poste: slot.pm,
             interneId: iid,
             interne: intObj ? intObj.shortName : iid,
             isSocle,
-            binome: isSocle && slot.pm === "TDM SAU",
-            note: slot.notePm || ""
+            binome: isSocle && (pmCounts[slot.pm] > 1),
+            note: slot.notePm || "",
+            absStatus: slot.absStatus || null
           });
         });
         (dayObj.closedAm || []).forEach(cl => {
@@ -1887,7 +2191,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               stats[iid].vacHalfDays++;
             } else if (up === "RG") {
               stats[iid].rgHalfDays++;
-            } else if (up !== "FÉRIÉ") {
+            } else if (up !== "FÉRIÉ" && !up.includes("FORMATION")) {
               stats[iid].activeHalfDays++;
               if (up.includes("IRM")) stats[iid].byModality.IRM++;
               else if (up.includes("ECHO")) stats[iid].byModality.ECHO++;
@@ -2016,17 +2320,271 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     /* =========================================================================
+     * DÉTECTION DES JOURS QUI BLOQUENT & VALIDATION DES VACANCES (ESPACE CHEF)
+     * ========================================================================= */
+    function groupAbsenceRequests(absList) {
+      const sorted = (absList || []).slice().sort((a, b) => {
+        if (a.interneId !== b.interneId) return a.interneId.localeCompare(b.interneId);
+        return a.date.localeCompare(b.date);
+      });
+      const groups = [];
+      sorted.forEach(a => {
+        if (!a || !a.date || !a.interneId) return;
+        const st = a.status || "pending";
+        const last = groups.length ? groups[groups.length - 1] : null;
+        if (
+          last &&
+          last.interneId === a.interneId &&
+          last.type === a.type &&
+          last.status === st &&
+          addDaysIso(last.endDate, 1) === a.date
+        ) {
+          last.endDate = a.date;
+          last.dates.push(a.date);
+          last.ids.push(a.id);
+          const [yy, mm, dd] = a.date.split("-").map(Number);
+          const jsDay = new Date(yy, mm - 1, dd).getDay();
+          if (jsDay >= 1 && jsDay <= 5) last.weekdaysCount++;
+        } else {
+          const [yy, mm, dd] = a.date.split("-").map(Number);
+          const jsDay = new Date(yy, mm - 1, dd).getDay();
+          groups.push({
+            groupId: `grp-${a.interneId}-${a.date}`,
+            interneId: a.interneId,
+            interneName: a.interneName || getInterneById(a.interneId).fullName,
+            type: a.type || "CA 1",
+            status: st,
+            comment: a.comment || "",
+            startDate: a.date,
+            endDate: a.date,
+            dates: [a.date],
+            ids: [a.id],
+            weekdaysCount: (jsDay >= 1 && jsDay <= 5) ? 1 : 0
+          });
+        }
+      });
+      return groups.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    }
+
+    function computeBlockingDays(st) {
+      const stateRef = st || STATE;
+      const sched = stateRef.schedule || {};
+      const decisions = stateRef.chefDecisions || {};
+      const seniorIds = ["gabriel", "marwane", "milan", "nathanael", "oussama"];
+      const allInterneIds = ["gabriel", "noe", "marwane", "milan", "nathanael", "oussama"];
+      const donorPriority = ["TDM OLLIER DIAG", "SCAN ACHARD", "ECHO", "IRM 1,5T", "IRM", "IRM 3T", "ALLURA", "GESTES (C)", "LECTURE/CS", "1/2 journée libre"];
+
+      const issues = [];
+      const byDate = {};
+
+      function addIssue(issue) {
+        if (decisions[issue.id] && decisions[issue.id].resolved) return;
+        issues.push(issue);
+        if (!byDate[issue.date]) byDate[issue.date] = [];
+        byDate[issue.date].push(issue);
+      }
+
+      // Pré-calcul des groupes d'absences pour repérer les mardis/vendredis isolés
+      const activeAbs = (stateRef.absences || []).filter(a => a && a.status !== "rejected");
+      const groups = groupAbsenceRequests(activeAbs);
+      const isolatedGroupByDateAndInt = {};
+      groups.forEach(g => {
+        if (g.weekdaysCount > 0 && g.weekdaysCount <= 2 && g.type !== "Repos de garde") {
+          g.dates.forEach(dIso => {
+            const [yy, mm, dd] = dIso.split("-").map(Number);
+            const jsDay = new Date(yy, mm - 1, dd).getDay();
+            if (jsDay === 2 || jsDay === 5) {
+              isolatedGroupByDateAndInt[dIso + "__" + g.interneId] = g;
+            }
+          });
+        }
+      });
+
+      Object.keys(sched).sort().forEach(iso => {
+        const dayObj = sched[iso];
+        if (!dayObj || dayObj.holiday || !dayObj.byInterne) return;
+        const [yy, mm, dd] = iso.split("-").map(Number);
+        const jsDay = new Date(yy, mm - 1, dd).getDay();
+        const isFirstMonday = (iso === "2026-11-02");
+
+        // 1. Vérifier couverture obligatoire TDM SAU (Urgences) par au moins un interne posté (incluant Noé Phase Socle)
+        if (!isFirstMonday) {
+          ["am", "pm"].forEach(periodKey => {
+            const pLabel = periodKey === "am" ? "Matin (08h00–13h00)" : "Après-midi (13h00–18h30)";
+            const hasSau = allInterneIds.some(iid => dayObj.byInterne[iid] && dayObj.byInterne[iid][periodKey] === "TDM SAU");
+            if (!hasSau) {
+              const absentInternes = allInterneIds
+                .filter(iid => dayObj.byInterne[iid] && (dayObj.byInterne[iid][periodKey] === "VACANCES" || dayObj.byInterne[iid][periodKey] === "RG"))
+                .map(iid => getInterneById(iid).shortName);
+
+              // Candidats disponibles ce jour/période pour reprendre TDM SAU
+              const candidates = [];
+              donorPriority.forEach(candPoste => {
+                allInterneIds.forEach(iid => {
+                  const sl = dayObj.byInterne[iid];
+                  if (!sl || sl[periodKey] !== candPoste) return;
+                  if (jsDay === 2 && periodKey === "pm" && candPoste === "LECTURE/CS") return;
+                  candidates.push({
+                    interneId: iid,
+                    shortName: getInterneById(iid).shortName,
+                    currentPoste: candPoste
+                  });
+                });
+              });
+
+              addIssue({
+                id: `block-sau-${iso}-${periodKey}`,
+                date: iso,
+                periodKey,
+                poste: "TDM SAU",
+                severity: "critical",
+                category: "tdm_sau",
+                title: `TDM SAU (${periodKey === "am" ? "Matin" : "PM"}) non couvert`,
+                detail: `Aucun interne posté sur TDM SAU — Urgences obligatoires (${pLabel}).${absentInternes.length ? ` Absent(s) : ${absentInternes.join(", ")}.` : ""}`,
+                candidates: candidates.slice(0, 4)
+              });
+            }
+          });
+        }
+
+        // 2. Vérifier couverture obligatoire Mardi PM : Relecture avec Pr Drapé (LECTURE/CS)
+        if (jsDay === 2) {
+          const hasTueCs = Object.keys(dayObj.byInterne).some(iid => dayObj.byInterne[iid] && dayObj.byInterne[iid].pm === "LECTURE/CS");
+          if (!hasTueCs) {
+            const candidates = [];
+            donorPriority.forEach(candPoste => {
+              seniorIds.forEach(iid => {
+                const sl = dayObj.byInterne[iid];
+                if (sl && sl.pm === candPoste) {
+                  candidates.push({
+                    interneId: iid,
+                    shortName: getInterneById(iid).shortName,
+                    currentPoste: candPoste
+                  });
+                }
+              });
+            });
+            addIssue({
+              id: `block-drape-${iso}-pm`,
+              date: iso,
+              periodKey: "pm",
+              poste: "LECTURE/CS",
+              severity: "critical",
+              category: "relecture_drape",
+              title: `Relecture Pr Drapé (Mardi PM) non couverte`,
+              detail: `Aucun interne affecté en LECTURE/CS le mardi après-midi pour la relecture systématique avec Pr Drapé.`,
+              candidates: candidates.slice(0, 3)
+            });
+          }
+        }
+
+        // 3. Vérifier si > 2 internes absents simultanément ce jour
+        const absentIds = Object.keys(dayObj.byInterne).filter(iid => {
+          const sl = dayObj.byInterne[iid];
+          return sl && (sl.am === "VACANCES" || sl.pm === "VACANCES" || sl.am === "RG" || sl.pm === "RG");
+        });
+        if (absentIds.length > 2) {
+          const names = absentIds.map(iid => getInterneById(iid).shortName).join(", ");
+          addIssue({
+            id: `block-quota-abs-${iso}`,
+            date: iso,
+            periodKey: "full",
+            poste: "VACANCES",
+            severity: "critical",
+            category: "over_quota_abs",
+            title: `${absentIds.length} internes absents simultanément (max 2 autorisés)`,
+            detail: `Absents le ${formatDateFr(iso)} : ${names}. Règle du service : 2 internes absents maximum en même temps.`,
+            absentIds,
+            candidates: []
+          });
+        }
+
+        // 4. Vérifier si un interne prévu pour présenter un Cas / Biblio / Cours 12h30 est absent ce jour-là
+        const dayPres = (stateRef.presentations || []).filter(p => p.date === iso);
+        dayPres.forEach(pr => {
+          if (pr.interneId && absentIds.includes(pr.interneId)) {
+            const presentSeniors = seniorIds.filter(iid => !absentIds.includes(iid)).map(iid => ({
+              interneId: iid,
+              shortName: getInterneById(iid).shortName
+            }));
+            addIssue({
+              id: `block-pres-${iso}-${pr.id}`,
+              date: iso,
+              periodKey: "am",
+              poste: "COURS",
+              severity: "warning",
+              category: "pres_absent",
+              presId: pr.id,
+              title: `Intervenant absent pour ${pr.typeLabel || "Séance 12h30"} (${pr.interneName})`,
+              detail: `${pr.interneName} est en congé/RG le ${formatDateFr(iso)} alors qu'il/elle est programmé(e) pour ${pr.typeLabel || "la séance de 12h30"}.`,
+              candidates: presentSeniors.slice(0, 3)
+            });
+          }
+        });
+
+        // 5. Vérifier congé isolé posé un Mardi ou Vendredi (règle : éviter Mardi/Vendredi hors semaine complète)
+        Object.keys(dayObj.byInterne).forEach(iid => {
+          const grp = isolatedGroupByDateAndInt[iso + "__" + iid];
+          if (grp) {
+            const iName = getInterneById(iid).shortName;
+            addIssue({
+              id: `block-isoday-${iso}-${iid}`,
+              date: iso,
+              periodKey: "full",
+              poste: "VACANCES",
+              severity: "warning",
+              category: "isolated_tue_fri",
+              interneId: iid,
+              groupId: grp.groupId,
+              title: `Congé isolé un ${jsDay === 2 ? "Mardi" : "Vendredi"} (${iName})`,
+              detail: `${iName} a posé un congé court (${grp.weekdaysCount} j.) incluant un ${jsDay === 2 ? "mardi" : "vendredi"}. Arbitrage chef requis.`,
+              candidates: []
+            });
+          }
+        });
+      });
+
+      return { issues, byDate };
+    }
+
+    /* =========================================================================
      * MODE CHEF DE PLANNING (CODE: cocochin) & DRAG-AND-DROP DES INTERNES
      * ========================================================================= */
+    function requireChefUnlockThen(actionFn) {
+      if (isChefPlanningMode) {
+        actionFn();
+        return;
+      }
+      pendingChefActionCallback = actionFn;
+      const inp = document.getElementById("chefCodeInput");
+      const err = document.getElementById("chefCodeError");
+      if (inp) inp.value = "";
+      if (err) err.style.display = "none";
+      document.getElementById("modalChefAuth").classList.add("open");
+      setTimeout(() => { if (inp) inp.focus(); }, 60);
+    }
+
+    function openChefSpacePanel() {
+      if (isChefPlanningMode) {
+        if (currentTab !== "planning") switchTab("planning");
+        const banner = document.getElementById("chefPlanningBanner");
+        if (banner) banner.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } else {
+        toggleChefPlanningMode();
+      }
+    }
+
     function toggleChefPlanningMode() {
       if (isChefPlanningMode) {
         isChefPlanningMode = false;
         selectedForMove = null;
         activeDragPayload = null;
+        pendingChefActionCallback = null;
         sessionStorage.removeItem(CHEF_MODE_STORAGE_KEY);
         renderAll();
-        showToast("Mode Chef de Planning verrouillé");
+        showToast("🔒 Espace Chef verrouillé");
       } else {
+        pendingChefActionCallback = null;
         const inp = document.getElementById("chefCodeInput");
         const err = document.getElementById("chefCodeError");
         if (inp) inp.value = "";
@@ -2045,58 +2603,360 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         selectedForMove = null;
         sessionStorage.setItem(CHEF_MODE_STORAGE_KEY, "1");
         closeModal("modalChefAuth");
-        currentTab = "planning";
+        if (typeof pendingChefActionCallback === "function") {
+          const cb = pendingChefActionCallback;
+          pendingChefActionCallback = null;
+          cb();
+          return;
+        }
         if (planningScope === "chefs" || planningScope === "perso") {
           planningScope = "internes";
         }
         renderAll();
-        showToast("🔓 Mode Chef de Planning activé !");
+        showToast("🔓 Espace Chef déverrouillé !");
       } else {
         if (err) err.style.display = "block";
         if (inp) inp.select();
       }
     }
 
+    function approveAbsenceGroup(groupId) {
+      requireChefUnlockThen(() => {
+        const groups = groupAbsenceRequests(STATE.absences || []);
+        const g = groups.find(x => x.groupId === groupId);
+        if (!g) return;
+        const idSet = new Set(g.ids);
+        (STATE.absences || []).forEach(a => {
+          if (idSet.has(a.id)) {
+            a.status = "approved";
+            a.validatedBy = "Chef";
+            a.validatedAt = new Date().toISOString();
+          }
+        });
+        saveStateLocal();
+        renderAll();
+        showToast(`✓ Congés validés pour ${g.interneName} (${g.dates.length} j.)`);
+        pushStateToCloud({});
+      });
+    }
+
+    function rejectAbsenceGroup(groupId) {
+      requireChefUnlockThen(() => {
+        const groups = groupAbsenceRequests(STATE.absences || []);
+        const g = groups.find(x => x.groupId === groupId);
+        if (!g) return;
+        const idSet = new Set(g.ids);
+        (STATE.absences || []).forEach(a => {
+          if (idSet.has(a.id)) {
+            a.status = "rejected";
+            a.validatedBy = "Chef";
+            a.validatedAt = new Date().toISOString();
+          }
+        });
+        saveStateLocal();
+        renderAll();
+        showToast(`✕ Congés refusés pour ${g.interneName} — planning restauré`);
+        pushStateToCloud({});
+      });
+    }
+
+    function setSingleAbsenceStatus(absId, newStatus) {
+      requireChefUnlockThen(() => {
+        const target = (STATE.absences || []).find(a => a.id === absId);
+        if (!target) return;
+        target.status = newStatus;
+        target.validatedBy = "Chef";
+        target.validatedAt = new Date().toISOString();
+        saveStateLocal();
+        renderAll();
+        showToast(newStatus === "approved" ? "✓ Journée de congé validée par le chef" : "✕ Journée de congé refusée (poste restauré)");
+        pushStateToCloud({});
+      });
+    }
+
+    function approveAllPendingAbsences() {
+      requireChefUnlockThen(() => {
+        let count = 0;
+        (STATE.absences || []).forEach(a => {
+          if ((a.status || "pending") === "pending") {
+            a.status = "approved";
+            a.validatedBy = "Chef";
+            a.validatedAt = new Date().toISOString();
+            count++;
+          }
+        });
+        saveStateLocal();
+        renderAll();
+        showToast(`✓ ${count} jour(s) de congé validés par le chef`);
+        pushStateToCloud({});
+      });
+    }
+
+    function applyChefBlockingDecision(issueId, dIso, periodKey, candidateInterneId, targetPoste, presId) {
+      requireChefUnlockThen(() => {
+        pushChefHistorySnapshot();
+        if (presId) {
+          const pr = (STATE.presentations || []).find(p => p.id === presId);
+          const iObj = getInterneById(candidateInterneId);
+          if (pr && iObj) {
+            pr.interneId = iObj.id;
+            pr.interneName = iObj.shortName;
+          }
+          saveStateLocal();
+          renderAll();
+          showToast(`✓ Décision Chef : ${iObj.shortName} reprend la séance du ${formatDateFr(dIso)}`);
+          pushStateToCloud({ syncStaffSheet: true });
+          return;
+        }
+        const iObj = getInterneById(candidateInterneId);
+        applyInterneSlotChange(dIso, periodKey, candidateInterneId, targetPoste, `Décision Chef : remplacement ${targetPoste}`);
+        currentDateIso = dIso;
+        saveStateLocal();
+        renderAll();
+        showToast(`✓ Décision Chef : ${iObj.shortName} affecté sur ${targetPoste} (${formatDateFr(dIso)} ${periodKey === "am" ? "Matin" : "PM"})`);
+        pushStateToCloud({});
+      });
+    }
+
+    function acknowledgeBlockingIssue(issueId, noteText) {
+      requireChefUnlockThen(() => {
+        if (!STATE.chefDecisions) STATE.chefDecisions = {};
+        STATE.chefDecisions[issueId] = {
+          resolved: true,
+          note: noteText || "Validé en l'état par le chef",
+          decidedAt: new Date().toISOString()
+        };
+        saveStateLocal();
+        renderAll();
+        showToast("✓ Décision Chef enregistrée");
+        pushStateToCloud({});
+      });
+    }
+
+    function resetAllChefDecisions() {
+      requireChefUnlockThen(() => {
+        STATE.chefDecisions = {};
+        saveStateLocal();
+        renderAll();
+        showToast("Alertes de blocage réinitialisées");
+        pushStateToCloud({});
+      });
+    }
+
+    function openBlockingDayInPlanning(dIso) {
+      currentDateIso = dIso;
+      currentTab = "planning";
+      if (planningScope === "chefs" || planningScope === "perso") {
+        planningScope = "internes";
+      }
+      planningMode = "week";
+      document.querySelectorAll(".tab-btn").forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-tab") === "planning");
+      });
+      renderAll();
+    }
+
     function renderChefModeUI() {
       const btn = document.getElementById("chefModeBtn");
       const btnTxt = document.getElementById("chefModeBtnText");
       const banner = document.getElementById("chefPlanningBanner");
+      const tabBtnPlanning = document.getElementById("tabBtnPlanning");
+      const tabBtnVacances = document.getElementById("tabBtnVacances");
+
+      const blocking = computeBlockingDays(STATE);
+      const allGroups = groupAbsenceRequests((STATE.absences || []).filter(a => a && a.status !== "rejected"));
+      const pendingGroups = allGroups.filter(g => g.status === "pending");
+      const totalNotifs = blocking.issues.length + pendingGroups.length;
+      const inChefSpace = (selectedInterneId === "all_chefs" || isChefId(selectedInterneId));
 
       if (btn && btnTxt) {
+        const badgeHtml = totalNotifs > 0
+          ? `<span class="notif-badge ${blocking.issues.length === 0 ? 'warn' : ''}">${totalNotifs}</span>`
+          : "";
         if (isChefPlanningMode) {
           btn.classList.add("unlocked");
-          btnTxt.textContent = "🔓 Mode Chef actif";
+          btnTxt.innerHTML = `🔓 Espace Chef actif ${badgeHtml}`;
         } else {
           btn.classList.remove("unlocked");
-          btnTxt.textContent = "🔒 Mode Chef";
+          btnTxt.innerHTML = `🔒 Espace Chef ${badgeHtml}`;
         }
       }
 
+      if (tabBtnPlanning) {
+        tabBtnPlanning.innerHTML = blocking.issues.length > 0
+          ? `Planning <span class="notif-badge">${blocking.issues.length}</span>`
+          : `Planning`;
+      }
+      if (tabBtnVacances) {
+        tabBtnVacances.innerHTML = pendingGroups.length > 0
+          ? `Congés <span class="notif-badge warn">${pendingGroups.length}</span>`
+          : `Congés`;
+      }
+
       if (!banner) return;
-      if (!isChefPlanningMode) {
-        banner.style.display = "none";
-        banner.innerHTML = "";
+
+      // Si l'Espace Chef n'est pas déverrouillé et qu'on n'est pas sur l'espace Chefs :
+      // afficher une barre d'alerte compacte dès qu'il y a un jour qui bloque ou un congé en attente
+      if (!isChefPlanningMode && !inChefSpace) {
+        if (totalNotifs === 0) {
+          banner.style.display = "none";
+          banner.innerHTML = "";
+          return;
+        }
+        const parts = [];
+        if (blocking.issues.length > 0) {
+          parts.push(`<strong>${blocking.issues.length} créneau(x) qui bloque(nt)</strong> sur le planning interne (décision chef requise)`);
+        }
+        if (pendingGroups.length > 0) {
+          parts.push(`<strong>${pendingGroups.length} demande(s) de vacances</strong> en attente de validation chef`);
+        }
+        banner.style.display = "block";
+        banner.innerHTML = `
+          <div class="chef-alert-strip">
+            <div class="chef-alert-strip-left">
+              <span style="font-size:16px;">🚨</span>
+              <div>
+                <div style="font-weight:800; color:#991B1B;">Notification Espace Chef — Décision requise sur le planning interne</div>
+                <div style="font-size:11.5px; color:#7F1D1D;">${parts.join(" • ")}</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-sm" style="background:#DC2626; color:#FFF; border-color:#B91C1C;" onclick="toggleChefPlanningMode()">🔓 Ouvrir l'Espace Chef & Décider</button>
+            </div>
+          </div>
+        `;
         return;
       }
 
+      // Espace Chef actif (ou sélection Chefs) : afficher le centre de notifications & décisions Chef
       const selInfo = selectedForMove
         ? `<span class="poste-pill poste-tdm">Sélectionné : ${getInterneById(selectedForMove.interneId).shortName} (${formatDateFr(selectedForMove.dIso)} • ${selectedForMove.periodKey === 'am' ? 'Matin' : 'PM'}) — Cliquez sur un autre interne ou poste pour déplacer/échanger</span>`
-        : `Glissez-déposez un interne vers un autre poste (déplacement) ou sur un autre interne (échange automatique). Sur mobile/tablette : touchez un interne puis touchez la case cible.`;
+        : (isChefPlanningMode
+          ? `Mode édition actif : validez les vacances, arbitrez les jours qui bloquent en 1 clic ou glissez-déposez un interne sur le tableau.`
+          : `Consultez les jours qui bloquent et les demandes de congés. Déverrouillez avec le code chef pour valider ou modifier.`);
+
+      // Section 1 : Jours qui bloquent (Décision requise)
+      let blockingCardsHtml = "";
+      if (blocking.issues.length === 0) {
+        blockingCardsHtml = `
+          <div class="chef-item-card ok">
+            <div class="chef-item-top">
+              <span class="chef-item-title" style="color:#065F46;">✓ Aucun jour bloquant sur le semestre</span>
+              <span class="status-pill-approved">Planning OK</span>
+            </div>
+            <div class="chef-item-desc">Tous les créneaux obligatoires (TDM SAU Matin/PM et Relecture Pr Drapé du mardi PM) sont couverts par un interne senior.</div>
+          </div>
+        `;
+      } else {
+        blockingCardsHtml = blocking.issues.map(iss => {
+          const candBtns = (iss.candidates || []).map(c => {
+            const pEsc = String(iss.poste || "").replace(/'/g, "\\'");
+            const prArg = iss.presId ? `'${iss.presId}'` : `null`;
+            return `<button class="btn-decide" onclick="applyChefBlockingDecision('${iss.id}', '${iss.date}', '${iss.periodKey}', '${c.interneId}', '${pEsc}', ${prArg})" title="Affecter ${c.shortName} (actuellement sur ${c.currentPoste || 'présent'})">⚡ Affecter ${c.shortName}${c.currentPoste ? ` (${c.currentPoste === '1/2 journée libre' ? 'Demi-off' : c.currentPoste})` : ''}</button>`;
+          }).join("");
+
+          return `
+            <div class="chef-item-card">
+              <div class="chef-item-top">
+                <span class="chef-item-title">🚨 ${formatDateFr(iss.date, true)} — ${iss.title}</span>
+                <button class="btn btn-sm" style="padding:2px 7px; font-size:10.5px;" onclick="openBlockingDayInPlanning('${iss.date}')">Voir le jour →</button>
+              </div>
+              <div class="chef-item-desc">${iss.detail}</div>
+              <div class="chef-decision-btns">
+                ${candBtns}
+                <button class="btn btn-sm" style="padding:3px 8px; font-size:10.5px; color:#475569;" onclick="acknowledgeBlockingIssue('${iss.id}', 'Maintenu / Géré par les chefs')">✓ Maintenir en l'état (géré)</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Section 2 : Demandes de vacances à valider par le Chef
+      let vacCardsHtml = "";
+      if (pendingGroups.length === 0) {
+        const approvedCount = allGroups.filter(g => g.status === "approved").length;
+        vacCardsHtml = `
+          <div class="chef-item-card ok">
+            <div class="chef-item-top">
+              <span class="chef-item-title" style="color:#065F46;">✓ Toutes les demandes de congés sont traitées</span>
+              <span class="status-pill-approved">${approvedCount} période(s) validée(s)</span>
+            </div>
+            <div class="chef-item-desc">Aucune demande de vacances en attente de validation chef. <a href="javascript:void(0)" onclick="switchTab('vacances')" style="color:#0284C7; font-weight:700;">Gérer tous les congés →</a></div>
+          </div>
+        `;
+      } else {
+        vacCardsHtml = pendingGroups.map(g => {
+          const iObj = getInterneById(g.interneId);
+          const periodLabel = g.startDate === g.endDate
+            ? formatDateFr(g.startDate, true)
+            : `Du ${formatDateFr(g.startDate)} au ${formatDateFr(g.endDate, true)} (${g.dates.length} j.)`;
+
+          // Vérifier si cette période de congé provoque des jours bloquants
+          const groupBlocks = g.dates.filter(dIso => blocking.byDate[dIso] && blocking.byDate[dIso].length > 0);
+          const blockWarnHtml = groupBlocks.length > 0
+            ? `<div style="font-size:10.5px; color:#B91C1C; font-weight:700;">⚠️ Génère un blocage sur ${groupBlocks.map(d => formatDateFr(d)).join(", ")} (ex: TDM SAU / Biblio non couvert)</div>`
+            : `<div style="font-size:10.5px; color:#047857; font-weight:600;">✓ Aucun doublon de congé détecté sur la période</div>`;
+
+          return `
+            <div class="chef-item-card warn">
+              <div class="chef-item-top">
+                <span class="chef-item-title">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${iObj.color}; margin-right:4px;"></span>
+                  ${iObj.fullName} — <span class="poste-pill poste-vac">${g.type}</span>
+                </span>
+                <span class="status-pill-pending">⏳ À valider par le chef</span>
+              </div>
+              <div class="chef-item-desc">
+                <strong>${periodLabel}</strong> ${g.comment ? `• <em>${g.comment}</em>` : ""}
+                ${blockWarnHtml}
+              </div>
+              <div class="chef-decision-btns">
+                <button class="btn-approve" onclick="approveAbsenceGroup('${g.groupId}')">✓ Valider les vacances</button>
+                <button class="btn-reject" onclick="rejectAbsenceGroup('${g.groupId}')">✕ Refuser (restaurer postes)</button>
+                <button class="btn btn-sm" style="padding:3px 8px; font-size:10.5px;" onclick="openBlockingDayInPlanning('${g.startDate}')">Voir sur le planning</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
 
       banner.style.display = "block";
       banner.innerHTML = `
-        <div class="chef-mode-banner">
-          <div>
-            <div class="chef-mode-title">
-              <span>🔓 Mode Chef de Planning — Édition directe par Drag & Drop</span>
+        <div class="chef-dashboard-panel">
+          <div class="chef-dashboard-header">
+            <div>
+              <div class="chef-mode-title">
+                <span>${isChefPlanningMode ? "🔓 Espace Chef de Planning — Centre de Décision & Validation" : "👨‍⚕️ Espace Chef — Notifications du Planning Interne"}</span>
+                ${blocking.issues.length > 0 ? `<span class="notif-badge">${blocking.issues.length} blocage(s)</span>` : `<span class="status-pill-approved">0 blocage</span>`}
+                ${pendingGroups.length > 0 ? `<span class="notif-badge warn">${pendingGroups.length} congé(s) à valider</span>` : ""}
+              </div>
+              <div class="chef-mode-sub">${selInfo}</div>
             </div>
-            <div class="chef-mode-sub">${selInfo}</div>
+            <div class="chef-mode-actions">
+              ${selectedForMove ? `<button class="btn btn-sm" onclick="cancelSelectedForMove()">Annuler sélection</button>` : ""}
+              ${chefHistoryStack.length > 0 ? `<button class="btn btn-sm" onclick="undoLastChefMove()">↩ Annuler (${chefHistoryStack.length})</button>` : ""}
+              ${Object.keys(STATE.chefDecisions || {}).length > 0 ? `<button class="btn btn-sm" onclick="resetAllChefDecisions()">Réafficher alertes masquées</button>` : ""}
+              ${isChefPlanningMode
+                ? `<button class="btn btn-sm" onclick="resetCurrentWeekVacations()" style="color:#B45309; border-color:#F59E0B;">Réinitialiser la semaine</button>
+                   <button class="btn btn-sm" onclick="toggleChefPlanningMode()" style="background:#92400E; color:#FFF; border-color:#92400E;">Verrouiller</button>`
+                : `<button class="btn btn-sm" onclick="toggleChefPlanningMode()" style="background:#0284C7; color:#FFF; border-color:#0284C7;">🔓 Déverrouiller avec le code Chef</button>`}
+            </div>
           </div>
-          <div class="chef-mode-actions">
-            ${selectedForMove ? `<button class="btn btn-sm" onclick="cancelSelectedForMove()">Annuler sélection</button>` : ""}
-            ${chefHistoryStack.length > 0 ? `<button class="btn btn-sm" onclick="undoLastChefMove()">↩ Annuler (${chefHistoryStack.length})</button>` : ""}
-            <button class="btn btn-sm" onclick="resetCurrentWeekVacations()" style="color:#B45309; border-color:#F59E0B;">Réinitialiser la semaine</button>
-            <button class="btn btn-sm" onclick="toggleChefPlanningMode()" style="background:#92400E; color:#FFF; border-color:#92400E;">Verrouiller</button>
+
+          <div class="chef-notif-grid">
+            <div class="chef-notif-section">
+              <div class="chef-notif-section-title">
+                <span>🚨 Jours qui bloquent — Décision Chef (${blocking.issues.length})</span>
+              </div>
+              ${blockingCardsHtml}
+            </div>
+            <div class="chef-notif-section">
+              <div class="chef-notif-section-title">
+                <span>🏖️ Validation des Vacances & RG par le Chef (${pendingGroups.length} en attente)</span>
+                ${pendingGroups.length > 1 ? `<button class="btn-approve" onclick="approveAllPendingAbsences()">✓ Tout valider</button>` : ""}
+              </div>
+              ${vacCardsHtml}
+            </div>
           </div>
         </div>
       `;
@@ -2174,6 +3034,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           ? tgtDayObj.byInterne[target.targetInterneId][target.periodKey]
           : target.toPoste;
 
+        const [yyS, mmS, ddS] = source.dIso.split("-").map(Number);
+        const jsDayS = new Date(yyS, mmS - 1, ddS).getDay();
+        const [yyT, mmT, ddT] = target.dIso.split("-").map(Number);
+        const jsDayT = new Date(yyT, mmT - 1, ddT).getDay();
+        if ((source.periodKey === "pm" && (jsDayS === 2 || jsDayS === 5) && tgtPoste === "1/2 journée libre") ||
+            (target.periodKey === "pm" && (jsDayT === 2 || jsDayT === 5) && srcPoste === "1/2 journée libre")) {
+          showToast("Règle du service : pas de demi-off le mardi après-midi ni le vendredi après-midi.");
+          selectedForMove = null;
+          renderAll();
+          return;
+        }
+
         pushChefHistorySnapshot();
         applyInterneSlotChange(source.dIso, source.periodKey, source.interneId, tgtPoste);
         applyInterneSlotChange(target.dIso, target.periodKey, target.targetInterneId, srcPoste);
@@ -2192,6 +3064,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
       // Déplacement vers une ligne de poste
       if (!target.toPoste || target.toPoste === source.fromPoste) {
+        selectedForMove = null;
+        renderAll();
+        return;
+      }
+
+      const [yyM, mmM, ddM] = source.dIso.split("-").map(Number);
+      const jsDayM = new Date(yyM, mmM - 1, ddM).getDay();
+      if (source.periodKey === "pm" && (jsDayM === 2 || jsDayM === 5) && target.toPoste === "1/2 journée libre") {
+        showToast("Règle du service : pas de demi-off le mardi après-midi ni le vendredi après-midi.");
         selectedForMove = null;
         renderAll();
         return;
@@ -2306,10 +3187,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function renderInterneSelector() {
       const bar = document.getElementById("interneSelectorBar");
       const inChefSpace = (selectedInterneId === "all_chefs" || isChefId(selectedInterneId));
+      const blocking = computeBlockingDays(STATE);
+      const pendingGroups = groupAbsenceRequests((STATE.absences || []).filter(a => a && a.status !== "rejected")).filter(g => g.status === "pending");
+      const totalChefAlerts = blocking.issues.length + pendingGroups.length;
+      const chefAlertBadge = totalChefAlerts > 0
+        ? `<span class="notif-badge ${blocking.issues.length === 0 ? 'warn' : ''}">${totalChefAlerts}</span>`
+        : "";
+
       let html = `
         <div class="segmented">
           <button class="seg-btn ${!inChefSpace ? 'active' : ''}" onclick="switchRoleSpace('internes')">Internes</button>
-          <button class="seg-btn ${inChefSpace ? 'active' : ''}" onclick="switchRoleSpace('chefs')">Chefs</button>
+          <button class="seg-btn ${inChefSpace ? 'active' : ''}" onclick="switchRoleSpace('chefs')">Chefs ${chefAlertBadge}</button>
         </div>
         <div class="person-chips">
       `;
@@ -2437,7 +3325,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div class="avatar-sm" style="background:#0284C7">6</div>
             <div>
               <div class="summary-title">Tous les internes & DJ (6)</div>
-              <div class="summary-sub">Oussama Docteur Junior (DJ) • Noé en Phase Socle (doublé aux Urgences TDM SAU, avec Macil les 3 premiers mardis)</div>
+              <div class="summary-sub">Oussama Docteur Junior (DJ) • Noé en Phase Socle (posté au TDM SAU ~50 %, avec Macil les 3 premiers mardis)</div>
             </div>
           </div>
           <div class="summary-stats">
@@ -2564,6 +3452,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function renderPlanningTab() {
       const monIso = getMondayOfWeek(currentDateIso);
       const friIso = addDaysIso(monIso, 4);
+      const blocking = computeBlockingDays(STATE);
 
       let headerLabel = "";
       if (planningMode === "day") {
@@ -2583,16 +3472,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         const dIso = addDaysIso(monIso, offset);
         const [yy, mm, dd] = dIso.split("-").map(Number);
         const isAct = (dIso === currentDateIso) ? "active" : "";
+        const dayIssues = blocking.byDate[dIso] || [];
+        const isBlock = dayIssues.length > 0 ? "blocking-day" : "";
         const g = (STATE.chefsGardes && STATE.chefsGardes[dIso] && STATE.chefsGardes[dIso].noms)
           ? STATE.chefsGardes[dIso].noms.join("/")
           : "";
         dayStripHtml += `
-          <div class="day-pill ${isAct}" onclick="setCurrentDate('${dIso}')">
+          <div class="day-pill ${isAct} ${isBlock}" onclick="setCurrentDate('${dIso}')" title="${dayIssues.length ? dayIssues.map(x => x.title).join(' • ') : ''}">
             <div class="dp-top">
-              <span class="dp-dow">${dNames[offset]}</span>
+              <span class="dp-dow">${dNames[offset]}${dayIssues.length ? ' 🚨' : ''}</span>
               <span class="dp-date">${String(dd).padStart(2, "0")}/${String(mm).padStart(2, "0")}</span>
             </div>
-            ${g ? `<div class="dp-sub">Garde: ${g}</div>` : ``}
+            ${dayIssues.length
+              ? `<div class="dp-sub" style="color:${isAct ? '#FDE68A' : '#DC2626'}; font-weight:800;">⚠️ Jour bloquant (${dayIssues.length})</div>`
+              : (g ? `<div class="dp-sub">Garde: ${g}</div>` : ``)}
           </div>
         `;
       }
@@ -2805,6 +3698,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function renderCombinedChefsInternesView(monIso) {
       const days = [0, 1, 2, 3, 4].map(off => addDaysIso(monIso, off));
       const sectors = [
+        { label: "FORMATION / ACCUEIL", chefMatch: [], intMatch: ["FORMATION / ACCUEIL"], defaultPosteAm: "FORMATION / ACCUEIL", defaultPostePm: "FORMATION / ACCUEIL", onlyIfPresent: true },
         { label: "ECHO", chefMatch: ["ECHO"], intMatch: ["ECHO"], defaultPosteAm: "ECHO", defaultPostePm: "ECHO" },
         { label: "GESTES (C)", chefMatch: ["GESTES"], intMatch: ["GESTES (C)"], defaultPosteAm: "GESTES (C)", defaultPostePm: "GESTES (C)" },
         { label: "TDM SAU", chefMatch: ["SAU", "OLLIER 4"], intMatch: ["TDM SAU"], defaultPosteAm: "TDM SAU", defaultPostePm: "TDM SAU" },
@@ -2819,6 +3713,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       function buildCombinedPeriodRows(periodKey) {
         let rows = "";
         sectors.forEach(sec => {
+          if (sec.onlyIfPresent) {
+            const hasAny = days.some(dIso => {
+              const intDay = (STATE.schedule && STATE.schedule[dIso]) ? (STATE.schedule[dIso][periodKey] || []) : [];
+              return intDay.some(x => sec.intMatch.includes(x.poste));
+            });
+            if (!hasAny) return;
+          }
           const targetPoste = periodKey === "am" ? sec.defaultPosteAm : sec.defaultPostePm;
           const escPoste = targetPoste.replace(/'/g, "\\'");
           rows += `<tr><td>${renderPosteCellLabel(sec.label, periodKey)}</td>`;
@@ -2874,7 +3775,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       let gardeRowHtml = `<tr><td><span class="poste-pill poste-rg">GARDE</span></td>`;
       days.forEach(dIso => {
         const g = STATE.chefsGardes ? STATE.chefsGardes[dIso] : null;
-        gardeRowHtml += `<td>${g && g.noms ? `<span style="font-weight:700; color:#B91C1C;">Dr ${g.noms.join(", ")}</span>` : '—'}</td>`;
+        gardeRowHtml += `<td>${g && g.noms ? `<span class="garde-name" style="font-weight:700; color:#B91C1C;" title="Dr ${g.noms.join(", ")}"><span class="garde-dr">Dr </span>${g.noms.join(", ")}</span>` : '—'}</td>`;
       });
       gardeRowHtml += `</tr>`;
 
@@ -2905,8 +3806,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     function renderWeekPlanningView(monIso) {
       const days = [0, 1, 2, 3, 4].map(off => addDaysIso(monIso, off));
-      const postesAm = ["ECHO", "GESTES (C)", "TDM SAU", "TDM OLLIER DIAG", "IRM 3T", "IRM 1,5T", "SCAN ACHARD", "LECTURE/CS", "1/2 journée libre", "RG", "VACANCES"];
+      const postesAm = ["FORMATION / ACCUEIL", "ECHO", "GESTES (C)", "TDM SAU", "TDM OLLIER DIAG", "IRM 3T", "IRM 1,5T", "SCAN ACHARD", "LECTURE/CS", "1/2 journée libre", "RG", "VACANCES"];
       const postesPm = ["GESTES (C)", "TDM OLLIER DIAG", "TDM SAU", "IRM", "ECHO", "ALLURA", "SCAN ACHARD", "LECTURE/CS", "1/2 journée libre", "RG", "VACANCES"];
+      const blocking = computeBlockingDays(STATE);
 
       if (planningScope === "perso") {
         const me = getInterneById(selectedInterneId === "all" ? "gabriel" : selectedInterneId);
@@ -2952,6 +3854,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             if (!dObj || !dObj[periodKey]) return false;
             return dObj[periodKey].some(x => x.poste === posteName);
           });
+          if (!hasAny && posteName === "FORMATION / ACCUEIL") return;
           if (periodKey === "am" && posteName === "LECTURE/CS" && !hasAny && !isChefPlanningMode) return;
           if (!isChefPlanningMode && !hasAny && (posteName === "RG" || posteName === "VACANCES")) return;
 
@@ -2968,15 +3871,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               return;
             }
             const matches = (dObj[periodKey] || []).filter(x => x.poste === posteName);
+            const cellIssue = (blocking.byDate[dIso] || []).find(iss => iss.periodKey === periodKey && iss.poste === posteName);
             const canDrop = isChefPlanningMode;
             const isTapTarget = canDrop && selectedForMove && selectedForMove.dIso === dIso && selectedForMove.periodKey === periodKey;
-            const tdClass = canDrop ? `drop-zone-cell ${isTapTarget ? 'tap-target-ready' : ''}` : "";
+            const tdClass = [
+              canDrop ? "drop-zone-cell" : "",
+              isTapTarget ? "tap-target-ready" : "",
+              cellIssue ? "cell-blocking-alert" : ""
+            ].filter(Boolean).join(" ");
             const tdAttrs = canDrop
               ? `ondragover="onCellDragOver(event, '${dIso}', '${periodKey}')" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event, '${dIso}', '${periodKey}', '${escPoste}')" onclick="onChefCellClick(event, '${dIso}', '${periodKey}', '${escPoste}')"`
               : "";
 
+            const issueBannerHtml = cellIssue
+              ? `<div style="margin-top:3px;"><span class="poste-pill poste-rg" style="font-size:9.5px; cursor:pointer; background:#DC2626; color:#FFF;" onclick="openChefSpacePanel()">🚨 BLOQUE : Décision Chef</span></div>`
+              : "";
+
             if (matches.length === 0) {
-              rowsHtml += `<td class="${tdClass}" ${tdAttrs} style="color:#CBD5E1">—</td>`;
+              rowsHtml += `<td class="${tdClass}" ${tdAttrs} style="color:#CBD5E1">${cellIssue ? issueBannerHtml : '—'}</td>`;
             } else {
               const [yy, mm, dd] = dIso.split("-").map(Number);
               const jsDay = new Date(yy, mm - 1, dd).getDay();
@@ -3000,6 +3912,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 } else if (m.binome) {
                   binomeHtml = `<span class="tag-binome">Binôme</span>`;
                 }
+                let vacStatusHtml = "";
+                if (posteName === "VACANCES" || posteName === "RG") {
+                  if (m.absStatus === "pending") {
+                    vacStatusHtml = `<span class="status-pill-pending" style="font-size:8.5px; padding:1px 4px;">⏳ À valider</span>`;
+                  } else if (m.absStatus === "approved") {
+                    vacStatusHtml = `<span class="status-pill-approved" style="font-size:8.5px; padding:1px 4px;">✓ Validé</span>`;
+                  }
+                }
                 const dragAttrs = isChefPlanningMode
                   ? `draggable="true" ondragstart="onInterneDragStart(event, '${dIso}', '${periodKey}', '${m.interneId}', '${escPoste}')" ondragend="onInterneDragEnd(event)" ondragover="onCellDragOver(event, '${dIso}', '${periodKey}')" ondrop="onBadgeDrop(event, '${dIso}', '${periodKey}', '${m.interneId}', '${escPoste}')"`
                   : "";
@@ -3010,9 +3930,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                   ${socleHtml}
                   ${djHtml}
                   ${binomeHtml}
+                  ${vacStatusHtml}
                 </span>`;
               }).join(" ");
-              rowsHtml += `<td class="${tdClass}" ${tdAttrs}>${badges}</td>`;
+              rowsHtml += `<td class="${tdClass}" ${tdAttrs}>${badges}${issueBannerHtml}</td>`;
             }
           });
           rowsHtml += `</tr>`;
@@ -3029,8 +3950,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           const isBone = p.type === "bone_club";
           const isCra = p.type === "confrontation_anapath";
           const isCoursInt = p.type === "cours_internes";
-          const bg = isBone ? "#FEF2F2" : (isCra ? "#FEF3C7" : (isCoursInt ? "#DBEAFE" : "#F3E8FF"));
-          const fg = isBone ? "#B91C1C" : (isCra ? "#B45309" : (isCoursInt ? "#1D4ED8" : "#6D28D9"));
+          const presBlock = (blocking.byDate[dIso] || []).find(iss => iss.category === "pres_absent" && iss.presId === p.id);
+          const bg = presBlock ? "#FEE2E2" : (isBone ? "#FEF2F2" : (isCra ? "#FEF3C7" : (isCoursInt ? "#DBEAFE" : "#F3E8FF")));
+          const fg = presBlock ? "#991B1B" : (isBone ? "#B91C1C" : (isCra ? "#B45309" : (isCoursInt ? "#1D4ED8" : "#6D28D9")));
           const lbl = isBone
             ? `Bone Club`
             : (isCra
@@ -3038,8 +3960,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               : (isCoursInt
                 ? `Cours 12h30`
                 : (p.type === 'cas_mardi' ? 'Cas 12h30' : 'Biblio 12h30')));
-          cell += `<div style="font-size:9.5px; margin-bottom:2px; padding:2px 4px; border-radius:4px; background:${bg}; cursor:pointer; line-height:1.15;" onclick="openPresentationModal('${p.id}')">
-            <strong style="color:${fg}">${lbl} :</strong> ${p.interneName}
+          cell += `<div style="font-size:9.5px; margin-bottom:2px; padding:2px 4px; border-radius:4px; background:${bg}; cursor:pointer; line-height:1.15; ${presBlock ? 'border:1px solid #EF4444;' : ''}" onclick="openPresentationModal('${p.id}')">
+            <strong style="color:${fg}">${lbl} :</strong> ${p.interneName} ${presBlock ? '<span style="color:#DC2626; font-weight:800;">(🚨 Absent)</span>' : ''}
           </div>`;
         });
         meets.forEach(m => {
@@ -3055,7 +3977,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       let gardeRowHtml = `<tr><td><span class="poste-pill poste-rg">GARDE</span></td>`;
       days.forEach(dIso => {
         const g = STATE.chefsGardes ? STATE.chefsGardes[dIso] : null;
-        gardeRowHtml += `<td>${g && g.noms ? `<span style="font-weight:700; color:#B91C1C;">Dr ${g.noms.join(", ")}</span>` : '—'}</td>`;
+        gardeRowHtml += `<td>${g && g.noms ? `<span class="garde-name" style="font-weight:700; color:#B91C1C;" title="Dr ${g.noms.join(", ")}"><span class="garde-dr">Dr </span>${g.noms.join(", ")}</span>` : '—'}</td>`;
       });
       gardeRowHtml += `</tr>`;
 
@@ -3066,7 +3988,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <thead>
                 <tr>
                   <th class="col-poste">POSTE</th>
-                  ${days.map(d => `<th>${formatShortDayHeader(d)}</th>`).join("")}
+                  ${days.map(d => {
+                    const dIss = blocking.byDate[d] || [];
+                    return `<th style="${dIss.length ? 'background:#FEF2F2; color:#991B1B;' : ''}">
+                      ${formatShortDayHeader(d)}
+                      ${dIss.length ? `<div style="font-size:9px; color:#DC2626; font-weight:800; cursor:pointer;" onclick="openChefSpacePanel()">🚨 Jour qui bloque (${dIss.length})</div>` : ''}
+                    </th>`;
+                  }).join("")}
                 </tr>
               </thead>
               <tbody>
@@ -3089,6 +4017,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     function renderDayPlanningView(iso) {
       const dObj = STATE.schedule[iso];
       const gSenior = STATE.chefsGardes ? STATE.chefsGardes[iso] : null;
+      const blocking = computeBlockingDays(STATE);
+      const dayIssues = blocking.byDate[iso] || [];
       if (!dObj) {
         return `
           <div class="card">
@@ -3151,12 +4081,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         `;
       });
 
+      const dayBlockAlertHtml = dayIssues.length > 0 ? `
+        <div class="chef-alert-strip" style="margin-bottom:10px;">
+          <div class="chef-alert-strip-left">
+            <span>🚨</span>
+            <div>
+              <div style="font-weight:800;">Ce jour bloque sur le planning interne (${dayIssues.length} décision(s) requise(s))</div>
+              <div style="font-size:11.5px;">${dayIssues.map(x => x.title).join(" • ")}</div>
+            </div>
+          </div>
+          <button class="btn btn-sm" style="background:#DC2626; color:#FFF; border-color:#B91C1C;" onclick="openChefSpacePanel()">Arbitrer dans l'Espace Chef</button>
+        </div>
+      ` : "";
+
       return `
         <div class="card">
           <div class="card-header">
             <div class="card-title">${formatDateFr(iso, true)}</div>
             ${gSenior && gSenior.noms ? `<span class="poste-pill poste-rg">Garde : Dr ${gSenior.noms.join(", ")}</span>` : ''}
           </div>
+          ${dayBlockAlertHtml}
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px;">
             <div>
               <div style="font-size:12px; font-weight:800; margin-bottom:6px;">${isChefPlanningMode ? "Internes & DJ (glissez-déposez un créneau sur un autre interne pour échanger)" : "Internes & DJ (cliquez pour modifier)"}</div>
@@ -3270,7 +4214,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       let gardeRowHtml = `<tr><td><span class="poste-pill poste-rg">GARDE</span></td>`;
       days.forEach(dIso => {
         const g = STATE.chefsGardes ? STATE.chefsGardes[dIso] : null;
-        gardeRowHtml += `<td>${g && g.noms ? `<span style="font-weight:700; color:#B91C1C;">Dr ${g.noms.join(", ")}</span>` : '—'}</td>`;
+        gardeRowHtml += `<td>${g && g.noms ? `<span class="garde-name" style="font-weight:700; color:#B91C1C;" title="Dr ${g.noms.join(", ")}"><span class="garde-dr">Dr </span>${g.noms.join(", ")}</span>` : '—'}</td>`;
       });
       gardeRowHtml += `</tr>`;
 
@@ -3373,7 +4317,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }
 
     /* =========================================================================
-     * ONGLET 2 : CONGÉS & RG
+     * ONGLET 2 : CONGÉS & RG (AVEC VALIDATION CHEF DANS L'ESPACE CHEF)
      * ========================================================================= */
     function renderVacancesTab() {
       const absences = (STATE.absences || []).slice().sort((a, b) => a.date.localeCompare(b.date));
@@ -3381,24 +4325,76 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         ? absences
         : absences.filter(a => a.interneId === selectedInterneId);
 
+      const blocking = computeBlockingDays(STATE);
       const countByDate = {};
       absences.forEach(a => {
+        if (a.status === "rejected") return;
         if (a.type !== "Repos de garde") {
           countByDate[a.date] = (countByDate[a.date] || 0) + 1;
         }
       });
 
+      const groupedRequests = groupAbsenceRequests(filtered);
+      let groupsHtml = "";
+      if (groupedRequests.length > 0) {
+        groupsHtml = `
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:8px; margin-bottom:12px;">
+            ${groupedRequests.map(g => {
+              const iObj = getInterneById(g.interneId);
+              const periodLabel = g.startDate === g.endDate
+                ? formatDateFr(g.startDate, true)
+                : `Du ${formatDateFr(g.startDate)} au ${formatDateFr(g.endDate, true)} (${g.dates.length} j.)`;
+              const statusBadge = g.status === "approved"
+                ? `<span class="status-pill-approved">✓ Validé par le chef</span>`
+                : (g.status === "rejected"
+                  ? `<span class="status-pill-rejected">✕ Refusé par le chef</span>`
+                  : `<span class="status-pill-pending">⏳ En attente de validation chef</span>`);
+              const blockDates = g.dates.filter(d => blocking.byDate[d] && blocking.byDate[d].length > 0);
+              return `
+                <div class="chef-item-card ${g.status === 'approved' ? 'ok' : (g.status === 'pending' ? 'warn' : '')}">
+                  <div class="chef-item-top">
+                    <span class="chef-item-title">
+                      <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${iObj.color}; margin-right:4px;"></span>
+                      ${iObj.fullName} — <span class="poste-pill poste-vac">${g.type}</span>
+                    </span>
+                    ${statusBadge}
+                  </div>
+                  <div class="chef-item-desc">
+                    <strong>${periodLabel}</strong> ${g.comment ? `• ${g.comment}` : ""}
+                    ${blockDates.length > 0 && g.status !== "rejected"
+                      ? `<div style="color:#B91C1C; font-weight:700; margin-top:2px;">🚨 Bloque le planning sur : ${blockDates.map(d => formatDateFr(d)).join(", ")}</div>`
+                      : ""}
+                  </div>
+                  <div class="chef-decision-btns">
+                    ${g.status !== "approved" ? `<button class="btn-approve" onclick="approveAbsenceGroup('${g.groupId}')">✓ Valider (Chef)</button>` : ""}
+                    ${g.status !== "rejected" ? `<button class="btn-reject" onclick="rejectAbsenceGroup('${g.groupId}')">✕ Refuser (Chef)</button>` : ""}
+                    <button class="btn btn-sm" style="padding:3px 8px; font-size:10.5px;" onclick="openBlockingDayInPlanning('${g.startDate}')">Voir semaine</button>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+      }
+
       let rowsHtml = "";
       if (filtered.length === 0) {
-        rowsHtml = `<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--text-muted);">Aucun congé enregistré. Utilisez le bouton "+ Ajouter" en haut à droite.</td></tr>`;
+        rowsHtml = `<tr><td colspan="7" style="text-align:center; padding:18px; color:var(--text-muted);">Aucun congé enregistré. Utilisez le bouton "+ Poser un congé".</td></tr>`;
       } else {
         filtered.forEach(a => {
           const iObj = getInterneById(a.interneId);
           const simCount = countByDate[a.date] || 1;
           const isOverLimit = simCount > 2;
+          const dayBlocks = blocking.byDate[a.date] || [];
+          const st = a.status || "pending";
+          const statusHtml = st === "approved"
+            ? `<span class="status-pill-approved">✓ Validé Chef</span>`
+            : (st === "rejected"
+              ? `<span class="status-pill-rejected">✕ Refusé Chef</span>`
+              : `<span class="status-pill-pending">⏳ À valider Chef</span>`);
 
           rowsHtml += `
-            <tr>
+            <tr style="${st === 'rejected' ? 'opacity:0.55; text-decoration:line-through;' : ''}">
               <td style="font-weight:700;">${formatDateFr(a.date, true)}</td>
               <td>${iObj.shortName}</td>
               <td><span class="poste-pill ${a.type.includes('garde') ? 'poste-rg' : 'poste-vac'}">${a.type}</span></td>
@@ -3406,10 +4402,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
               <td>
                 ${isOverLimit
                   ? `<span class="poste-pill poste-rg">${simCount} absents (max 2)</span>`
-                  : `<span class="poste-pill poste-vac">OK (${simCount}/2)</span>`}
+                  : `<span class="poste-pill poste-vac">Quota OK (${simCount}/2)</span>`}
+                ${dayBlocks.length > 0 && st !== "rejected"
+                  ? `<span class="poste-pill poste-rg" style="margin-left:4px; cursor:pointer;" onclick="openBlockingDayInPlanning('${a.date}')">🚨 Jour bloquant</span>`
+                  : ""}
               </td>
+              <td>${statusHtml}</td>
               <td>
-                <button class="btn btn-sm" onclick="deleteAbsence('${a.id}')" style="color:#DC2626;">Supprimer</button>
+                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                  ${st !== "approved" ? `<button class="btn-approve" onclick="setSingleAbsenceStatus('${a.id}', 'approved')">✓ Valider</button>` : ""}
+                  ${st !== "rejected" ? `<button class="btn-reject" onclick="setSingleAbsenceStatus('${a.id}', 'rejected')">✕ Refuser</button>` : ""}
+                  <button class="btn btn-sm" onclick="deleteAbsence('${a.id}')" style="color:#64748B;">Suppr.</button>
+                </div>
               </td>
             </tr>
           `;
@@ -3420,11 +4424,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="card">
           <div class="card-header">
             <div>
-              <div class="card-title">Congés & Repos de garde</div>
-              <div style="font-size:12px; color:var(--text-muted);">Maximum 2 internes absents en même temps • Éviter mardi et vendredi pour les jours isolés</div>
+              <div class="card-title">Congés & Repos de garde — Validation Chef dans l'Espace Chef</div>
+              <div style="font-size:12px; color:var(--text-muted);">Les vacances sont validées par le chef dans l'Espace Chef • Max 2 internes absents simultanément • Éviter mardi/vendredi isolés</div>
             </div>
-            <button class="btn btn-sm btn-primary" onclick="openAbsenceModal()">+ Poser un congé</button>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${!isChefPlanningMode ? `<button class="btn btn-sm" onclick="toggleChefPlanningMode()" style="border-color:#F59E0B; color:#B45309; font-weight:700;">🔒 Déverrouiller Espace Chef</button>` : ""}
+              <button class="btn btn-sm btn-primary" onclick="openAbsenceModal()">+ Poser un congé</button>
+            </div>
           </div>
+
+          ${groupsHtml}
 
           <div class="week-table-wrap">
             <table class="planning-table">
@@ -3434,8 +4443,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                   <th>Interne</th>
                   <th>Type</th>
                   <th>Note</th>
-                  <th>Statut</th>
-                  <th>Action</th>
+                  <th>Impact Planning</th>
+                  <th>Validation Chef</th>
+                  <th>Décision / Action</th>
                 </tr>
               </thead>
               <tbody>${rowsHtml}</tbody>
@@ -3445,6 +4455,55 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       `;
     }
 
+    function previewAbsenceRuleWarning() {
+      const warnEl = document.getElementById("absRuleWarning");
+      if (!warnEl) return;
+      const iid = document.getElementById("absInterneSelect") ? document.getElementById("absInterneSelect").value : "gabriel";
+      const type = document.getElementById("absTypeSelect") ? document.getElementById("absTypeSelect").value : "CA 1";
+      const startIso = document.getElementById("absStartDate") ? document.getElementById("absStartDate").value : "";
+      const endIso = (document.getElementById("absEndDate") && document.getElementById("absEndDate").value) || startIso;
+      if (!startIso || endIso < startIso) {
+        warnEl.style.display = "none";
+        return;
+      }
+
+      const warnings = [];
+      let cur = startIso;
+      let weekdays = 0;
+      const tueFriDates = [];
+      while (cur <= endIso) {
+        const [yy, mm, dd] = cur.split("-").map(Number);
+        const jsDay = new Date(yy, mm - 1, dd).getDay();
+        if (jsDay >= 1 && jsDay <= 5) {
+          weekdays++;
+          if (jsDay === 2 || jsDay === 5) tueFriDates.push(formatDateFr(cur));
+          const otherAbs = (STATE.absences || []).filter(a => a.date === cur && a.interneId !== iid && a.status !== "rejected");
+          if (otherAbs.length >= 2) {
+            warnings.push(`🚨 <strong>${formatDateFr(cur)}</strong> : déjà ${otherAbs.length} internes absents (${otherAbs.map(x => getInterneById(x.interneId).shortName).join(", ")}) — dépasse la limite de 2.`);
+          }
+          const baseSched = INITIAL_DATA.baseSchedule || INITIAL_DATA.schedule;
+          const dOrig = baseSched[cur];
+          if (dOrig && dOrig.byInterne && dOrig.byInterne[iid]) {
+            const sl = dOrig.byInterne[iid];
+            if (sl.am === "TDM SAU" || sl.pm === "TDM SAU") {
+              warnings.push(`⚠️ <strong>${formatDateFr(cur)}</strong> : vous êtes prévu(e) sur <strong>TDM SAU</strong> (Urgences obligatoires) — générera une notification de décision dans l'Espace Chef.`);
+            }
+          }
+        }
+        cur = addDaysIso(cur, 1);
+      }
+      if (weekdays > 0 && weekdays <= 2 && tueFriDates.length > 0 && type !== "Repos de garde") {
+        warnings.push(`⚠️ Congé isolé un Mardi/Vendredi (${tueFriDates.join(", ")}) : soumission soumise à arbitrage du Chef.`);
+      }
+
+      if (warnings.length > 0) {
+        warnEl.style.display = "block";
+        warnEl.innerHTML = warnings.join("<br>");
+      } else {
+        warnEl.style.display = "none";
+      }
+    }
+
     function openAbsenceModal(defaultInterneId) {
       const sel = document.getElementById("absInterneSelect");
       const target = defaultInterneId || ((!isChefId(selectedInterneId) && selectedInterneId !== "all" && selectedInterneId !== "all_chefs") ? selectedInterneId : "gabriel");
@@ -3452,7 +4511,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       document.getElementById("absStartDate").value = currentDateIso;
       document.getElementById("absEndDate").value = currentDateIso;
       document.getElementById("absComment").value = "";
-      document.getElementById("absRuleWarning").style.display = "none";
+      previewAbsenceRuleWarning();
       document.getElementById("modalAbsence").classList.add("open");
     }
 
@@ -3469,6 +4528,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         return;
       }
 
+      // Si le chef est déjà connecté en Mode Chef, la pose est directement validée ; sinon elle est en attente ("pending") de validation dans l'Espace Chef
+      const initialStatus = isChefPlanningMode ? "approved" : "pending";
+
       let cur = startIso;
       const addedDates = [];
       while (cur <= endIso) {
@@ -3480,6 +4542,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           interneId: iid,
           interneName: iObj.fullName,
           type,
+          status: initialStatus,
           comment,
           createdAt: new Date().toISOString()
         });
@@ -3490,7 +4553,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       saveStateLocal();
       closeModal("modalAbsence");
       renderAll();
-      showToast(`Congé enregistré (${addedDates.length} j.)`);
+      showToast(
+        initialStatus === "approved"
+          ? `✓ Congé enregistré et validé (${addedDates.length} j.)`
+          : `⏳ Demande envoyée dans l'Espace Chef pour validation (${addedDates.length} j.)`
+      );
       pushStateToCloud({ syncAbsenceSheet: true, addedDates, interneName: iObj.fullName, absType: type });
     }
 
@@ -4036,6 +5103,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       const pm = document.getElementById("vacEditPm").value;
       const note = document.getElementById("vacEditNote").value.trim();
 
+      // Vérification stricte : pas de demi-off le mardi après-midi ni le vendredi après-midi
+      const [yyV, mmV, ddV] = iso.split("-").map(Number);
+      const jsDayV = new Date(yyV, mmV - 1, ddV).getDay();
+      if ((jsDayV === 2 || jsDayV === 5) && pm === "1/2 journée libre") {
+        alert("Règle du service : pas de demi-off le mardi après-midi ni le vendredi après-midi pour les internes.");
+        return;
+      }
+
       // Vérification stricte : maximum 2 demi-offs ('1/2 journée libre') par semaine par interne
       const monIso = getMondayOfWeek(iso);
       let weekDemiOffs = 0;
@@ -4093,6 +5168,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         updatedAt: new Date().toISOString(),
         absences: STATE.absences || [],
         customVacations: STATE.customVacations || {},
+        chefDecisions: STATE.chefDecisions || {},
         presentations: STATE.presentations || [],
         meetings: STATE.meetings || [],
         phoneDirectory: STATE.phoneDirectory || []
@@ -4196,10 +5272,13 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           const remote = res.evalResult.cloudState;
           if (remote) {
             if (Array.isArray(remote.absences) && remote.absences.length >= (STATE.absences || []).length) {
-              STATE.absences = remote.absences;
+              STATE.absences = normalizeAbsencesList(remote.absences);
             }
             if (remote.customVacations) {
               STATE.customVacations = Object.assign({}, STATE.customVacations, remote.customVacations);
+            }
+            if (remote.chefDecisions) {
+              STATE.chefDecisions = Object.assign({}, STATE.chefDecisions || {}, remote.chefDecisions);
             }
             if (Array.isArray(remote.presentations) && remote.presentations.length > 0) {
               STATE.presentations = mergePresentationsList(INITIAL_DATA.presentations, remote.presentations);
@@ -4231,6 +5310,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     interneId: matched.id,
                     interneName: matched.fullName,
                     type: sa.type,
+                    status: "pending",
                     comment: "Google Sheet"
                   });
                 }
@@ -4289,19 +5369,23 @@ def generate_pwa_files(dataset: dict):
     }
     MANIFEST_FILE.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
 
-    sw_code = """const CACHE_NAME = 'cochin-internes-v4';
+    sw_version = dataset.get("updatedAt", "v5")
+    sw_code = f"""const CACHE_NAME = 'cochin-internes-{sw_version}';
 const ASSETS = ['./index.html', './manifest.json', './icon.svg'];
-self.addEventListener('install', e => {
+self.addEventListener('install', e => {{
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
   self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(self.clients.claim());
-});
-self.addEventListener('fetch', e => {
+}});
+self.addEventListener('activate', e => {{
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
+}});
+self.addEventListener('fetch', e => {{
   if (e.request.method !== 'GET') return;
   e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-});
+}});
 """
     SW_FILE.write_text(sw_code, encoding="utf-8")
 
@@ -4314,7 +5398,7 @@ self.addEventListener('fetch', e => {
 
     launcher_code = """#!/bin/zsh
 cd "$(dirname "$0")"
-open "./index.html"
+open "https://mrthomaslef.github.io/agenda-internes/"
 """
     LAUNCHER_FILE.write_text(launcher_code, encoding="utf-8")
     LAUNCHER_FILE.chmod(LAUNCHER_FILE.stat().st_mode | stat.S_IEXEC)
@@ -4330,3 +5414,8 @@ if __name__ == "__main__":
         print("Synced initial state to cloud:", res)
     except Exception as exc:
         print("Cloud sync warning:", exc)
+    try:
+        prod_res = push_to_prod_github()
+        print("Pushed to GitHub Pages prod (https://mrthomaslef.github.io/agenda-internes/):", prod_res)
+    except Exception as exc:
+        print("GitHub Pages prod push warning:", exc)
