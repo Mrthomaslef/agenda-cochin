@@ -2,19 +2,16 @@ import json
 import os
 import re
 
-gardes_path = "/tmp/gardes_parsed.json" if os.path.exists("/tmp/gardes_parsed.json") else "/Users/thomaslefevre/Documents/Agendainterventionnel/agenda-internes/chefs_gardes.json"
+gardes_path = "/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_gardes.json"
 with open(gardes_path) as f:
     gardes_dict = json.load(f)
 
-planning_path = "/tmp/general_planning.json" if os.path.exists("/tmp/general_planning.json") else "/Users/thomaslefevre/Documents/Agendainterventionnel/agenda-internes/chefs_planning.json"
+planning_path = "/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_planning.json"
 with open(planning_path) as f:
     general_planning = json.load(f)
 
-with open("/Users/thomaslefevre/Documents/Agendainterventionnel/agenda-internes/internes_data.json") as f:
-    _internes_full_json = json.load(f)
-    cochin_phone_directory = _internes_full_json.get("phoneDirectory", [])
-    internes_schedule_data = _internes_full_json.get("schedule", {})
-    internes_list_data = _internes_full_json.get("internes", [])
+with open("/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_annuaire.json") as f:
+    cochin_phone_directory = json.load(f)
 
 
 def js_json(obj):
@@ -1655,7 +1652,6 @@ html_template = """<!DOCTYPE html>
       </div>
     </div>
     <div class="header-actions">
-      <a class="btn-icon" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener" style="text-decoration:none; border-color:#7DD3FC; background:#F0F9FF; color:#0369A1;" title="Ouvrir l'Espace Internes & Chefs">🎓/🩺 Espace</a>
       <button class="btn-icon" onclick="goToday()">Auj.</button>
       <button class="btn-icon btn-sync-arrow" id="btn-sync-arrow" onclick="syncFromCloud(true)" aria-label="Actualiser">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -1674,7 +1670,6 @@ html_template = """<!DOCTYPE html>
         <div class="segmented">
           <button class="seg-btn scope-active" id="scope-btn-mine" onclick="setAgendaScope('mine')">Mon agenda (TL)</button>
           <button class="seg-btn" id="scope-btn-all" onclick="setAgendaScope('all')">Chefs</button>
-          <button class="seg-btn" id="scope-btn-internes" onclick="setAgendaScope('internes')">🎓 Internes (6)</button>
         </div>
         <div class="segmented">
           <button class="seg-btn active" id="view-btn-day" onclick="setCalendarView('day')">Jour</button>
@@ -1857,14 +1852,12 @@ html_template = """<!DOCTYPE html>
     const DEFAULT_GARDES_HIVER = __GARDES_JSON__;
     const GENERAL_PLANNING_NOV = __GENERAL_PLANNING_JSON__;
     const COCHIN_ANNUAIRE = __ANNUAIRE_JSON__;
-    const INTERNES_SCHEDULE = __INTERNES_SCHEDULE_JSON__;
-    const INTERNES_LIST = __INTERNES_LIST_JSON__;
 
     // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
       "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • RCP Méta-Os (DUBOIS O. & QUENTIN V.) • 15h IGEA • Soir : Marie en demi-garde (23h)", offCochin: false },
       "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "4 gestes prévus (MARANDET 08h, DENIS 10h30, 3e à conf., CANTIN en fin de planning)", offCochin: false },
-      "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "17h00 : Réunion Internes & Chefs en salle de staff", offCochin: false },
+      "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "", offCochin: false },
       "2026-11-05": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre (hors Cochin)", offCochin: true },
       "2026-11-06": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
       "2026-11-09": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "IRM"], note: "", offCochin: false },
@@ -2284,7 +2277,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v52"; /*__APP_BUILD_ID:v52__*/
+        const CURRENT_BUILD_ID = "v58"; /*__APP_BUILD_ID:v58__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -2915,7 +2908,6 @@ html_template = """<!DOCTYPE html>
           { poste: "IRM", doc: "FERMÉ", closed: true },
           { poste: "ECHO", doc: "MH" },
           { poste: "ALLURA", doc: "FERMÉ", closed: true },
-          { poste: "CONSULTATION", doc: "INTERNES" },
           { poste: "UCSA", doc: "YA" }
         ]
       },
@@ -2988,7 +2980,7 @@ html_template = """<!DOCTYPE html>
           { poste: "IRM", doc: "TL" },
           { poste: "ECHO", doc: "FERMÉ", closed: true },
           { poste: "ALLURA", doc: "FERMÉ", closed: true },
-          { poste: "CONSULTATION", doc: "MH/INTERNES" }
+          { poste: "CONSULTATION", doc: "MH" }
         ]
       }
     };
@@ -3012,8 +3004,7 @@ html_template = """<!DOCTYPE html>
       "RUBINI": "Dr RUBINI",
       "THEVENIN": "Dr THÉVENIN",
       "MOUTOUNET": "Dr MOUTOUNET",
-      "HAMMOUD": "Dr HAMMOUD",
-      "INTERNES": "Internes RI"
+      "HAMMOUD": "Dr HAMMOUD"
     };
 
     function expandDocString(docCodeStr) {
@@ -3111,7 +3102,7 @@ html_template = """<!DOCTYPE html>
       const myV = getMyVacationForIso(isoDate);
 
       // Ignorer l'ancienne mention générique "(Consultation RI)" si elle provient d'un cache antérieur
-      const isGenericOldTag = mRaw === "Dr LEFEVRE Thomas Jean (Consultation RI)" || mRaw === "Dr LEFEVRE Thomas Jean / Internes (Consultation RI)";
+      const isGenericOldTag = mRaw === "Dr LEFEVRE Thomas Jean (Consultation RI)";
       const cleanMRaw = isGenericOldTag ? "" : mRaw;
       const cleanMLow = cleanMRaw.toLowerCase();
 
@@ -3333,7 +3324,7 @@ html_template = """<!DOCTYPE html>
     }
 
     function filterEventsByScope(events) {
-      if (agendaScope === "all" || agendaScope === "internes") return events;
+      if (agendaScope === "all") return events;
       return events.filter(e => e.isMine);
     }
 
@@ -3395,7 +3386,6 @@ html_template = """<!DOCTYPE html>
       if (/rubini/i.test(s)) codes.push("Rubini");
       if (/th[eé]venin/i.test(s)) codes.push("Thévenin");
       if (/hammoud/i.test(s)) codes.push("Hammoud");
-      if (/internes/i.test(s)) codes.push("Internes");
       if (/anesth/i.test(s)) codes.push("Anesth");
       if (codes.length > 0) return codes.join(" / ");
       return s.replace(/\(.*?\)/g, "").replace(/\b(Dr|Pr)\s+/gi, "").trim();
@@ -5582,146 +5572,9 @@ html_template = """<!DOCTYPE html>
       }
       document.getElementById("scope-btn-mine")?.classList.toggle("scope-active", scope === "mine");
       document.getElementById("scope-btn-all")?.classList.toggle("scope-active", scope === "all");
-      document.getElementById("scope-btn-internes")?.classList.toggle("scope-active", scope === "internes");
       syncActiviteControls();
       updateKpis();
       renderCalendar();
-    }
-
-    function matchInternePostWithChefPost(internePost, chefPost) {
-      const ip = String(internePost || "").toUpperCase();
-      const cp = String(chefPost || "").toUpperCase();
-      if (!ip || !cp || ip === "REPOS" || ip.includes("LIBRE") || ip === "CONGES" || ip === "FERIE" || ip === "COURS") return false;
-      if (ip.includes("ACHARD") && cp.includes("ACHARD")) return true;
-      if (ip.includes("GESTES") && cp.includes("GESTES")) return true;
-      if (ip.includes("ECHO") && (cp.includes("ECHO") || cp.includes("ÉCHO"))) return true;
-      if (ip.includes("IRM") && cp.includes("IRM")) return true;
-      if ((ip.includes("OLLIER") || ip.includes("URGENCE") || ip.includes("SAU")) && (cp.includes("OLLIER") || cp.includes("SAU"))) return true;
-      if (ip.includes("CS") && (cp.includes("CONSULT") || cp.includes("CS"))) return true;
-      return false;
-    }
-
-    function findChefsForInternePost(iso, period, internePost) {
-      const gen = getGeneralPlanningForIso(iso);
-      const slots = period === "pm" ? (gen.pm || []) : (gen.am || []);
-      const matched = slots.filter(s => !s.closed && !/ferm[eé]|maintenance/i.test(String(s.doc || "")) && matchInternePostWithChefPost(internePost, s.poste)).map(s => s.doc);
-      return matched.join(" / ");
-    }
-
-    function renderInternesBlockForDay(iso, compactMode) {
-      const daySched = INTERNES_SCHEDULE ? INTERNES_SCHEDULE[iso] : null;
-      if (!daySched || !daySched.slots) {
-        return compactMode ? "" : `<div class="empty-state">Planning internes hors jour ouvré ou non renseigné pour cette date.</div>`;
-      }
-      const myVac = getMyVacationForIso(iso);
-      const myAm = myVac.am || [];
-      const myPm = myVac.pm || [];
-      const closedAm = daySched.closedAm || [];
-      const closedPm = daySched.closedPm || [];
-      const rows = (INTERNES_LIST || []).map(intObj => {
-        const s = daySched.slots[intObj.id] || { am: "-", pm: "-" };
-        const amPairedTL = !myVac.offCochin && myAm.some(p => matchInternePostWithChefPost(s.am, p));
-        const pmPairedTL = !myVac.offCochin && myPm.some(p => matchInternePostWithChefPost(s.pm, p));
-        const chefAm = findChefsForInternePost(iso, "am", s.am);
-        const chefPm = findChefsForInternePost(iso, "pm", s.pm);
-        return {
-          intObj,
-          am: s.am || "-",
-          pm: s.pm || "-",
-          noteAm: s.noteAm || "",
-          notePm: s.notePm || "",
-          isSocle: Boolean(intObj.isSocle || s.isSocle),
-          amPairedTL,
-          pmPairedTL,
-          chefAm,
-          chefPm
-        };
-      });
-
-      const closedAmPills = closedAm.map(c => `<span class="post-pill post-closed">🔒 ${c.poste} : ${c.status}</span>`).join("");
-      const closedPmPills = closedPm.map(c => `<span class="post-pill post-closed">🔒 ${c.poste} : ${c.status}</span>`).join("");
-
-      if (compactMode) {
-        const pairedWithMe = [];
-        rows.forEach(r => {
-          if (r.amPairedTL) pairedWithMe.push(`<strong>${r.intObj.short}</strong> (Matin : ${r.am})`);
-          if (r.pmPairedTL) pairedWithMe.push(`<strong>${r.intObj.short}</strong> (AM : ${r.pm})`);
-        });
-        const pillsAm = rows.map(r =>
-          `<span class="post-pill ${postColorClass(r.am)}" style="${r.amPairedTL ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${r.intObj.short}${r.isSocle ? " (Socle)" : ""} : ${formatVacationPosteLabel(r.am)}${r.chefAm ? ` <span style="opacity:0.8;font-weight:600;">(${r.chefAm})</span>` : ""}${r.noteAm && r.noteAm.includes("Macil") ? ` <strong style="color:#0369A1;">[+Macil MH]</strong>` : ""}</span>`
-        ).join("");
-        const pillsPm = rows.map(r =>
-          `<span class="post-pill ${postColorClass(r.pm)}" style="${r.pmPairedTL ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${r.intObj.short}${r.isSocle ? " (Socle)" : ""} : ${formatVacationPosteLabel(r.pm)}${r.chefPm ? ` <span style="opacity:0.8;font-weight:600;">(${r.chefPm})</span>` : ""}</span>`
-        ).join("");
-
-        return `
-          <div class="vac-card" style="margin-bottom:10px; border-color:#BAE6FD; background:#F8FAFC;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
-              <div class="vac-period" style="margin:0; color:#0369A1;">🎓 Planning des 6 Internes DES (dont Noé Phase Socle) ${pairedWithMe.length ? `• Binôme TL : ${pairedWithMe.join(", ")}` : ""}</div>
-              <div style="display:flex; gap:6px; align-items:center;">
-                <button class="bloc-toggle-btn" style="padding:2px 7px; font-size:10px;" onclick="setAgendaScope('internes')">Vue détaillée</button>
-                <a class="bloc-toggle-btn" style="padding:2px 7px; font-size:10px; text-decoration:none;" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener">Espace Internes & Chefs ↗</a>
-              </div>
-            </div>
-            <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:7px;">
-              <div>
-                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Matin (IRM 7h45 • TDM SAU 8h • Écho/Poste C 9h)</div>
-                <div class="post-pills">${pillsAm}${closedAmPills}</div>
-              </div>
-              <div>
-                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Après-midi (TDM SAU fin 18h30)</div>
-                <div class="post-pills">${pillsPm}${closedPmPills}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="vac-card" style="margin-bottom:10px; border-color:#7DD3FC; background:#FFFFFF;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
-            <div>
-              <div style="font-size:13px; font-weight:800; color:#0F172A;">🎓 Planning des 6 Internes DES & Binômes Chefs</div>
-              <div style="font-size:11px; color:var(--text-muted);">Horaires : IRM dès 07h45 • TDM SAU 08h00–18h30 • Écho & Poste C dès 09h00 • Noé GRANDVAL (Phase Socle : Urgences TDM SAU)</div>
-            </div>
-            <a class="bloc-toggle-btn" style="text-decoration:none;" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener">Ouvrir Espace Internes & Chefs ↗</a>
-          </div>
-          ${(closedAm.length || closedPm.length) ? `
-            <div style="margin-bottom:8px; padding:7px 9px; border-radius:8px; background:#FEF2F2; border:1px dashed #FCA5A5;">
-              <div style="font-size:10px; font-weight:800; color:#B91C1C; text-transform:uppercase; margin-bottom:4px;">🔒 Vacations fermées ce jour</div>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-                <div><span style="font-size:9.5px; font-weight:700; color:#991B1B;">Matin :</span> <div class="post-pills" style="margin-top:2px;">${closedAmPills || `<span style="font-size:10px; color:#64748B;">Aucune fermeture</span>`}</div></div>
-                <div><span style="font-size:9.5px; font-weight:700; color:#991B1B;">Après-midi :</span> <div class="post-pills" style="margin-top:2px;">${closedPmPills || `<span style="font-size:10px; color:#64748B;">Aucune fermeture</span>`}</div></div>
-              </div>
-            </div>
-          ` : ""}
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            ${rows.map(r => `
-              <div style="display:grid; grid-template-columns: 135px 1fr 1fr; gap:6px; align-items:center; padding:6px 8px; border-radius:8px; background:${(r.amPairedTL || r.pmPairedTL) ? "#F0F9FF" : "#F8FAFC"}; border:1px solid ${(r.amPairedTL || r.pmPairedTL) ? "#7DD3FC" : "var(--border)"};">
-                <div>
-                  <div style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-                    <span>${r.intObj.name}</span>
-                    ${r.isSocle ? `<span style="font-size:8.5px; padding:1px 5px; border-radius:99px; background:#E0F2FE; color:#0369A1; border:1px solid #7DD3FC; font-weight:800;">SOCLE</span>` : ""}
-                  </div>
-                  ${(r.amPairedTL || r.pmPairedTL) ? `<span style="font-size:9.5px; color:#0284C7; font-weight:700;">★ En binôme avec TL</span>` : `<span style="font-size:9.5px; color:var(--text-muted);">${r.isSocle ? "DES Phase Socle" : "Interne DES"}</span>`}
-                </div>
-                <div>
-                  <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:2px;">Matin</div>
-                  <span class="post-pill ${postColorClass(r.am)}">${formatVacationPosteLabel(r.am)}</span>
-                  ${r.chefAm ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🩺 Chef : <strong>${r.chefAm}</strong></div>` : ""}
-                  ${r.noteAm ? `<div style="font-size:9.5px; color:#0369A1; font-weight:700; margin-top:2px;">🤝 ${r.noteAm}</div>` : ""}
-                </div>
-                <div>
-                  <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:2px;">Après-midi</div>
-                  <span class="post-pill ${postColorClass(r.pm)}">${formatVacationPosteLabel(r.pm)}</span>
-                  ${r.chefPm ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🩺 Chef : <strong>${r.chefPm}</strong></div>` : ""}
-                  ${r.notePm ? `<div style="font-size:9.5px; color:#0369A1; font-weight:700; margin-top:2px;">🤝 ${r.notePm}</div>` : ""}
-                </div>
-              </div>
-            `).join("")}
-          </div>
-        </div>
-      `;
     }
 
     function setCalendarView(v) {
@@ -6140,24 +5993,21 @@ html_template = """<!DOCTYPE html>
 
         const genVac = getGeneralPlanningForIso(iso);
         const dayEvents = allEvents.filter(e => e.isoDate === iso);
-        const isInternesScope = (agendaScope === "internes");
         const isWeekendDay = (selectedDate.getDay() === 0 || selectedDate.getDay() === 6);
 
         let html = `
           ${renderGardeBannerHtml(iso)}
           ${!isWeekendDay ? `
-            ${isInternesScope ? renderInternesBlockForDay(iso, false) : ""}
             <div class="vac-grid">
               <div class="vac-card">
-                <div class="vac-period">${isGeneral || isInternesScope ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
-                <div class="post-pills">${renderPostPills((isGeneral || isInternesScope) ? genVac.am : myVac.am, (isGeneral || isInternesScope))}</div>
+                <div class="vac-period">${isGeneral ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
               </div>
               <div class="vac-card">
-                <div class="vac-period">${isGeneral || isInternesScope ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
-                <div class="post-pills">${renderPostPills((isGeneral || isInternesScope) ? genVac.pm : myVac.pm, (isGeneral || isInternesScope))}</div>
+                <div class="vac-period">${isGeneral ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
               </div>
             </div>
-            ${!isInternesScope ? renderInternesBlockForDay(iso, true) : ""}
           ` : `
             <div class="vac-card" style="background:#FFF1F2;border-color:#FECDD3;margin-bottom:8px;">
               <div class="vac-period" style="color:#BE123C;">🚨 Week-end — Permanence des soins & Gardes uniquement</div>
@@ -6167,12 +6017,12 @@ html_template = """<!DOCTYPE html>
             </div>
           `}
           <div class="section-label">
-            <span>${(isGeneral || isInternesScope) ? "Patients du service" : "Patients & RDV"} (${dayEvents.length})</span>
+            <span>${isGeneral ? "Patients du service" : "Patients & RDV"} (${dayEvents.length})</span>
           </div>
         `;
 
         html += dayEvents.length === 0
-          ? `<div class="empty-state">${myVac.offCochin && !isGeneral && !isInternesScope ? "Journée hors Cochin." : "Aucun RDV programmé sur ce créneau."}</div>`
+          ? `<div class="empty-state">${myVac.offCochin && !isGeneral ? "Journée hors Cochin." : "Aucun RDV programmé sur ce créneau."}</div>`
           : dayEvents.map(ev => renderEventCard(ev, false)).join("");
 
         container.innerHTML = html;
@@ -6185,8 +6035,6 @@ html_template = """<!DOCTYPE html>
         titleEl.textContent = `Semaine du ${mon.getDate()}/${mon.getMonth() + 1} au ${fri.getDate()}/${fri.getMonth() + 1} (+ WE ${sat.getDate()}-${sun.getDate()}/${sun.getMonth() + 1})`;
         subEl.textContent = "";
         subEl.style.display = "none";
-
-        const isInternesScope = (agendaScope === "internes");
 
         // 1. Vue synthétique mobile Lundi -> Vendredi (5 colonnes côte à côte) + Samedi/Dimanche en petit avec juste les gardes
         let fiveColsHtml = "";
@@ -6251,7 +6099,7 @@ html_template = """<!DOCTYPE html>
             gardeBadge = `<span class="pill pill-marie">🚨 GARDE MARIE (${mg.shortHours})</span>`;
           } else if (g && g.is_tl) {
             gardeBadge = `<span class="pill pill-danger">DE GARDE</span>`;
-          } else if ((isGeneral || isInternesScope) && g && g.noms && g.noms.length) {
+          } else if (isGeneral && g && g.noms && g.noms.length) {
             gardeBadge = `<span class="pill pill-cs">Garde : ${g.noms.join("/")}</span>`;
           }
 
@@ -6265,13 +6113,10 @@ html_template = """<!DOCTYPE html>
                 <span class="week-day-name">${dayName}</span>
                 <div style="display:flex;gap:4px;align-items:center;">${gardeBadge}</div>
               </div>
-              ${isInternesScope ? renderInternesBlockForDay(iso, false) : `
-                <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
-                  <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
-                  <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
-                </div>
-                ${renderInternesBlockForDay(iso, true)}
-              `}
+              <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+              </div>
               ${dayEvs.map(ev => renderEventCard(ev, false)).join("")}
             </div>
           `;
@@ -7189,7 +7034,7 @@ html_template = """<!DOCTYPE html>
                   : `<span style="background:#FFFBEB; border:1px solid #FCD34D; color:#B45309; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px;">📟 ${esc(item.phone)}</span>`
                 }
                 <div style="display:flex; align-items:center; gap:6px;">
-                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#475569; background:#F1F5F9; padding:2px 7px; border-radius:6px; border:1px solid #CBD5E1;">${isDectOnly ? 'Interne' : 'Poste / DECT'} : <strong style="color:#0F172A;">${esc(item.short)}</strong></span>` : ``}
+                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#475569; background:#F1F5F9; padding:2px 7px; border-radius:6px; border:1px solid #CBD5E1;">Poste / DECT : <strong style="color:#0F172A;">${esc(item.short)}</strong></span>` : ``}
                   ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:#DC2626; font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
                 </div>
               </div>
@@ -7335,8 +7180,6 @@ html_out = (
     .replace("__GARDES_JSON__", js_json(gardes_dict))
     .replace("__GENERAL_PLANNING_JSON__", js_json(general_planning))
     .replace("__ANNUAIRE_JSON__", js_json(cochin_phone_directory))
-    .replace("__INTERNES_SCHEDULE_JSON__", js_json(internes_schedule_data))
-    .replace("__INTERNES_LIST_JSON__", js_json(internes_list_data))
     .replace("__INITIAL_SHEET_DATA_JSON__", "{}")
 )
 
