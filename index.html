@@ -1733,7 +1733,12 @@
       "2026-12-01": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
       "2026-12-02": { am: ["Gestes (C)", "TDM Ollier 4 (SAU)"], pm: ["TDM Ollier 4 (SAU)"], note: "", offCochin: false },
       "2026-12-03": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi hors Cochin", offCochin: true },
-      "2026-12-04": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false }
+      "2026-12-04": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
+      "2026-12-28": { am: ["Congés de fin d'année"], pm: ["Congés de fin d'année"], note: "Congés de fin d'année (28/12 – 03/01) • Validé par Anne-Marie Fortin", offCochin: true },
+      "2026-12-29": { am: ["Congés de fin d'année"], pm: ["Congés de fin d'année"], note: "Congés de fin d'année (28/12 – 03/01) • Validé par Anne-Marie Fortin", offCochin: true },
+      "2026-12-30": { am: ["Congés de fin d'année"], pm: ["Congés de fin d'année"], note: "Congés de fin d'année (28/12 – 03/01) • Validé par Anne-Marie Fortin", offCochin: true },
+      "2026-12-31": { am: ["Congés de fin d'année"], pm: ["Congés de fin d'année"], note: "Congés de fin d'année (28/12 – 03/01) • Validé par Anne-Marie Fortin", offCochin: true },
+      "2027-01-01": { am: ["FÉRIÉ (Jour de l'An)"], pm: ["FÉRIÉ (Jour de l'An)"], note: "Congés de fin d'année (28/12 – 03/01)", offCochin: true }
     };
 
     const MAQUETTE_DEFAULT_DOW = {
@@ -2116,7 +2121,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v45"; /*__APP_BUILD_ID:v45__*/
+        const CURRENT_BUILD_ID = "v46"; /*__APP_BUILD_ID:v46__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
