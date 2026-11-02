@@ -2226,7 +2226,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v58"; /*__APP_BUILD_ID:v58__*/
+        const CURRENT_BUILD_ID = "v59"; /*__APP_BUILD_ID:v59__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -2598,9 +2598,16 @@
       try {
         savedMap = JSON.parse(localStorage.getItem(STORAGE_PERSO_KEY) || "{}");
       } catch (e) {}
+      let changed = false;
+      for (const k of Object.keys(savedMap)) {
+        if (/^\d+$/.test(k)) {
+          delete savedMap[k];
+          changed = true;
+        }
+      }
       if (cloudPersoMap && typeof cloudPersoMap === "object") {
-        let changed = false;
         for (const k of Object.keys(cloudPersoMap)) {
+          if (/^\d+$/.test(k)) continue;
           const cVal = cloudPersoMap[k];
           const lVal = savedMap[k];
           if (cVal && typeof cVal === "object" && cVal.status) {
@@ -2613,22 +2620,21 @@
             changed = true;
           }
         }
-        if (changed) {
-          try {
-            localStorage.setItem(STORAGE_PERSO_KEY, JSON.stringify(savedMap));
-          } catch (e) {}
-        }
       }
-      return DEFAULT_QUESTIONS_PERSO.map(item => {
+      if (changed) {
+        try {
+          localStorage.setItem(STORAGE_PERSO_KEY, JSON.stringify(savedMap));
+        } catch (e) {}
+      }
+      return DEFAULT_QUESTIONS_PERSO.map((item, idx) => {
         const sKey = getPersoStableKey(item);
-        const byStable = savedMap[sKey];
-        const byRow = savedMap[item._row] || savedMap[String(item._row)];
-        const entry = byStable !== undefined ? byStable : byRow;
+        const entry = sKey ? savedMap[sKey] : undefined;
         const resolvedStatus = (entry && typeof entry === "object" && entry.status)
           ? entry.status
           : (typeof entry === "string" ? entry : item["Statut"]);
         return {
           ...item,
+          _row: Number(item._row) > 0 ? Number(item._row) : (idx + 1),
           "Statut": resolvedStatus
         };
       });
@@ -2974,28 +2980,32 @@
       return { am: [], pm: [] };
     }
 
-    function formatVacationPosteLabel(posteStr) {
+    function formatVacationPosteLabel(posteStr, periodKey) {
       const s = String(posteStr || "");
       const up = s.toUpperCase();
       if (/\([0-9]/.test(s)) return s;
-      if (up.includes("IRM") && !up.includes("SANS IRM") && !up.includes("JDP")) return `${s} (7h45)`;
-      if (up.includes("ECHO") || up.includes("ÉCHO")) return `${s} (9h)`;
-      if (up.includes("GESTES")) return `${s} (9h)`;
+      const isPm = periodKey === "pm";
+      if (up.includes("IRM") && !up.includes("SANS IRM") && !up.includes("JDP")) return `${s} (${isPm ? "13h" : "7h45"})`;
+      if (up.includes("ECHO") || up.includes("ÉCHO")) return `${s} (${isPm ? "14h" : "9h"})`;
+      if (up.includes("GESTES")) return `${s} (${isPm ? "14h" : "9h"})`;
+      if (isPm && (up.includes("CONSULT") || up === "CS")) return `${s} (14h–15h)`;
+      if (isPm && up.includes("LECTURE")) return `${s} (14h–16h)`;
       if (up.includes("SAU") || up.includes("OLLIER 4")) return `${s} (8h–18h30)`;
       return s;
     }
 
-    function renderPostPills(items, isGeneral) {
+    function renderPostPills(items, isGeneral, periodKey = "am", showHours = true) {
       if (!items || items.length === 0) return `<span class="post-pill post-libre">-</span>`;
       if (!isGeneral) {
-        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${formatVacationPosteLabel(txt)}</span>`).join("");
+        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${showHours ? formatVacationPosteLabel(txt, periodKey) : txt}</span>`).join("");
       }
       return items.map(it => {
         const isClosed = Boolean(it.closed || /ferm[eé]|maintenance/i.test(String(it.doc || "")));
         const isMe = /\bTL\b|lefevre/i.test(it.doc);
         const cls = isClosed ? "post-closed" : postColorClass(it.poste);
         const docIcon = isClosed ? (/maintenance/i.test(it.doc) ? "🔧 " : "🔒 ") : "";
-        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${formatVacationPosteLabel(it.poste)} : <strong>${docIcon}${it.doc}</strong></span>`;
+        const pLbl = (showHours && !isClosed) ? formatVacationPosteLabel(it.poste, periodKey) : it.poste;
+        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${pLbl} : <strong>${docIcon}${it.doc}</strong></span>`;
       }).join("");
     }
 
@@ -5950,11 +5960,11 @@
             <div class="vac-grid">
               <div class="vac-card">
                 <div class="vac-period">${isGeneral ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
-                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am")}</div>
               </div>
               <div class="vac-card">
                 <div class="vac-period">${isGeneral ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
-                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm")}</div>
               </div>
             </div>
           ` : `
@@ -6063,8 +6073,8 @@
                 <div style="display:flex;gap:4px;align-items:center;">${gardeBadge}</div>
               </div>
               <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
-                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
-                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am", false)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm", false)}</div>
               </div>
               ${dayEvs.map(ev => renderEventCard(ev, false)).join("")}
             </div>
@@ -6188,8 +6198,8 @@
           </div>
           ${renderGardeBannerHtml(selectedIso)}
           <div class="vac-grid">
-            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral)}</div></div>
-            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral)}</div></div>
+            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral, "am")}</div></div>
+            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral, "pm")}</div></div>
           </div>
           ${selEvs.map(ev => renderEventCard(ev, false)).join("")}
         `;
@@ -6522,6 +6532,7 @@
         const nextStatus = isRep ? "Non répondu" : "Répondu";
         const emailAddr = q["Email Expéditeur"] || "";
         const subj = encodeURIComponent("RE: " + (q["Sujet / Objet"] || ""));
+        const sKeyAttr = escHtmlAttr(encodeURIComponent(getPersoStableKey(q)));
         return `
           <div class="event-card" style="border-left-color:${isRep ? "var(--success)" : "var(--perso-msg)"};">
             <div class="event-top">
@@ -6543,7 +6554,7 @@
             ${q["Date Réponse / Note"] ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">📌 ${q["Date Réponse / Note"]}</div>` : ""}
             <div style="margin-top:8px; display:flex; justify-content:flex-end; gap:6px;">
               ${emailAddr ? `<a class="btn-icon" style="text-decoration:none;" href="mailto:${escHtmlAttr(encodeURIComponent(emailAddr).replace(/%40/g, "@"))}?subject=${subj}">✉️ Répondre</a>` : ""}
-              <button class="btn-icon" onclick="togglePersoStatus(${q._row || (idx + 9)}, '${nextStatus}')">
+              <button class="btn-icon" onclick="togglePersoStatus('${sKeyAttr}', '${nextStatus}')">
                 ${isRep ? "↩️ Marquer À répondre" : "✅ Marquer Répondu"}
               </button>
             </div>
@@ -6552,28 +6563,39 @@
       }).join("");
     }
 
-    async function togglePersoStatus(row, newStatus) {
-      const rowNum = Number(row);
+    async function togglePersoStatus(keyOrRow, newStatus) {
+      let targetKey = "";
+      try {
+        targetKey = decodeURIComponent(String(keyOrRow || ""));
+      } catch (e) {
+        targetKey = String(keyOrRow || "");
+      }
+      const rowNum = /^\d+$/.test(targetKey) ? Number(targetKey) : 0;
       const nowIso = new Date().toISOString();
       let savedMap = {};
       try {
         savedMap = JSON.parse(localStorage.getItem(STORAGE_PERSO_KEY) || "{}");
       } catch (e) {}
+      for (const k of Object.keys(savedMap)) {
+        if (/^\d+$/.test(k)) delete savedMap[k];
+      }
 
       const statusEntry = { status: newStatus, updated_at: nowIso };
-      savedMap[rowNum] = statusEntry;
-      savedMap[String(rowNum)] = statusEntry;
+      let stableKey = targetKey.includes("__") ? targetKey : "";
 
-      let stableKey = "";
       for (const item of (appData.Questions_perso || [])) {
-        if (Number(item._row) === rowNum) {
+        const itemKey = getPersoStableKey(item);
+        if ((stableKey && itemKey === stableKey) || (!stableKey && rowNum > 0 && Number(item._row) === rowNum)) {
           item["Statut"] = newStatus;
-          stableKey = getPersoStableKey(item);
-          if (stableKey) savedMap[stableKey] = statusEntry;
+          stableKey = itemKey;
         }
       }
+      if (stableKey) {
+        savedMap[stableKey] = statusEntry;
+      }
       for (const defItem of (DEFAULT_QUESTIONS_PERSO || [])) {
-        if (Number(defItem._row) === rowNum || (stableKey && getPersoStableKey(defItem) === stableKey)) {
+        const defKey = getPersoStableKey(defItem);
+        if ((stableKey && defKey === stableKey) || (!stableKey && rowNum > 0 && Number(defItem._row) === rowNum)) {
           defItem["Statut"] = newStatus;
         }
       }
@@ -6587,7 +6609,11 @@
         if (cachedRaw) {
           const cachedObj = JSON.parse(cachedRaw);
           if (cachedObj && cachedObj.data) {
-            cachedObj.data.perso_status = Object.assign({}, cachedObj.data.perso_status || {}, savedMap);
+            const cleanPersoStatus = Object.assign({}, cachedObj.data.perso_status || {}, savedMap);
+            for (const k of Object.keys(cleanPersoStatus)) {
+              if (/^\d+$/.test(k)) delete cleanPersoStatus[k];
+            }
+            cachedObj.data.perso_status = cleanPersoStatus;
             localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedObj));
           }
         }
@@ -6597,11 +6623,15 @@
       renderPersoTab();
 
       // Synchroniser dans PropertiesService d'Apps Script pour persistance multi-appareils (iPhone / Mac) sans créer d'onglet dans le Sheet
-      try {
-        const patchObj = { [String(rowNum)]: statusEntry };
-        if (stableKey) patchObj[stableKey] = statusEntry;
-        await callApi("set_perso_status", { patch: patchObj });
-      } catch (e) {}
+      if (stableKey) {
+        const btnArrow = document.getElementById("btn-sync-arrow");
+        if (btnArrow) btnArrow.classList.add("spinning");
+        try {
+          await callApi("set_perso_status", { patch: { [stableKey]: statusEntry } });
+        } catch (e) {} finally {
+          if (btnArrow) btnArrow.classList.remove("spinning");
+        }
+      }
     }
 
     // CS & IMAGERIE
