@@ -1541,7 +1541,7 @@
       </div>
     </div>
     <div class="header-actions">
-      <a class="btn-icon" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener" style="text-decoration:none; border-color:rgba(56,189,248,0.45); color:#7DD3FC;" title="Ouvrir l'Espace Internes & Chefs">🎓/🩺 Espace</a>
+      <a class="btn-icon" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener" style="text-decoration:none; border-color:#7DD3FC; background:#F0F9FF; color:#0369A1;" title="Ouvrir l'Espace Internes & Chefs">🎓/🩺 Espace</a>
       <button class="btn-icon" onclick="goToday()">Auj.</button>
       <button class="btn-icon btn-sync-arrow" id="btn-sync-arrow" onclick="syncFromCloud(true)" aria-label="Actualiser">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
@@ -2718,6 +2718,8 @@
 
     function postColorClass(label) {
       const l = String(label || "").toLowerCase();
+      if (l.includes("ferme") || l.includes("fermé") || l.includes("maintenance")) return "post-closed";
+      if (l.includes("1/2 journée libre") || l.includes("demi") || l.includes("repos") || l.includes("cong")) return "post-libre";
       if (l.includes("jardin des plantes") || l.includes("jdp") || l.includes("geoffroy") || l.includes("gsh") || l.includes("libéral") || l.includes("clinique du sport")) return "post-liberal";
       if (l.includes("masterclass") || l.includes("formation") || l.includes("staff") || l.includes("anapath") || l.includes("séminaire")) return "post-staff";
       if (l.includes("achard")) return "post-tdm-achard";
@@ -2749,24 +2751,33 @@
       return { am: def.am, pm: def.pm, note: "", offCochin: def.offCochin };
     }
 
-    // Maquette hebdomadaire complète du service (Modèle Nov 2026) pour les dates au-delà du tableau hebdomadaire
+    // Maquette hebdomadaire complète du service (Modèle Nov 2026 avec postes fermés et 1/2 journées libres)
     const GENERAL_MAQUETTE_DOW = {
       1: {
         am: [
           { poste: "ECHO", doc: "HAMMOUD" },
           { poste: "GESTES (C)", doc: "HM" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "YA" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
+          { poste: "IRM 3T", doc: "FERMÉ", closed: true },
+          { poste: "IRM 1,5T", doc: "FERMÉ", closed: true },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "TL" },
           { poste: "UCSA", doc: "TL" },
-          { poste: "STAFF", doc: "TL (méta OS)" }
+          { poste: "STAFF", doc: "TL (méta OS)" },
+          { poste: "1/2 journée libre", doc: "SL/MH" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "TL" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "TL" },
           { poste: "TDM OLLIER 3", doc: "YA" },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
           { poste: "IRM", doc: "FEYDY" },
           { poste: "ECHO", doc: "HM" },
-          { poste: "STAFF", doc: "HM (Cirtal/Ewing)" }
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
+          { poste: "STAFF", doc: "HM (Cirtal/Ewing)" },
+          { poste: "1/2 journée libre", doc: "SL/MH" }
         ]
       },
       2: {
@@ -2774,17 +2785,22 @@
           { poste: "ECHO", doc: "YA" },
           { poste: "GESTES (C)", doc: "MIHOUBI" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "MH" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "TL" },
           { poste: "IRM 3T", doc: "DRAPE/YANG" },
           { poste: "IRM 1,5T", doc: "AL" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "HM" },
           { poste: "UCSA", doc: "SL" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "HM" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "SL" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "TL" },
+          { poste: "IRM", doc: "FERMÉ", closed: true },
           { poste: "ECHO", doc: "MH" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "INTERNES" },
           { poste: "UCSA", doc: "YA" }
         ]
@@ -2795,17 +2811,23 @@
           { poste: "GESTES (C)", doc: "TL" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "YA" },
           { poste: "TDM OLLIER 3", doc: "MH" },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
           { poste: "IRM 3T", doc: "DRAPE/YANG" },
-          { poste: "IRM 1,5T", doc: "MOUTOUNET" }
+          { poste: "IRM 1,5T", doc: "MOUTOUNET" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
+          { poste: "1/2 journée libre", doc: "HM" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "DRAPE" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "TL" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "SEROR/YA" },
           { poste: "IRM", doc: "SL" },
           { poste: "ECHO", doc: "MIHOUBI" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "TL" },
-          { poste: "UCSA", doc: "MH" }
+          { poste: "UCSA", doc: "MH" },
+          { poste: "1/2 journée libre", doc: "HM" }
         ]
       },
       4: {
@@ -2813,17 +2835,24 @@
           { poste: "ECHO", doc: "AL/AC" },
           { poste: "GESTES (C)", doc: "RUBINI" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "MH" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "HM" },
-          { poste: "CONSULTATION", doc: "SL" }
+          { poste: "IRM 3T", doc: "FERMÉ", closed: true },
+          { poste: "IRM 1,5T", doc: "FERMÉ", closed: true },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
+          { poste: "CONSULTATION", doc: "SL" },
+          { poste: "1/2 journée libre", doc: "TL/YA" }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "SL" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "SL" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "AL/MH" },
           { poste: "IRM", doc: "AC" },
           { poste: "ECHO", doc: "MD" },
           { poste: "ALLURA", doc: "HM" },
-          { poste: "CONSULTATION", doc: "FEYDY" }
+          { poste: "CONSULTATION", doc: "FEYDY" },
+          { poste: "1/2 journée libre", doc: "TL/YA" }
         ]
       },
       5: {
@@ -2831,14 +2860,20 @@
           { poste: "ECHO", doc: "TL/YANG" },
           { poste: "GESTES (C)", doc: "MH" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "AC" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
+          { poste: "TDM ACHARD 1", doc: "FERMÉ", closed: true },
           { poste: "IRM 3T", doc: "HM" },
-          { poste: "IRM 1,5T", doc: "YA" }
+          { poste: "IRM 1,5T", doc: "YA" },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true }
         ],
         pm: [
           { poste: "GESTES (C)", doc: "YA" },
           { poste: "TDM OLLIER 4 (SAU)", doc: "HM" },
+          { poste: "TDM OLLIER 3", doc: "FERMÉ", closed: true },
           { poste: "TDM ACHARD 1", doc: "AC/SL" },
           { poste: "IRM", doc: "TL" },
+          { poste: "ECHO", doc: "FERMÉ", closed: true },
+          { poste: "ALLURA", doc: "FERMÉ", closed: true },
           { poste: "CONSULTATION", doc: "MH/INTERNES" }
         ]
       }
@@ -2891,9 +2926,11 @@
         return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${txt}</span>`).join("");
       }
       return items.map(it => {
+        const isClosed = Boolean(it.closed || /ferm[eé]|maintenance/i.test(String(it.doc || "")));
         const isMe = /\bTL\b|lefevre/i.test(it.doc);
-        const cls = postColorClass(it.poste);
-        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #fff;" : ""}">${it.poste} : <strong>${it.doc}</strong></span>`;
+        const cls = isClosed ? "post-closed" : postColorClass(it.poste);
+        const docIcon = isClosed ? (/maintenance/i.test(it.doc) ? "🔧 " : "🔒 ") : "";
+        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${it.poste} : <strong>${docIcon}${it.doc}</strong></span>`;
       }).join("");
     }
 
@@ -5345,13 +5382,13 @@
         return `
           <div class="event-card type-marie-garde">
             <div class="event-top">
-              <span class="event-time-badge" style="background:rgba(236,72,153,0.35); color:#FFF;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+              <span class="event-time-badge" style="background:#DB2777; color:#FFF; border-color:#BE185D;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
               <span class="pill pill-marie">${ev.badgeLabel}</span>
             </div>
-            <div class="event-patient" style="color:#FCE7F3; font-size:15px;"><span>🚨 ${ev.title}</span></div>
-            <div class="event-title" style="color:#FBCFE8; font-weight:700;">${ev.patient}</div>
-            ${ev.lieu ? `<div class="event-meta" style="color:#F9A8D4;"><span>📍 ${ev.lieu}</span></div>` : ""}
-            ${ev.remarques ? `<div style="font-size:11.5px; color:#FDF2F8; margin-top:5px; font-weight:600;">${ev.remarques}</div>` : ""}
+            <div class="event-patient" style="color:#9D174D; font-size:15px;"><span>🚨 ${ev.title}</span></div>
+            <div class="event-title" style="color:#BE185D; font-weight:700;">${ev.patient}</div>
+            ${ev.lieu ? `<div class="event-meta" style="color:#9D174D;"><span>📍 ${ev.lieu}</span></div>` : ""}
+            ${ev.remarques ? `<div style="font-size:11.5px; color:#831843; margin-top:5px; font-weight:600;">${ev.remarques}</div>` : ""}
           </div>
         `;
       }
@@ -5366,7 +5403,7 @@
             <div class="event-patient"><span>${ev.title}</span></div>
             <div class="event-title">${ev.patient}</div>
             ${ev.lieu ? `<div class="event-meta"><span>${ev.lieu}</span>${shortDocRdv ? `<span class="doc-tag">${shortDocRdv}</span>` : ""}</div>` : ""}
-            ${ev.remarques ? `<div style="font-size:11px; color:#FDE68A; margin-top:4px;">${ev.remarques}</div>` : ""}
+            ${ev.remarques ? `<div style="font-size:11px; color:#B45309; margin-top:4px; font-weight:600;">${ev.remarques}</div>` : ""}
           </div>
         `;
       }
@@ -5406,7 +5443,7 @@
             ${ev.ipp && ev.ipp !== "Non spécifié" ? `<span class="event-ipp">${ev.ipp}</span>` : ""}
           </div>
           ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
-          ${subLine ? `<div style="font-size:11px; color:#94A3B8; margin-top:3px;">${subLine}</div>` : ""}
+          ${subLine ? `<div style="font-size:11px; color:#64748B; margin-top:3px;">${subLine}</div>` : ""}
           ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
           ${renderBlocNotesHtml(ev, cardPrefix)}
         </div>
@@ -5429,7 +5466,7 @@
     function matchInternePostWithChefPost(internePost, chefPost) {
       const ip = String(internePost || "").toUpperCase();
       const cp = String(chefPost || "").toUpperCase();
-      if (!ip || !cp || ip === "REPOS" || ip === "CONGES" || ip === "FERIE" || ip === "COURS") return false;
+      if (!ip || !cp || ip === "REPOS" || ip.includes("LIBRE") || ip === "CONGES" || ip === "FERIE" || ip === "COURS") return false;
       if (ip.includes("ACHARD") && cp.includes("ACHARD")) return true;
       if (ip.includes("GESTES") && cp.includes("GESTES")) return true;
       if (ip.includes("ECHO") && (cp.includes("ECHO") || cp.includes("ÉCHO"))) return true;
@@ -5442,7 +5479,7 @@
     function findChefsForInternePost(iso, period, internePost) {
       const gen = getGeneralPlanningForIso(iso);
       const slots = period === "pm" ? (gen.pm || []) : (gen.am || []);
-      const matched = slots.filter(s => matchInternePostWithChefPost(internePost, s.poste)).map(s => s.doc);
+      const matched = slots.filter(s => !s.closed && !/ferm[eé]|maintenance/i.test(String(s.doc || "")) && matchInternePostWithChefPost(internePost, s.poste)).map(s => s.doc);
       return matched.join(" / ");
     }
 
@@ -5454,14 +5491,30 @@
       const myVac = getMyVacationForIso(iso);
       const myAm = myVac.am || [];
       const myPm = myVac.pm || [];
+      const closedAm = daySched.closedAm || [];
+      const closedPm = daySched.closedPm || [];
       const rows = (INTERNES_LIST || []).map(intObj => {
         const s = daySched.slots[intObj.id] || { am: "-", pm: "-" };
         const amPairedTL = !myVac.offCochin && myAm.some(p => matchInternePostWithChefPost(s.am, p));
         const pmPairedTL = !myVac.offCochin && myPm.some(p => matchInternePostWithChefPost(s.pm, p));
         const chefAm = findChefsForInternePost(iso, "am", s.am);
         const chefPm = findChefsForInternePost(iso, "pm", s.pm);
-        return { intObj, am: s.am || "-", pm: s.pm || "-", amPairedTL, pmPairedTL, chefAm, chefPm };
+        return {
+          intObj,
+          am: s.am || "-",
+          pm: s.pm || "-",
+          noteAm: s.noteAm || "",
+          notePm: s.notePm || "",
+          isSocle: Boolean(intObj.isSocle || s.isSocle),
+          amPairedTL,
+          pmPairedTL,
+          chefAm,
+          chefPm
+        };
       });
+
+      const closedAmPills = closedAm.map(c => `<span class="post-pill post-closed">🔒 ${c.poste} : ${c.status}</span>`).join("");
+      const closedPmPills = closedPm.map(c => `<span class="post-pill post-closed">🔒 ${c.poste} : ${c.status}</span>`).join("");
 
       if (compactMode) {
         const pairedWithMe = [];
@@ -5469,17 +5522,17 @@
           if (r.amPairedTL) pairedWithMe.push(`<strong>${r.intObj.short}</strong> (Matin : ${r.am})`);
           if (r.pmPairedTL) pairedWithMe.push(`<strong>${r.intObj.short}</strong> (AM : ${r.pm})`);
         });
-        const pillsAm = rows.filter(r => r.am && r.am !== "-" && r.am !== "REPOS").map(r =>
-          `<span class="post-pill ${postColorClass(r.am)}" style="${r.amPairedTL ? "box-shadow:0 0 0 1.5px #38BDF8;" : ""}">${r.intObj.short} : ${r.am}${r.chefAm ? ` <span style="opacity:0.75;font-weight:500;">(${r.chefAm})</span>` : ""}</span>`
+        const pillsAm = rows.map(r =>
+          `<span class="post-pill ${postColorClass(r.am)}" style="${r.amPairedTL ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${r.intObj.short}${r.isSocle ? " (Socle)" : ""} : ${r.am}${r.chefAm ? ` <span style="opacity:0.8;font-weight:600;">(${r.chefAm})</span>` : ""}${r.noteAm && r.noteAm.includes("Macil") ? ` <strong style="color:#0369A1;">[+Macil MH]</strong>` : ""}</span>`
         ).join("");
-        const pillsPm = rows.filter(r => r.pm && r.pm !== "-" && r.pm !== "REPOS").map(r =>
-          `<span class="post-pill ${postColorClass(r.pm)}" style="${r.pmPairedTL ? "box-shadow:0 0 0 1.5px #38BDF8;" : ""}">${r.intObj.short} : ${r.pm}${r.chefPm ? ` <span style="opacity:0.75;font-weight:500;">(${r.chefPm})</span>` : ""}</span>`
+        const pillsPm = rows.map(r =>
+          `<span class="post-pill ${postColorClass(r.pm)}" style="${r.pmPairedTL ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${r.intObj.short}${r.isSocle ? " (Socle)" : ""} : ${r.pm}${r.chefPm ? ` <span style="opacity:0.8;font-weight:600;">(${r.chefPm})</span>` : ""}</span>`
         ).join("");
 
         return `
-          <div class="vac-card" style="margin-bottom:10px; border-color:rgba(56,189,248,0.28); background:rgba(15,23,42,0.75);">
+          <div class="vac-card" style="margin-bottom:10px; border-color:#BAE6FD; background:#F8FAFC;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap;">
-              <div class="vac-period" style="margin:0; color:#7DD3FC;">🎓 Planning des 6 Internes DES ${pairedWithMe.length ? `• Binôme TL : ${pairedWithMe.join(", ")}` : ""}</div>
+              <div class="vac-period" style="margin:0; color:#0369A1;">🎓 Planning des 6 Internes DES (dont Noé Phase Socle) ${pairedWithMe.length ? `• Binôme TL : ${pairedWithMe.join(", ")}` : ""}</div>
               <div style="display:flex; gap:6px; align-items:center;">
                 <button class="bloc-toggle-btn" style="padding:2px 7px; font-size:10px;" onclick="setAgendaScope('internes')">Vue détaillée</button>
                 <a class="bloc-toggle-btn" style="padding:2px 7px; font-size:10px; text-decoration:none;" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener">Espace Internes & Chefs ↗</a>
@@ -5487,12 +5540,12 @@
             </div>
             <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:7px;">
               <div>
-                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Matin (Internes)</div>
-                <div class="post-pills">${pillsAm || `<span class="post-pill post-libre">-</span>`}</div>
+                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Matin (Internes & Postes fermés)</div>
+                <div class="post-pills">${pillsAm}${closedAmPills}</div>
               </div>
               <div>
-                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Après-midi (Internes)</div>
-                <div class="post-pills">${pillsPm || `<span class="post-pill post-libre">-</span>`}</div>
+                <div style="font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:3px;">Après-midi (Internes & Postes fermés)</div>
+                <div class="post-pills">${pillsPm}${closedPmPills}</div>
               </div>
             </div>
           </div>
@@ -5500,30 +5553,44 @@
       }
 
       return `
-        <div class="vac-card" style="margin-bottom:10px; border-color:rgba(56,189,248,0.4);">
+        <div class="vac-card" style="margin-bottom:10px; border-color:#7DD3FC; background:#FFFFFF;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
             <div>
-              <div style="font-size:13px; font-weight:800; color:#F8FAFC;">🎓 Planning des Internes DES & Binômes Chefs</div>
-              <div style="font-size:11px; color:var(--text-muted);">6 Internes DES Radiologie B • Semestre d'Hiver 2026–2027</div>
+              <div style="font-size:13px; font-weight:800; color:#0F172A;">🎓 Planning des 6 Internes DES & Binômes Chefs</div>
+              <div style="font-size:11px; color:var(--text-muted);">Noé GRANDVAL (Phase Socle : doublé uniquement en Urgences TDM SAU, avec Macil MH les 3 premiers mardis matin) • Demi-off inclus</div>
             </div>
             <a class="bloc-toggle-btn" style="text-decoration:none;" href="https://mrthomaslef.github.io/agenda-internes/" target="_blank" rel="noopener">Ouvrir Espace Internes & Chefs ↗</a>
           </div>
+          ${(closedAm.length || closedPm.length) ? `
+            <div style="margin-bottom:8px; padding:7px 9px; border-radius:8px; background:#FEF2F2; border:1px dashed #FCA5A5;">
+              <div style="font-size:10px; font-weight:800; color:#B91C1C; text-transform:uppercase; margin-bottom:4px;">🔒 Vacations fermées ce jour</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                <div><span style="font-size:9.5px; font-weight:700; color:#991B1B;">Matin :</span> <div class="post-pills" style="margin-top:2px;">${closedAmPills || `<span style="font-size:10px; color:#64748B;">Aucune fermeture</span>`}</div></div>
+                <div><span style="font-size:9.5px; font-weight:700; color:#991B1B;">Après-midi :</span> <div class="post-pills" style="margin-top:2px;">${closedPmPills || `<span style="font-size:10px; color:#64748B;">Aucune fermeture</span>`}</div></div>
+              </div>
+            </div>
+          ` : ""}
           <div style="display:flex; flex-direction:column; gap:6px;">
             ${rows.map(r => `
-              <div style="display:grid; grid-template-columns: 120px 1fr 1fr; gap:6px; align-items:center; padding:6px 8px; border-radius:8px; background:rgba(30,41,59,0.55); border:1px solid ${(r.amPairedTL || r.pmPairedTL) ? "rgba(56,189,248,0.5)" : "var(--border)"};">
+              <div style="display:grid; grid-template-columns: 135px 1fr 1fr; gap:6px; align-items:center; padding:6px 8px; border-radius:8px; background:${(r.amPairedTL || r.pmPairedTL) ? "#F0F9FF" : "#F8FAFC"}; border:1px solid ${(r.amPairedTL || r.pmPairedTL) ? "#7DD3FC" : "var(--border)"};">
                 <div>
-                  <div style="font-size:12px; font-weight:800; color:#F8FAFC;">${r.intObj.name}</div>
-                  ${(r.amPairedTL || r.pmPairedTL) ? `<span style="font-size:9.5px; color:#38BDF8; font-weight:700;">★ En binôme avec TL</span>` : `<span style="font-size:9.5px; color:var(--text-muted);">Interne DES</span>`}
+                  <div style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
+                    <span>${r.intObj.name}</span>
+                    ${r.isSocle ? `<span style="font-size:8.5px; padding:1px 5px; border-radius:99px; background:#E0F2FE; color:#0369A1; border:1px solid #7DD3FC; font-weight:800;">SOCLE</span>` : ""}
+                  </div>
+                  ${(r.amPairedTL || r.pmPairedTL) ? `<span style="font-size:9.5px; color:#0284C7; font-weight:700;">★ En binôme avec TL</span>` : `<span style="font-size:9.5px; color:var(--text-muted);">${r.isSocle ? "DES Phase Socle" : "Interne DES"}</span>`}
                 </div>
                 <div>
                   <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:2px;">Matin</div>
                   <span class="post-pill ${postColorClass(r.am)}">${r.am}</span>
-                  ${r.chefAm ? `<div style="font-size:10px; color:#94A3B8; margin-top:2px;">🩺 Chef : <strong>${r.chefAm}</strong></div>` : ""}
+                  ${r.chefAm ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🩺 Chef : <strong>${r.chefAm}</strong></div>` : ""}
+                  ${r.noteAm ? `<div style="font-size:9.5px; color:#0369A1; font-weight:700; margin-top:2px;">🤝 ${r.noteAm}</div>` : ""}
                 </div>
                 <div>
                   <div style="font-size:9px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:2px;">Après-midi</div>
                   <span class="post-pill ${postColorClass(r.pm)}">${r.pm}</span>
-                  ${r.chefPm ? `<div style="font-size:10px; color:#94A3B8; margin-top:2px;">🩺 Chef : <strong>${r.chefPm}</strong></div>` : ""}
+                  ${r.chefPm ? `<div style="font-size:10px; color:#475569; margin-top:2px;">🩺 Chef : <strong>${r.chefPm}</strong></div>` : ""}
+                  ${r.notePm ? `<div style="font-size:9.5px; color:#0369A1; font-weight:700; margin-top:2px;">🤝 ${r.notePm}</div>` : ""}
                 </div>
               </div>
             `).join("")}
@@ -6339,13 +6406,13 @@
               <span>${a["Identité Patient"] || "-"}</span>
               <span class="event-ipp">${a["N° Dossier / IPP"] && a["N° Dossier / IPP"] !== "Non spécifié" ? a["N° Dossier / IPP"] : ""}</span>
             </div>
-            <div style="font-size:11.5px; color:var(--primary); font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="font-size:11.5px; color:var(--primary); font-weight:700;" onclick="openPatientModal('${safePatientAttr}')">
               ${a["Médecin Demandeur (Service)"] || "-"}
             </div>
-            <div style="font-size:12px; color:#E2E8F0; margin-top:4px;" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="font-size:12px; color:#334155; margin-top:4px; font-weight:500;" onclick="openPatientModal('${safePatientAttr}')">
               ${a["Motif de l'avis / Question clinique"] || ""}
             </div>
-            <div style="font-size:11.5px; color:#86EFAC; margin-top:4px;" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="font-size:11.5px; color:#15803D; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
               <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
             </div>
             <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -6476,10 +6543,10 @@
             <div class="event-patient">
               <span>${q["Sujet / Objet"] || "-"}</span>
             </div>
-            <div style="font-size:11.5px; color:var(--primary); font-weight:600;">
+            <div style="font-size:11.5px; color:var(--primary); font-weight:700;">
               De : ${q["Expéditeur"] || "-"}
             </div>
-            <div style="font-size:12.5px; color:#E2E8F0; margin-top:5px;">
+            <div style="font-size:12.5px; color:#334155; margin-top:5px; font-weight:500;">
               ${q["Question / Action demandée"] || ""}
             </div>
             ${q["Date Réponse / Note"] ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">📌 ${q["Date Réponse / Note"]}</div>` : ""}
@@ -6911,22 +6978,22 @@
           const canCall = rawTel.length >= 10;
           const isDectOnly = (item.phone || "").toUpperCase().includes("DECT");
           html += `
-            <div style="background:rgba(30,41,59,0.78); border:1px solid rgba(148,163,184,0.16); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; box-shadow:0 1px 2px rgba(15,23,42,0.03);">
               <div style="min-width:0; flex:1;">
-                <div style="font-size:13px; font-weight:700; color:#f8fafc; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <div style="font-size:13px; font-weight:700; color:#0F172A; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <span>${esc(item.name)}</span>
-                  ${item.custom ? `<span style="font-size:9px; padding:1px 6px; border-radius:99px; background:rgba(16,185,129,0.2); color:#34d399;">Perso</span>` : ``}
+                  ${item.custom ? `<span style="font-size:9px; padding:1px 6px; border-radius:99px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">Perso</span>` : ``}
                 </div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(item.role || "")}</div>
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
                 ${canCall
-                  ? `<a href="tel:${rawTel}" style="text-decoration:none; background:rgba(56,189,248,0.16); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px; display:inline-flex; align-items:center; gap:5px;">📞 ${esc(item.phone)}</a>`
-                  : `<span style="background:rgba(245,158,11,0.16); border:1px solid rgba(245,158,11,0.38); color:#fbbf24; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px;">📟 ${esc(item.phone)}</span>`
+                  ? `<a href="tel:${rawTel}" style="text-decoration:none; background:#F0F9FF; border:1px solid #7DD3FC; color:#0369A1; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px; display:inline-flex; align-items:center; gap:5px;">📞 ${esc(item.phone)}</a>`
+                  : `<span style="background:#FFFBEB; border:1px solid #FCD34D; color:#B45309; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px;">📟 ${esc(item.phone)}</span>`
                 }
                 <div style="display:flex; align-items:center; gap:6px;">
-                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#cbd5e1; background:rgba(15,23,42,0.75); padding:2px 7px; border-radius:6px; border:1px solid rgba(148,163,184,0.2);">${isDectOnly ? 'Interne' : 'Poste / DECT'} : <strong style="color:#f8fafc;">${esc(item.short)}</strong></span>` : ``}
-                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:#f87171; font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
+                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#475569; background:#F1F5F9; padding:2px 7px; border-radius:6px; border:1px solid #CBD5E1;">${isDectOnly ? 'Interne' : 'Poste / DECT'} : <strong style="color:#0F172A;">${esc(item.short)}</strong></span>` : ``}
+                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:#DC2626; font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
                 </div>
               </div>
             </div>`;
@@ -6940,7 +7007,7 @@
       const body = document.getElementById("modal-body");
       if (!body) return;
       body.innerHTML = `
-        <div style="font-size:16px; font-weight:800; color:#f8fafc; margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
+        <div style="font-size:16px; font-weight:800; color:#0F172A; margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Nom / Salle / Correspondant *</label>
