@@ -5936,6 +5936,9 @@
       let dateHospit = "";
       if ((ev.category === "acte" || ev.category === "biopsie") && ev.dateStr && /\d{2}\/\d{2}\/\d{4}/.test(ev.dateStr)) {
         dateHospit = ev.dateStr;
+      } else if ((ev.category === "acte" || ev.category === "biopsie") && ev.isoDate && /^\d{4}-\d{2}-\d{2}$/.test(ev.isoDate)) {
+        const [y, m, d] = ev.isoDate.split("-");
+        dateHospit = `${d}/${m}/${y}`;
       }
       if (!dateHospit && patNorm) {
         for (const a of (appData.actes || [])) {
@@ -6049,17 +6052,18 @@
       if (mode === "crh") {
         // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Concis, sans répétition, douleurs & impact fonctionnel, zéro matériel technique, signature Dr T. Lefevre
         const { dateHospit, anesth, guidage } = findPatientInterventionDateAndAnesth(ev, prof);
-        const ageChunk = (prof.age && !prof.age.includes("À préciser")) ? `, ${prof.age} ans,` : " ([âge à préciser])";
-        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [Date à préciser]";
-        const rawGeste = prof.gesteRealise && !prof.gesteRealise.includes("À préciser")
+        const isUnknownVal = (v) => !v || /à préciser|\[<.*>\]/i.test(String(v));
+        const ageChunk = !isUnknownVal(prof.age) ? `, ${prof.age} ans,` : " ([<âge>])";
+        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [<date>]";
+        const rawGeste = !isUnknownVal(prof.gesteRealise)
           ? prof.gesteRealise
-          : (prof.gesteRetenu || "[geste réalisé à préciser]");
+          : (prof.gesteRetenu || "[<geste réalisé à préciser>]");
         const gesteCourt = rawGeste
           .replace(/\s+sous\s+(?:guidage\s+|contrôle\s+)?(?:scanographique|scanner|échographique|échographie|scopique|anesthésie\s+générale|anesthésie\s+locale|AG|AL)(?:\s+et\s+sous\s+[^,.)]+)?/gi, "")
           .replace(/\s+en\s+HDJ(?:\s+radio\s*B)?/gi, "")
           .trim();
 
-        const terrainClause = (prof.terrain && !prof.terrain.includes("À préciser"))
+        const terrainClause = !isUnknownVal(prof.terrain)
           ? ` sur un terrain de ${prof.terrain}`
           : "";
         const procContext = `${rawGeste} ${prof.detailsProcedure || ""}`;
@@ -6169,7 +6173,7 @@
       const linesSuivi = [
         "Chère Consœur, Cher Confrère,",
         "",
-        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${gesteSuiviCourt}.`,
+        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation ${gesteSuiviCourt.replace(/^le\s+/i, "du ").replace(/^la\s+/i, "de la ").replace(/^l'/i, "de l'").replace(/^(?!du\s|de\s)/i, "de ")}.`,
         "",
         `Pour rappel, ce geste avait été réalisé devant ${indicInitSuivi}, ${suitesRappelClause}.`,
         "",
