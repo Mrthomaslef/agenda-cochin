@@ -60,11 +60,12 @@ html_template = """<!DOCTYPE html>
   <meta name="apple-mobile-web-app-title" content="Cochin RI" />
   <meta name="application-name" content="Cochin RI" />
   <meta name="theme-color" content="#F8FAFC" />
-  <link rel="manifest" href="manifest.json?v=2" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2" />
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=2" />
-  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=2" />
+  <link rel="manifest" href="manifest.json?v=3" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=3" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=3" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=3" />
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png?v=3" />
   <title>Cochin RI — Dr T. Lefèvre</title>
   <style>
     :root {
@@ -583,30 +584,31 @@ html_template = """<!DOCTYPE html>
     }
     .garde-banner.is-marie {
       background: linear-gradient(135deg, #FDF2F8, #FFF1F2);
-      border: 2px solid #DB2777;
-      box-shadow: 0 2px 10px rgba(219, 39, 119, 0.14);
+      border: 1px solid #F472B6;
+      padding: 4px 9px;
+      font-size: 11px;
       color: #9D174D;
-      font-weight: 800;
+      font-weight: 700;
     }
     .garde-strip-lbl-marie {
-      font-size: 10px;
-      font-weight: 800;
+      font-size: 9.5px;
+      font-weight: 700;
       color: #9D174D;
       white-space: nowrap;
-      padding: 4px 8px;
+      padding: 3px 7px;
       border-radius: 7px;
       background: #FDF2F8;
-      border: 1.5px solid #F472B6;
+      border: 1px solid #F472B6;
       flex-shrink: 0;
     }
     .garde-chip-marie {
-      border: 1.5px solid #F472B6;
+      border: 1px solid #F472B6;
       background: #FFFFFF;
       color: #9D174D;
-      padding: 4px 9px;
+      padding: 3px 7px;
       border-radius: 7px;
-      font-size: 10.5px;
-      font-weight: 800;
+      font-size: 9.5px;
+      font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
@@ -620,14 +622,14 @@ html_template = """<!DOCTYPE html>
       background: #FDF2F8;
       color: #9D174D;
       border: 1px solid #F472B6;
-      font-weight: 800;
+      font-weight: 700;
     }
     .ws-day.is-marie-garde {
-      border: 1.5px solid #DB2777 !important;
+      border: 1px solid #DB2777 !important;
       background: #FDF2F8 !important;
     }
     .month-cell.is-marie-garde {
-      border: 1.5px solid #DB2777 !important;
+      border: 1px solid #DB2777 !important;
       background: #FDF2F8 !important;
     }
 
@@ -661,8 +663,9 @@ html_template = """<!DOCTYPE html>
     .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(13,148,136,0.04) 0%, #FFFFFF 35%); }
     .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(217,119,6,0.06) 0%, #FFFFFF 45%); }
     .event-card.type-marie-garde {
-      border: 1.5px solid #F472B6;
-      border-left: 5px solid #DB2777;
+      border: 1px solid #F472B6;
+      border-left: 3.5px solid #DB2777;
+      padding: 6px 9px;
       background: linear-gradient(90deg, #FDF2F8 0%, #FFFFFF 100%);
     }
 
@@ -1048,17 +1051,17 @@ html_template = """<!DOCTYPE html>
       min-width: 36px;
       padding: 4px 2px;
       opacity: 0.94;
-      background: #FFF1F2;
-      border: 1px dashed #FECDD3;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
       justify-content: center;
     }
     .ws-day.is-weekend .ws-dow {
       font-size: 7.5px;
-      color: #BE123C;
+      color: var(--text-muted);
     }
     .ws-day.is-weekend .ws-num {
       font-size: 10.5px;
-      color: #881337;
+      color: #475569;
     }
     .ws-day.is-weekend .ws-mon {
       display: none;
@@ -1070,13 +1073,10 @@ html_template = """<!DOCTYPE html>
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      background: #FFE4E6;
-      color: #BE123C;
-      border-color: #FDA4AF;
     }
     .ws-day.is-weekend .ws-cnt {
       font-size: 6.5px;
-      color: #9F1239;
+      color: #64748B;
       font-weight: 700;
       line-height: 1;
       max-width: 100%;
@@ -1118,11 +1118,19 @@ html_template = """<!DOCTYPE html>
       gap: 6px;
       padding: 5px 8px;
       border-radius: 8px;
-      background: #FFF1F2;
-      border: 1px dashed #FECDD3;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
       cursor: pointer;
       font-size: 10px;
       min-width: 0;
+    }
+    .v3-weekend-garde-pill.is-garde {
+      background: #FEF2F2;
+      border: 1px solid #EF4444;
+    }
+    .v3-weekend-garde-pill.is-marie-garde {
+      background: #FDF2F8;
+      border: 1px solid #F472B6;
     }
     .ws-day.active {
       border-color: var(--primary);
@@ -1603,7 +1611,445 @@ html_template = """<!DOCTYPE html>
     .btn-sync-arrow.spinning svg {
       animation: ptrSpin 0.7s linear infinite;
     }
+    /* DARK THEME */
+    html[data-theme="dark"] {
+      --bg: #0B1120;
+      --bg-card: #131C31;
+      --bg-elevated: #1E293B;
+      --border: #334155;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --primary: #38BDF8;
+      --primary-dark: #0284C7;
+      color-scheme: dark;
+    }
+    html[data-theme="dark"] #lock-screen {
+      background: radial-gradient(circle at 50% 20%, #0F172A 0%, #0B1120 75%);
+    }
+    html[data-theme="dark"] .lock-card {
+      background: #131C31;
+      border-color: #334155;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+    html[data-theme="dark"] .lock-title,
+    html[data-theme="dark"] .brand-text h1,
+    html[data-theme="dark"] .kpi-val,
+    html[data-theme="dark"] .date-nav-title,
+    html[data-theme="dark"] .event-patient,
+    html[data-theme="dark"] .week-day-name,
+    html[data-theme="dark"] .month-day-num,
+    html[data-theme="dark"] .week-group-header,
+    html[data-theme="dark"] .detail-value {
+      color: var(--text);
+    }
+    html[data-theme="dark"] .pin-kbd-input {
+      background: #0B1120;
+      color: var(--text);
+      border-color: var(--primary);
+    }
+    html[data-theme="dark"] .app-header {
+      background: rgba(15, 23, 42, 0.92);
+      border-bottom-color: var(--border);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+    }
+    html[data-theme="dark"] .btn-icon {
+      background: #1E293B;
+      color: #F8FAFC;
+      border-color: #334155;
+    }
+    html[data-theme="dark"] .btn-icon:active {
+      background: #334155;
+    }
+    html[data-theme="dark"] .kpi-strip,
+    html[data-theme="dark"] .bottom-nav {
+      background: rgba(19, 28, 49, 0.95);
+      border-color: #334155;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+    html[data-theme="dark"] .kpi-box {
+      background: #0F172A;
+      border-color: #1E293B;
+    }
+    html[data-theme="dark"] .kpi-box.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--primary);
+    }
+    html[data-theme="dark"] .kpi-box.active .kpi-lbl {
+      color: #7DD3FC;
+    }
+    html[data-theme="dark"] .nav-item.active {
+      color: #38BDF8;
+      background: rgba(56, 189, 248, 0.15);
+    }
+    html[data-theme="dark"] .segmented {
+      background: #0F172A;
+      border-color: #334155;
+    }
+    html[data-theme="dark"] .seg-btn.active {
+      background: #1E293B;
+      color: #F8FAFC;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+    html[data-theme="dark"] .date-nav-sub {
+      color: #FBBF24;
+    }
+    html[data-theme="dark"] .garde-strip-lbl {
+      background: rgba(239, 68, 68, 0.15);
+      color: #FCA5A5;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    html[data-theme="dark"] .garde-chip {
+      background: #131C31;
+      color: #FCA5A5;
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+    html[data-theme="dark"] .garde-chip.active {
+      background: #DC2626;
+      color: #FFFFFF;
+      border-color: #EF4444;
+    }
+    html[data-theme="dark"] .garde-strip-lbl-marie {
+      background: rgba(219, 39, 119, 0.18);
+      color: #F9A8D4;
+      border-color: #EC4899;
+    }
+    html[data-theme="dark"] .garde-chip-marie {
+      background: #131C31;
+      color: #F9A8D4;
+      border-color: #EC4899;
+    }
+    html[data-theme="dark"] .garde-chip-marie.active {
+      background: #DB2777;
+      color: #FFFFFF;
+      border-color: #F472B6;
+    }
+    html[data-theme="dark"] .post-tdm-achard { background: rgba(6, 182, 212, 0.16); color: #67E8F9; border-color: rgba(6, 182, 212, 0.35); }
+    html[data-theme="dark"] .post-gestes     { background: rgba(249, 115, 22, 0.16); color: #FDBA74; border-color: rgba(249, 115, 22, 0.35); }
+    html[data-theme="dark"] .post-cs         { background: rgba(99, 102, 241, 0.18); color: #A5B4FC; border-color: rgba(99, 102, 241, 0.35); }
+    html[data-theme="dark"] .post-echo       { background: rgba(16, 185, 129, 0.16); color: #6EE7B7; border-color: rgba(16, 185, 129, 0.35); }
+    html[data-theme="dark"] .post-irm        { background: rgba(168, 85, 247, 0.18); color: #D8B4FE; border-color: rgba(168, 85, 247, 0.35); }
+    html[data-theme="dark"] .post-sau        { background: rgba(14, 165, 233, 0.16); color: #7DD3FC; border-color: rgba(14, 165, 233, 0.35); }
+    html[data-theme="dark"] .post-staff      { background: rgba(234, 179, 8, 0.16); color: #FDE047; border-color: rgba(234, 179, 8, 0.35); }
+    html[data-theme="dark"] .post-liberal    { background: rgba(245, 158, 11, 0.16); color: #FCD34D; border-color: rgba(245, 158, 11, 0.35); }
+    html[data-theme="dark"] .post-libre      { background: rgba(148, 163, 184, 0.12); color: #94A3B8; border-color: #475569; }
+    html[data-theme="dark"] .post-closed     { background: rgba(239, 68, 68, 0.14); color: #FCA5A5; border-color: rgba(239, 68, 68, 0.35); }
+    html[data-theme="dark"] .post-marie      { background: rgba(219, 39, 119, 0.2); color: #F9A8D4; border-color: #EC4899; }
+    html[data-theme="dark"] .garde-banner {
+      background: #131C31;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    html[data-theme="dark"] .garde-banner.is-me {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.22), rgba(234, 88, 12, 0.15));
+      border-color: #EF4444;
+      color: #FECACA;
+    }
+    html[data-theme="dark"] .garde-banner.is-marie {
+      background: linear-gradient(135deg, rgba(219, 39, 119, 0.22), rgba(225, 29, 72, 0.15));
+      border-color: #EC4899;
+      color: #FBCFE8;
+    }
+    html[data-theme="dark"] .event-card.type-acte     { background: linear-gradient(90deg, rgba(225,29,72,0.14) 0%, #131C31 40%); }
+    html[data-theme="dark"] .event-card.type-biopsie  { background: linear-gradient(90deg, rgba(124,58,237,0.15) 0%, #131C31 40%); }
+    html[data-theme="dark"] .event-card.type-cs       { background: linear-gradient(90deg, rgba(37,99,235,0.15) 0%, #131C31 40%); }
+    html[data-theme="dark"] .event-card.type-img      { background: linear-gradient(90deg, rgba(13,148,136,0.15) 0%, #131C31 40%); }
+    html[data-theme="dark"] .event-card.type-mail-rdv { background: linear-gradient(90deg, rgba(217,119,6,0.16) 0%, #131C31 45%); }
+    html[data-theme="dark"] .event-card.type-marie-garde {
+      border-color: #EC4899;
+      border-left-color: #DB2777;
+      background: linear-gradient(90deg, rgba(219, 39, 119, 0.22) 0%, #131C31 100%);
+    }
+    html[data-theme="dark"] .event-time-badge {
+      background: #1E293B;
+      color: #E2E8F0;
+      border-color: #334155;
+    }
+    html[data-theme="dark"] .pill-acte     { background: rgba(225, 29, 72, 0.2); color: #FDA4AF; border-color: rgba(225, 29, 72, 0.4); }
+    html[data-theme="dark"] .pill-biopsie  { background: rgba(124, 58, 237, 0.22); color: #DDD6FE; border-color: rgba(124, 58, 237, 0.45); }
+    html[data-theme="dark"] .pill-cs       { background: rgba(37, 99, 235, 0.22); color: #93C5FD; border-color: rgba(37, 99, 235, 0.45); }
+    html[data-theme="dark"] .pill-img      { background: rgba(13, 148, 136, 0.22); color: #5EEAD4; border-color: rgba(13, 148, 136, 0.45); }
+    html[data-theme="dark"] .pill-mail-rdv { background: rgba(217, 119, 6, 0.22); color: #FCD34D; border-color: rgba(217, 119, 6, 0.45); }
+    html[data-theme="dark"] .pill-live     { background: rgba(2, 132, 199, 0.22); color: #7DD3FC; border-color: rgba(2, 132, 199, 0.45); }
+    html[data-theme="dark"] .pill-aphp     { background: rgba(124, 58, 237, 0.22); color: #DDD6FE; border-color: rgba(124, 58, 237, 0.45); }
+    html[data-theme="dark"] .pill-whatsapp { background: rgba(22, 163, 74, 0.22); color: #86EFAC; border-color: rgba(22, 163, 74, 0.45); }
+    html[data-theme="dark"] .pill-imessage { background: rgba(37, 99, 235, 0.22); color: #93C5FD; border-color: rgba(37, 99, 235, 0.45); }
+    html[data-theme="dark"] .pill-success  { background: rgba(22, 163, 74, 0.22); color: #86EFAC; border-color: rgba(22, 163, 74, 0.45); }
+    html[data-theme="dark"] .pill-danger   { background: rgba(220, 38, 38, 0.22); color: #FCA5A5; border-color: rgba(220, 38, 38, 0.45); }
+    html[data-theme="dark"] .pill-warn     { background: rgba(217, 119, 6, 0.22); color: #FCD34D; border-color: rgba(217, 119, 6, 0.45); }
+    html[data-theme="dark"] .event-ipp {
+      background: rgba(56, 189, 248, 0.15);
+      color: #7DD3FC;
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    html[data-theme="dark"] .event-title {
+      color: #CBD5E1;
+    }
+    html[data-theme="dark"] .doc-tag {
+      background: #1E293B;
+      color: #CBD5E1;
+      border-color: #334155;
+    }
+    html[data-theme="dark"] .doc-tag.is-tl {
+      background: rgba(56, 189, 248, 0.16);
+      color: #7DD3FC;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    html[data-theme="dark"] .alert-anticoag {
+      background: rgba(220, 38, 38, 0.16);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+    }
+    html[data-theme="dark"] .month-cell.other-month {
+      background: #0B1120;
+    }
+    html[data-theme="dark"] .month-cell.selected {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+    }
+    html[data-theme="dark"] .month-cell.is-tl-garde,
+    html[data-theme="dark"] .ws-day.is-garde,
+    html[data-theme="dark"] .v3-week-5col-cell.is-garde {
+      background: rgba(220, 38, 38, 0.18) !important;
+      border-color: #EF4444 !important;
+    }
+    html[data-theme="dark"] .month-cell.is-marie-garde,
+    html[data-theme="dark"] .ws-day.is-marie-garde {
+      background: rgba(219, 39, 119, 0.18) !important;
+      border-color: #EC4899 !important;
+    }
+    @media (min-width: 768px) {
+      html[data-theme="dark"] .month-cell:hover {
+        background: #1E293B;
+        border-color: #38BDF8;
+      }
+      html[data-theme="dark"] .month-desk-cnt {
+        background: rgba(56, 189, 248, 0.18);
+        color: #7DD3FC;
+      }
+      html[data-theme="dark"] .month-desk-vacs {
+        border-bottom-color: #334155;
+      }
+      html[data-theme="dark"] .month-desk-ev {
+        background: #0F172A;
+        color: #F8FAFC;
+      }
+      html[data-theme="dark"] .month-desk-ev.type-acte        { background: rgba(225, 29, 72, 0.18); }
+      html[data-theme="dark"] .month-desk-ev.type-biopsie     { background: rgba(124, 58, 237, 0.18); }
+      html[data-theme="dark"] .month-desk-ev.type-cs          { background: rgba(37, 99, 235, 0.18); }
+      html[data-theme="dark"] .month-desk-ev.type-img         { background: rgba(13, 148, 136, 0.18); }
+      html[data-theme="dark"] .month-desk-ev.type-mail-rdv    { background: rgba(217, 119, 6, 0.18); }
+      html[data-theme="dark"] .month-desk-ev.type-marie-garde { background: rgba(219, 39, 119, 0.22); color: #F9A8D4; }
+    }
+    html[data-theme="dark"] .chip {
+      color: #CBD5E1;
+    }
+    html[data-theme="dark"] .chip.active {
+      background: var(--primary);
+      color: #0B1120;
+      border-color: var(--primary);
+    }
+    html[data-theme="dark"] .ws-day.is-weekend {
+      background: rgba(148, 163, 184, 0.08);
+      border-color: rgba(148, 163, 184, 0.28);
+    }
+    html[data-theme="dark"] .ws-day.is-weekend .ws-dow,
+    html[data-theme="dark"] .ws-day.is-weekend .ws-num,
+    html[data-theme="dark"] .ws-day.is-weekend .ws-cnt {
+      color: #94A3B8;
+    }
+    html[data-theme="dark"] .v3-week-5col-cell {
+      background: var(--bg-card);
+    }
+    html[data-theme="dark"] .v3-weekend-garde-pill {
+      background: rgba(148, 163, 184, 0.08);
+      border-color: rgba(148, 163, 184, 0.28);
+    }
+    html[data-theme="dark"] .v3-weekend-garde-pill.is-garde {
+      background: rgba(220, 38, 38, 0.18);
+      border-color: #EF4444;
+    }
+    html[data-theme="dark"] .v3-weekend-garde-pill.is-marie-garde {
+      background: rgba(219, 39, 119, 0.18);
+      border-color: #EC4899;
+    }
+    html[data-theme="dark"] .ws-day.active,
+    html[data-theme="dark"] .week-sel-card.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: var(--primary);
+    }
+    html[data-theme="dark"] .ws-day.active .ws-mon,
+    html[data-theme="dark"] .day-strip-month-header,
+    html[data-theme="dark"] .ws-cnt {
+      color: #7DD3FC;
+    }
+    html[data-theme="dark"] .ws-month-sep {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.35);
+      color: #7DD3FC;
+    }
+    html[data-theme="dark"] .week-group-header {
+      background: #1E293B;
+    }
+    html[data-theme="dark"] .bloc-toggle-btn {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.35);
+      color: #7DD3FC;
+    }
+    html[data-theme="dark"] .bloc-toggle-btn.cr-btn {
+      background: #1E293B;
+      border-color: #334155;
+      color: #CBD5E1;
+    }
+    html[data-theme="dark"] .bloc-toggle-btn.cr-primary {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: rgba(129, 140, 248, 0.45);
+      color: #A5B4FC;
+    }
+    html[data-theme="dark"] .bloc-toggle-btn.copied {
+      background: rgba(22, 163, 74, 0.25) !important;
+      border-color: #4ADE80 !important;
+      color: #86EFAC !important;
+    }
+    html[data-theme="dark"] .bloc-toggle-btn.has-saved {
+      background: rgba(22, 163, 74, 0.18);
+      border-color: rgba(74, 222, 128, 0.4);
+      color: #86EFAC;
+    }
+    html[data-theme="dark"] .bloc-notes-box {
+      background: #0F172A;
+      border-color: #334155;
+    }
+    html[data-theme="dark"] .bloc-input {
+      background: #131C31;
+      border-color: #334155;
+      color: #F8FAFC;
+    }
+    html[data-theme="dark"] .mat-chip {
+      background: #131C31;
+      border-color: rgba(56, 189, 248, 0.35);
+      color: #7DD3FC;
+    }
+    html[data-theme="dark"] .mat-chip:hover,
+    html[data-theme="dark"] .mat-chip:active {
+      background: rgba(56, 189, 248, 0.2);
+      color: #F8FAFC;
+    }
+    html[data-theme="dark"] .bloc-save-status {
+      color: #4ADE80;
+    }
+    html[data-theme="dark"] .modal-backdrop {
+      background: rgba(2, 6, 23, 0.72);
+    }
+    html[data-theme="dark"] .modal-sheet {
+      background: #131C31;
+      border-top-color: #334155;
+      box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.6);
+    }
+    html[data-theme="dark"] .sheet-handle {
+      background: #475569;
+    }
+    html[data-theme="dark"] .detail-block {
+      background: #0F172A;
+      border-color: #334155;
+    }
+    .marie-ev-title { color: #9D174D; font-size: 11.5px; font-weight: 700; }
+    .marie-ev-sub { color: #BE185D; font-size: 10.5px; font-weight: 700; }
+    .marie-ev-meta { color: #9D174D; font-size: 10px; }
+    .marie-ev-rem { font-size: 10px; color: #831843; margin-top: 2px; font-weight: 600; }
+    .mail-ev-rem { font-size: 11px; color: #B45309; margin-top: 4px; font-weight: 600; }
+    .vac-card-we { background: #FFF1F2; border-color: #FECDD3; margin-bottom: 8px; }
+    .vac-card-we .vac-period { color: #BE123C; }
+    .vac-card-we-body { font-size: 12px; color: #881337; font-weight: 700; }
+    .we-pill-day { font-weight: 800; color: var(--text-muted); }
+    .we-pill-doc { font-weight: 700; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .v3-weekend-garde-pill.is-garde .we-pill-day,
+    .v3-weekend-garde-pill.is-garde .we-pill-doc { color: #BE123C; }
+    .v3-weekend-garde-pill.is-marie-garde .we-pill-day,
+    .v3-weekend-garde-pill.is-marie-garde .we-pill-doc { color: #9D174D; }
+    .ev-body-txt { color: #334155; }
+    .ev-rep-txt { color: #15803D; }
+    .ann-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+    .ann-call-btn {
+      text-decoration: none;
+      background: #F0F9FF;
+      border: 1px solid #7DD3FC;
+      color: #0369A1;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ann-dect-badge {
+      background: #FFFBEB;
+      border: 1px solid #FCD34D;
+      color: #B45309;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 9px;
+    }
+    .ann-short-badge {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    html[data-theme="dark"] .marie-ev-title { color: #F9A8D4; }
+    html[data-theme="dark"] .marie-ev-sub { color: #F472B6; }
+    html[data-theme="dark"] .marie-ev-meta { color: #FBCFE8; }
+    html[data-theme="dark"] .marie-ev-rem { color: #F9A8D4; }
+    html[data-theme="dark"] .mail-ev-rem { color: #FCD34D; }
+    html[data-theme="dark"] .vac-card-we { background: rgba(225, 29, 72, 0.14); border-color: rgba(244, 63, 94, 0.35); }
+    html[data-theme="dark"] .vac-card-we .vac-period { color: #FDA4AF; }
+    html[data-theme="dark"] .vac-card-we-body { color: #FECDD3; }
+    html[data-theme="dark"] .we-pill-day { color: #FDA4AF; }
+    html[data-theme="dark"] .we-pill-doc { color: #FECDD3; }
+    html[data-theme="dark"] .ev-body-txt { color: #CBD5E1; }
+    html[data-theme="dark"] .ev-rep-txt { color: #4ADE80; }
+    html[data-theme="dark"] .ann-call-btn {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: #7DD3FC;
+    }
+    html[data-theme="dark"] .ann-dect-badge {
+      background: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #FCD34D;
+    }
+    html[data-theme="dark"] .ptr-spinner {
+      background: #1E293B;
+      border-color: #38BDF8;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    }
   </style>
+  <script>
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem("cochin_theme_v1");
+        if (savedTheme === "dark") {
+          document.documentElement.setAttribute("data-theme", "dark");
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", "#0B1120");
+        }
+      } catch (_) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -1620,7 +2066,7 @@ html_template = """<!DOCTYPE html>
   <!-- ÉCRAN DE VERROUILLAGE (code d'accès vérifié côté serveur) -->
   <div id="lock-screen">
     <div class="lock-card">
-      <div class="lock-logo"><img src="apple-touch-icon.png?v=2" alt="Cochin RI" /></div>
+      <div class="lock-logo"><img src="icon.svg?v=3" alt="Cochin RI" /></div>
       <h2 class="lock-title">Cochin Radiologie B</h2>
       <p class="lock-sub">Dr Thomas Lefèvre</p>
       <form class="pin-form" onsubmit="submitPinForm(event)">
@@ -1645,7 +2091,7 @@ html_template = """<!DOCTYPE html>
   <!-- HEADER -->
   <header class="app-header">
     <div class="brand">
-      <div class="brand-badge"><img src="apple-touch-icon.png?v=2" alt="Cochin RI" /></div>
+      <div class="brand-badge"><img src="icon.svg?v=3" alt="Cochin RI" /></div>
       <div class="brand-text">
         <h1>Cochin Radio B</h1>
         <p id="sync-status-text">Synchronisé</p>
@@ -1653,6 +2099,22 @@ html_template = """<!DOCTYPE html>
     </div>
     <div class="header-actions">
       <button class="btn-icon" onclick="goToday()">Auj.</button>
+      <button class="btn-icon" id="btn-theme-toggle" onclick="toggleDarkMode()" aria-label="Basculer le mode sombre" title="Mode sombre / clair">
+        <svg id="icon-theme-moon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg id="icon-theme-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
       <button class="btn-icon btn-sync-arrow" id="btn-sync-arrow" onclick="syncFromCloud(true)" aria-label="Actualiser">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
@@ -1771,7 +2233,7 @@ html_template = """<!DOCTYPE html>
     <section id="tab-annuaire" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
         <div>
-          <div style="font-size:15px; font-weight:800; color:#f8fafc;">☎️ Annuaire Téléphonique — Hôpital Cochin</div>
+          <div style="font-size:15px; font-weight:800; color:var(--text);">☎️ Annuaire Téléphonique — Hôpital Cochin</div>
           <div style="font-size:11px; color:var(--text-muted);">Radiologie B (Secrétariats, Consoles, DECT Chefs) • Orthopédie • Rhumatologie • Anapath • DAM</div>
         </div>
         <button class="chip active" style="flex-shrink:0; cursor:pointer; border:none;" onclick="openAddAnnuaireModal()">+ Numéro</button>
@@ -1855,7 +2317,7 @@ html_template = """<!DOCTYPE html>
 
     // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
-      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • RCP Méta-Os (DUBOIS O. & QUENTIN V.) • 15h IGEA • Soir : Marie en demi-garde (23h)", offCochin: false },
+      "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • RCP Méta-Os (DUBOIS O. & QUENTIN V.) • 15h IGEA • Marie 23h", offCochin: false },
       "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "4 gestes prévus (MARANDET 08h, DENIS 10h30, 3e à conf., CANTIN en fin de planning)", offCochin: false },
       "2026-11-04": { am: ["Gestes (C) (avec SL)"], pm: ["Consultation", "UCSA"], note: "", offCochin: false },
       "2026-11-05": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre (hors Cochin)", offCochin: true },
@@ -1871,7 +2333,7 @@ html_template = """<!DOCTYPE html>
       },
       "2026-11-13": { am: ["Écho (9h-12h / Yang)"], pm: ["Sans IRM (S2)"], note: "", offCochin: false },
       "2026-11-16": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], note: "", offCochin: false },
-      "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h • 🚨 Marie en garde complète", offCochin: false },
+      "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h • Marie garde", offCochin: false },
       "2026-11-18": { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)", "UCSA"], note: "", offCochin: false },
       "2026-11-19": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre en journée • Garde de nuit Cochin", offCochin: true },
       "2026-11-20": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
@@ -2277,7 +2739,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v58"; /*__APP_BUILD_ID:v58__*/
+        const CURRENT_BUILD_ID = "v62"; /*__APP_BUILD_ID:v62__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -2649,9 +3111,16 @@ html_template = """<!DOCTYPE html>
       try {
         savedMap = JSON.parse(localStorage.getItem(STORAGE_PERSO_KEY) || "{}");
       } catch (e) {}
+      let changed = false;
+      for (const k of Object.keys(savedMap)) {
+        if (/^\d+$/.test(k)) {
+          delete savedMap[k];
+          changed = true;
+        }
+      }
       if (cloudPersoMap && typeof cloudPersoMap === "object") {
-        let changed = false;
         for (const k of Object.keys(cloudPersoMap)) {
+          if (/^\d+$/.test(k)) continue;
           const cVal = cloudPersoMap[k];
           const lVal = savedMap[k];
           if (cVal && typeof cVal === "object" && cVal.status) {
@@ -2664,22 +3133,21 @@ html_template = """<!DOCTYPE html>
             changed = true;
           }
         }
-        if (changed) {
-          try {
-            localStorage.setItem(STORAGE_PERSO_KEY, JSON.stringify(savedMap));
-          } catch (e) {}
-        }
       }
-      return DEFAULT_QUESTIONS_PERSO.map(item => {
+      if (changed) {
+        try {
+          localStorage.setItem(STORAGE_PERSO_KEY, JSON.stringify(savedMap));
+        } catch (e) {}
+      }
+      return DEFAULT_QUESTIONS_PERSO.map((item, idx) => {
         const sKey = getPersoStableKey(item);
-        const byStable = savedMap[sKey];
-        const byRow = savedMap[item._row] || savedMap[String(item._row)];
-        const entry = byStable !== undefined ? byStable : byRow;
+        const entry = sKey ? savedMap[sKey] : undefined;
         const resolvedStatus = (entry && typeof entry === "object" && entry.status)
           ? entry.status
           : (typeof entry === "string" ? entry : item["Statut"]);
         return {
           ...item,
+          _row: Number(item._row) > 0 ? Number(item._row) : (idx + 1),
           "Statut": resolvedStatus
         };
       });
@@ -3025,28 +3493,32 @@ html_template = """<!DOCTYPE html>
       return { am: [], pm: [] };
     }
 
-    function formatVacationPosteLabel(posteStr) {
+    function formatVacationPosteLabel(posteStr, periodKey) {
       const s = String(posteStr || "");
       const up = s.toUpperCase();
       if (/\\([0-9]/.test(s)) return s;
-      if (up.includes("IRM") && !up.includes("SANS IRM") && !up.includes("JDP")) return `${s} (7h45)`;
-      if (up.includes("ECHO") || up.includes("ÉCHO")) return `${s} (9h)`;
-      if (up.includes("GESTES")) return `${s} (9h)`;
+      const isPm = periodKey === "pm";
+      if (up.includes("IRM") && !up.includes("SANS IRM") && !up.includes("JDP")) return `${s} (${isPm ? "13h" : "7h45"})`;
+      if (up.includes("ECHO") || up.includes("ÉCHO")) return `${s} (${isPm ? "14h" : "9h"})`;
+      if (up.includes("GESTES")) return `${s} (${isPm ? "14h" : "9h"})`;
+      if (isPm && (up.includes("CONSULT") || up === "CS")) return `${s} (14h–15h)`;
+      if (isPm && up.includes("LECTURE")) return `${s} (14h–16h)`;
       if (up.includes("SAU") || up.includes("OLLIER 4")) return `${s} (8h–18h30)`;
       return s;
     }
 
-    function renderPostPills(items, isGeneral) {
+    function renderPostPills(items, isGeneral, periodKey = "am", showHours = true) {
       if (!items || items.length === 0) return `<span class="post-pill post-libre">-</span>`;
       if (!isGeneral) {
-        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${formatVacationPosteLabel(txt)}</span>`).join("");
+        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${showHours ? formatVacationPosteLabel(txt, periodKey) : txt}</span>`).join("");
       }
       return items.map(it => {
         const isClosed = Boolean(it.closed || /ferm[eé]|maintenance/i.test(String(it.doc || "")));
         const isMe = /\\bTL\\b|lefevre/i.test(it.doc);
         const cls = isClosed ? "post-closed" : postColorClass(it.poste);
         const docIcon = isClosed ? (/maintenance/i.test(it.doc) ? "🔧 " : "🔒 ") : "";
-        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${formatVacationPosteLabel(it.poste)} : <strong>${docIcon}${it.doc}</strong></span>`;
+        const pLbl = (showHours && !isClosed) ? formatVacationPosteLabel(it.poste, periodKey) : it.poste;
+        return `<span class="post-pill ${cls}" style="${isMe ? "box-shadow:0 0 0 1.5px #0284C7;" : ""}">${pLbl} : <strong>${docIcon}${it.doc}</strong></span>`;
       }).join("");
     }
 
@@ -3298,10 +3770,10 @@ html_template = """<!DOCTYPE html>
         });
       }
       for (const rdv of PERSONAL_MAIL_RDVS) {
-        const isMarieGarde = /marie\s*(parizot)?.*garde|garde.*marie\s*(parizot)?/i.test(`${rdv.title || ""} ${rdv.patient || ""} ${rdv.remarques || ""}`);
+        const isMarieGarde = /marie\s*(parizot)?.*(garde|formation)|(garde|formation).*marie\s*(parizot)?/i.test(`${rdv.title || ""} ${rdv.patient || ""} ${rdv.remarques || ""}`);
         events.push({
           category: isMarieGarde ? "marie-garde" : "mail-rdv",
-          badgeLabel: isMarieGarde ? "🚨 GARDE MARIE" : "RDV / Libéral",
+          badgeLabel: isMarieGarde ? "Marie" : "RDV / Libéral",
           isoDate: rdv.isoDate,
           dateStr: rdv.dateStr,
           horaire: rdv.horaire,
@@ -4111,6 +4583,381 @@ html_template = """<!DOCTYPE html>
         evolutionGlobale: "marquée par la persistance de douleurs de la hanche droite",
         evolutionCliniqueDetails: "des coxalgies résiduelles motivant la réalisation d'un arthroscanner de la hanche droite couplé à un test anesthésique à la recherche d'une cause intra-articulaire"
       },
+      "denisfranck": {
+        civiliteNom: "M. DENIS Franck", fem: false, age: "60", defaultMode: "preop",
+        motif: "une lésion de la hanche gauche [<nature exacte à préciser>]",
+        terrain: "un suivi en oncologie médicale à l'HEGP (adressé par le Pr J. Medioni et le Dr A. Rochand)",
+        arguments: "la symptomatologie clinique et les données de l'imagerie de la hanche gauche",
+        gesteRetenu: "biopsie et cryothérapie percutanée de la hanche gauche sous guidage scanographique en HDJ",
+        objectifs: "diagnostique, antalgique et de contrôle local",
+        principesNom: "la biopsie couplée à la cryothérapie percutanée sous contrôle scanographique",
+        benefices: "documentation histologique et contrôle local de la lésion de la hanche gauche",
+        risques: "les risques hémorragique, infectieux, neurologique, de fragilisation osseuse et d'échec ou de récidive",
+        terrainSuivi: "une lésion de la hanche gauche suivie en oncologie médicale à l'HEGP (Pr J. Medioni, Dr A. Rochand)",
+        gesteRealise: "la biopsie et cryothérapie percutanée de la hanche gauche sous guidage scanographique",
+        indicationInitiale: "une lésion de la hanche gauche [<nature à préciser>]",
+        detailsProcedure: "une biopsie couplée à une cryothérapie percutanée de la hanche gauche sous guidage scanographique"
+      },
+      "meuniersophie": {
+        civiliteNom: "Mme MEUNIER Sophie", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "une lésion vertébrale de L2 [<contexte clinique / histologique à préciser>]",
+        terrain: "[<terrain à préciser>]",
+        arguments: "les données cliniques et l'imagerie rachidienne centrée sur L2",
+        gesteRetenu: "traitement interventionnel rachidien de L2 (radiofréquence par Ostéocool et cimentoplastie) sous guidage scanographique",
+        objectifs: "antalgique et de contrôle local",
+        principesNom: "le traitement percutané rachidien de L2 sous contrôle scanographique",
+        benefices: "soulagement douloureux et consolidation / contrôle local de L2",
+        risques: "les risques hémorragique, infectieux, neurologique (radiculaire ou médullaire) et de fuite de ciment",
+        terrainSuivi: "une lésion vertébrale de L2 [<contexte à préciser>]",
+        gesteRealise: "le geste interventionnel rachidien de L2 sous guidage scanographique",
+        indicationInitiale: "une lésion vertébrale symptomatique de L2",
+        detailsProcedure: "un geste interventionnel percutané de L2 sous contrôle scanographique"
+      },
+      "baoullahassan": {
+        civiliteNom: "M. BAOULLA Hassan", fem: false, age: "45", defaultMode: "preop",
+        motif: "une tumeur desmoïde du flanc gauche",
+        terrain: "un suivi spécialisé (adressé par le Dr Johanna Noel)",
+        arguments: "la symptomatologie clinique et les données de l'IRM de la paroi abdominale / du flanc gauche",
+        gesteRetenu: "cryothérapie percutanée de la tumeur desmoïde du flanc gauche sous anesthésie générale et guidage scanographique en HDJ",
+        objectifs: "de contrôle local et antalgique",
+        principesNom: "la cryothérapie percutanée sous contrôle scanographique",
+        benefices: "réduction volumétrique et sédation douloureuse de la tumeur desmoïde du flanc gauche",
+        risques: "les risques hémorragique, infectieux, de lésion thermique cutanée ou digestive de voisinage et de récidive locale",
+        terrainSuivi: "une tumeur desmoïde du flanc gauche (adressé par le Dr Johanna Noel)",
+        gesteRealise: "la cryothérapie percutanée de la tumeur desmoïde du flanc gauche",
+        indicationInitiale: "une tumeur desmoïde symptomatique du flanc gauche",
+        detailsProcedure: "une cryothérapie percutanée de la tumeur desmoïde du flanc gauche sous anesthésie générale"
+      },
+      "chemlatoscane": {
+        civiliteNom: "Mme CHEMLA Toscane", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "une récidive de tumeur à cellules géantes (TCG) du genou [<côté à préciser>]",
+        terrain: "un antécédent de tumeur à cellules géantes (TCG) du genou",
+        arguments: "la mise en évidence d'une récidive locale de TCG du genou à l'imagerie",
+        gesteRetenu: "cryothérapie percutanée de la récidive de tumeur à cellules géantes (TCG) du genou [<côté à préciser>] sous guidage scanographique",
+        objectifs: "curative, de contrôle local et antalgique",
+        principesNom: "la cryothérapie percutanée sous contrôle scanographique",
+        benefices: "destruction thermique de la récidive tumorale locale du genou",
+        risques: "les risques hémorragique, infectieux, d'atteinte cartilagineuse ou nerveuse de voisinage, de fragilisation osseuse et de nouvelle récidive",
+        terrainSuivi: "une récidive de tumeur à cellules géantes (TCG) du genou [<côté à préciser>]",
+        gesteRealise: "la cryothérapie percutanée sur récidive de TCG du genou",
+        indicationInitiale: "une récidive locale de tumeur à cellules géantes (TCG) du genou",
+        detailsProcedure: "une cryothérapie percutanée de la récidive de TCG du genou sous guidage scanographique"
+      },
+      "ledererflorence": {
+        civiliteNom: "Mme LEDERER Florence", fem: true, age: "88", defaultMode: "preop",
+        motif: "une fracture vertébrale corporéale récente œdémateuse de T12 (perte de hauteur de 50%) et une fracture récente du plateau supérieur de T9 (30%), associées à une fracture ancienne de L1",
+        terrain: "des lombalgies post-chute (adressée par le Dr Johan Lar-Han)",
+        arguments: "l'importance des douleurs rachidiennes post-chute et l'œdème médullaire de T12 (+/- T9) sur l'IRM lombaire du 02/11/2026",
+        gesteRetenu: "cimentoplastie vertébrale percutanée de T12 (+/- T9) sous guidage scanographique ou scopique en HDJ",
+        objectifs: "antalgique et de consolidation vertébrale",
+        principesNom: "la vertébroplastie / cimentoplastie percutanée sous guidage radiologique",
+        benefices: "stabilisation mécanique du foyer fracturaire vertébral et soulagement rapide des douleurs",
+        risques: "les risques hémorragique, infectieux, de fuite de ciment discale, épidurale ou vasculaire et de fracture adjacente",
+        terrainSuivi: "une fracture vertébrale porotique récente de T12 (+/- T9)",
+        gesteRealise: "la cimentoplastie vertébrale percutanée de T12 (+/- T9)",
+        indicationInitiale: "une fracture vertébrale récente œdémateuse et douloureuse de T12 (+/- T9)",
+        detailsProcedure: "une cimentoplastie vertébrale percutanée de T12 (+/- T9) sous guidage radiologique"
+      },
+      "penanhoatmaud": {
+        civiliteNom: "Mme PENANHOAT Maud", fem: true, age: "62", defaultMode: "preop",
+        motif: "des cervicalgies sur arthropathie facettaire cervicale C6-C7 bilatérale",
+        terrain: "[<terrain à préciser>]",
+        arguments: "la symptomatologie cervicale et la corrélation avec l'arthropathie inter-apophysaire postérieure C6-C7",
+        gesteRetenu: "infiltration inter-articulaire postérieure (IAP) cervicale C6-C7 bilatérale sous guidage scanographique ou scopique",
+        objectifs: "antalgique",
+        principesNom: "l'infiltration inter-articulaire postérieure cervicale sous guidage radiologique",
+        benefices: "soulagement des cervicalgies d'origine facettaire",
+        risques: "les risques d'hématome, d'infection, de complication neurologique et de recrudescence douloureuse transitoire",
+        terrainSuivi: "une arthropathie facettaire cervicale C6-C7 bilatérale",
+        gesteRealise: "l'infiltration inter-articulaire postérieure cervicale C6-C7 bilatérale",
+        indicationInitiale: "des cervicalgies rebelles d'origine facettaire C6-C7",
+        detailsProcedure: "une infiltration inter-articulaire postérieure cervicale C6-C7 bilatérale sous guidage radiologique"
+      },
+      "pedrosandra": {
+        civiliteNom: "Mme PEDRO Sandra", fem: true, age: "50", defaultMode: "preop",
+        motif: "une lomboradiculalgie [<topographie à préciser>]",
+        terrain: "[<terrain à préciser>]",
+        arguments: "la symptomatologie radiculaire rebelle au traitement médical",
+        gesteRetenu: "infiltration épidurale sous contrôle radiologique au poste C",
+        objectifs: "antalgique",
+        principesNom: "l'infiltration épidurale sous contrôle scopique",
+        benefices: "soulagement des douleurs radiculaires",
+        risques: "les risques d'hématome, d'infection, de brèche durale et de recrudescence douloureuse transitoire",
+        terrainSuivi: "une lomboradiculalgie [<topographie à préciser>]",
+        gesteRealise: "l'infiltration épidurale sous contrôle scopique",
+        indicationInitiale: "une lomboradiculalgie rebelle",
+        detailsProcedure: "une infiltration épidurale sous contrôle scopique au poste C"
+      },
+      "gauthiergerard": {
+        civiliteNom: "M. GAUTHIER Gerard", fem: false, age: "[<âge>]", defaultMode: "preop",
+        motif: "une lombosciatique L5 gauche sur canal lombaire étroit en échec d'infiltration par voie anatomique",
+        terrain: "une hospitalisation en rhumatologie à Cochin et un antécédent de laminectomie L3-L4",
+        arguments: "la persistance d'une sciatique L5 gauche invalidante sur canal lombaire étroit",
+        gesteRetenu: "infiltration épidurale L5-S1 sous contrôle scopique au poste C",
+        objectifs: "antalgique",
+        principesNom: "l'infiltration épidurale L5-S1 sous contrôle scopique",
+        benefices: "soulagement de la radiculalgie L5 gauche",
+        risques: "les risques d'hématome, d'infection, de brèche durale et de recrudescence douloureuse transitoire",
+        terrainSuivi: "une sciatique L5 gauche sur canal lombaire étroit (ATCD de laminectomie L3-L4)",
+        gesteRealise: "l'infiltration épidurale L5-S1 sous contrôle scopique",
+        indicationInitiale: "une sciatique L5 gauche rebelle sur canal lombaire étroit",
+        detailsProcedure: "une infiltration épidurale L5-S1 sous contrôle scopique au poste C"
+      },
+      "fernandesnathalie": {
+        civiliteNom: "Mme FERNANDES Nathalie", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "une tendinopathie calcifiante de l'épaule droite",
+        terrain: "un suivi médical (adressée par le Dr Marie-Martine Colau)",
+        arguments: "les douleurs d'épaule droite et la présence d'une tendinopathie calcifiante à l'imagerie",
+        gesteRetenu: "infiltration sous guidage échographique de la bourse sous-acromio-deltoïdienne (BSAD) de l'épaule droite",
+        objectifs: "antalgique",
+        principesNom: "l'infiltration échoguidée de la bourse sous-acromio-deltoïdienne",
+        benefices: "soulagement douloureux et amélioration de la mobilité de l'épaule droite",
+        risques: "les risques d'hématome, d'infection et de recrudescence douloureuse transitoire",
+        terrainSuivi: "une tendinopathie calcifiante de l'épaule droite",
+        gesteRealise: "l'infiltration sous échographie de la BSAD de l'épaule droite",
+        indicationInitiale: "une tendinopathie calcifiante douloureuse de l'épaule droite",
+        detailsProcedure: "une infiltration sous guidage échographique de la BSAD de l'épaule droite"
+      },
+      "morandcatherine": {
+        civiliteNom: "Mme MORAND Catherine", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "un névrome de Morton des 2e et 3e espaces interdigitaux [<côté à préciser>] (prédominant sur le 2e espace)",
+        terrain: "[<terrain à préciser>]",
+        arguments: "les métatarsalgies et la mise en évidence d'un névrome de Morton des 2e et 3e espaces",
+        gesteRetenu: "infiltration sous guidage échographique du névrome de Morton (ciblant en priorité le 2e espace interdigital)",
+        objectifs: "antalgique",
+        principesNom: "l'infiltration échoguidée interdigitale",
+        benefices: "soulagement des douleurs de l'avant-pied à l'appui et au chaussage",
+        risques: "les risques d'hématome, d'infection, d'atrophie graisseuse locale et de recrudescence douloureuse transitoire",
+        terrainSuivi: "un névrome de Morton des 2e et 3e espaces interdigitaux",
+        gesteRealise: "l'infiltration sous échographie du névrome de Morton (2e espace)",
+        indicationInitiale: "un névrome de Morton symptomatique prédominant au 2e espace",
+        detailsProcedure: "une infiltration sous guidage échographique du 2e espace interdigital"
+      },
+      "andreanimarina": {
+        civiliteNom: "Mme ANDREANI Marina", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "des douleurs neuropathiques persistantes du moignon de jambe droite post-amputation trans-tibiale (décembre 2024)",
+        terrain: "un suivi en MPR (adressée par les Drs N. Lefèvre et E. Chapon via le Pr A. Dohan)",
+        arguments: "le caractère rebelle des douleurs neuropathiques post-amputation trans-tibiale droite",
+        gesteRetenu: "traitement percutané par radiofréquence nerveuse de la jambe droite [<nerf cible à préciser après relecture IRM>]",
+        objectifs: "antalgique",
+        principesNom: "la neuromodulation / radiofréquence nerveuse percutanée sous guidage radiologique",
+        benefices: "réduction des douleurs neuropathiques et amélioration de la tolérance prothétique",
+        risques: "les risques d'hématome, d'infection, de dysesthésies transitoires et d'échec ou de récidive douloureuse",
+        terrainSuivi: "des douleurs neuropathiques post-amputation trans-tibiale droite",
+        gesteRealise: "la radiofréquence nerveuse de la jambe droite",
+        indicationInitiale: "des douleurs neuropathiques rebelles post-amputation trans-tibiale droite",
+        detailsProcedure: "une radiofréquence nerveuse percutanée de la jambe droite"
+      },
+      "bouteilleanne": {
+        civiliteNom: "Mme BOUTEILLE Anne", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "des douleurs neuropathiques dans le territoire du nerf cutané latéral de la cuisse (FCL) droit, avec premier bloc test positif le 28/10/2026 (EVA passant de 7/10 à 1-2/10)",
+        terrain: "un suivi en rhumatologie / douleur (adressée par le Dr Anne-Priscille Trouvin)",
+        arguments: "l'épaississement du nerf FCL droit avec douleur spécifique à l'échopalpation et la positivité du premier test anesthésique",
+        gesteRetenu: "second test anesthésique du nerf cutané latéral de la cuisse (FCL) droit sous guidage échographique avant radiofréquence",
+        objectifs: "diagnostique et pré-thérapeutique avant radiofréquence",
+        principesNom: "le bloc test anesthésique sous guidage échographique",
+        benefices: "confirmation de l'indication de neurolyse / radiofréquence pulsée du nerf FCL droit",
+        risques: "les risques d'hématome, d'infection et d'hypoesthésie transitoire",
+        terrainSuivi: "une névralgie du nerf cutané latéral de la cuisse (FCL) droit",
+        gesteRealise: "le test anesthésique sous échographie du nerf FCL droit",
+        indicationInitiale: "une douleur neuropathique du nerf FCL droit avec premier test positif",
+        detailsProcedure: "un test anesthésique sous guidage échographique du nerf FCL droit"
+      },
+      "boulbetatechesamira": {
+        civiliteNom: "Mme BOULBETATECHE Samira", fem: true, age: "60", defaultMode: "preop",
+        motif: "un névrome de Morton symptomatique du pied droit [<espace interdigital à préciser>]",
+        terrain: "un suivi spécialisé (adressée par le Pr Anthony Dohan)",
+        arguments: "les métatarsalgies rebelles du pied droit et les données de l'IRM de l'avant-pied droit",
+        gesteRetenu: "cryothérapie percutanée du névrome de Morton du pied droit [<espace à préciser>] sous anesthésie locale et guidage radiologique",
+        objectifs: "antalgique",
+        principesNom: "la cryothérapie percutanée du névrome de Morton",
+        benefices: "soulagement durable des douleurs plantaires à la marche et au chaussage",
+        risques: "les risques d'hématome, d'infection, d'hypoesthésie interdigitale et d'échec ou de récidive douloureuse",
+        terrainSuivi: "un névrome de Morton du pied droit",
+        gesteRealise: "la cryothérapie percutanée du névrome de Morton du pied droit",
+        indicationInitiale: "un névrome de Morton symptomatique du pied droit",
+        detailsProcedure: "une cryothérapie percutanée du névrome de Morton du pied droit"
+      },
+      "gallbrigitte": {
+        civiliteNom: "Mme GALL Brigitte", fem: true, age: "78", defaultMode: "suivi",
+        motif: "des nodules métastatiques du muscle trapèze sur trajet de repérage de radiothérapie",
+        terrain: "un carcinome mammaire métastatique (antécédent de deux séances de cryothérapie de nodules du trapèze en 2026)",
+        arguments: "l'évaluation IRM cervicale injectée de contrôle à 3 mois",
+        gesteRetenu: "cryothérapie percutanée des nodules métastatiques du trapèze",
+        objectifs: "de contrôle carcinologique local et antalgique",
+        principesNom: "la cryothérapie percutanée sous contrôle scanographique",
+        benefices: "contrôle tumoral local des nodules du trapèze",
+        risques: "les risques d'hématome, d'infection, d'atteinte nerveuse spinale accessoire et de récidive locale",
+        terrainSuivi: "des nodules métastatiques du trapèze d'origine mammaire traités par cryothérapie",
+        gesteRealise: "la cryothérapie percutanée de nodules métastatiques du trapèze",
+        indicationInitiale: "des nodules métastatiques du trapèze sur trajet de repérage de radiothérapie",
+        detailsProcedure: "une cryothérapie percutanée des nodules du trapèze sous contrôle scanographique"
+      },
+      "fleurycamille": {
+        civiliteNom: "Mme FLEURY Camille", fem: true, age: "19", defaultMode: "suivi",
+        motif: "un kyste osseux anévrismal (KOA) de l'humérus droit traité par curetage biopsique en 2021 et sclérothérapie à l'alcool en 2022",
+        terrain: "un suivi en chirurgie orthopédique (adressée par le Dr P. Maalouf)",
+        arguments: "le contrôle scanographique annuel de la consolidation osseuse de l'humérus droit",
+        gesteRetenu: "surveillance radio-clinique avec scanner du bras droit à 1 an",
+        objectifs: "de contrôle de la consolidation osseuse",
+        principesNom: "la sclérothérapie percutanée à l'alcool de kyste osseux anévrismal",
+        benefices: "consolidation corticale et comblement progressif de la cavité kystique",
+        risques: "le risque de persistance d'un résidu kystique ou de fragilité osseuse",
+        terrainSuivi: "un kyste osseux anévrismal (KOA) de l'humérus droit opéré en 2021 et alcoolisé en 2022",
+        gesteRealise: "l'alcoolisation percutanée du kyste osseux anévrismal de l'humérus droit",
+        indicationInitiale: "un kyste osseux anévrismal (KOA) de l'humérus droit",
+        detailsProcedure: "une sclérothérapie percutanée à l'alcool de l'humérus droit"
+      },
+      "mouyflorine": {
+        civiliteNom: "Mme MOUY Florine", fem: true, age: "[<âge>]", defaultMode: "suivi",
+        motif: "un tassement vertébral porotique de L4 sous arthrodèse L2-L3",
+        terrain: "un adénocarcinome pulmonaire muté EGFR",
+        arguments: "les lombalgies mécaniques sur tassement de L4 sous arthrodèse L2-L3",
+        gesteRetenu: "cimentoplastie vertébrale percutanée de L4",
+        objectifs: "antalgique et de consolidation vertébrale",
+        principesNom: "la cimentoplastie vertébrale percutanée de L4",
+        benefices: "stabilisation du corps vertébral de L4 et sédation douloureuse",
+        risques: "les risques de fuite de ciment, d'hématome et d'infection",
+        terrainSuivi: "un tassement vertébral de L4 sous arthrodèse L2-L3 (sur terrain d'adénocarcinome pulmonaire EGFR muté)",
+        gesteRealise: "la cimentoplastie vertébrale percutanée de L4 (réalisée le 15/10/2026)",
+        indicationInitiale: "un tassement vertébral douloureux de L4 sous arthrodèse L2-L3",
+        detailsProcedure: "une cimentoplastie percutanée de L4 en HDJ Radio B"
+      },
+      "bonnatmickael": {
+        civiliteNom: "M. BONNAT Mickael", fem: false, age: "[<âge>]", defaultMode: "preop",
+        motif: "une masse de la cuisse gauche (suspicion de sarcome vs métastase de mélanome achromique)",
+        terrain: "un antécédent de deux mélanomes dont un métastatique en rémission (adressé par le Dr Valérie Dumaine)",
+        arguments: "la nécessité d'une caractérisation histologique de la masse de la cuisse gauche",
+        gesteRetenu: "biopsie percutanée sous guidage échographique de la masse de la cuisse gauche",
+        objectifs: "diagnostique",
+        principesNom: "la biopsie percutanée des parties molles sous guidage échographique",
+        benefices: "caractérisation histologique et immunohistochimique précise",
+        risques: "les risques d'hématome, d'infection et de douleur au point de ponction",
+        terrainSuivi: "une masse de la cuisse gauche biopsiée sous échographie (ATCD de mélanome)",
+        gesteRealise: "la biopsie sous guidage échographique de la masse de la cuisse gauche",
+        indicationInitiale: "une masse de la cuisse gauche suspecte de sarcome ou de localisation secondaire de mélanome",
+        detailsProcedure: "une biopsie percutanée sous guidage échographique de la masse de la cuisse gauche"
+      },
+      "vilacamarlene": {
+        civiliteNom: "Mme VILACA Marlene", fem: true, age: "[<âge>]", defaultMode: "preop",
+        motif: "une lésion graisseuse profonde de la fesse gauche",
+        terrain: "un suivi en chirurgie orthopédique (adressée par le Pr David Biau, sans traitement anticoagulant ni antiagrégant)",
+        arguments: "la nécessité d'une caractérisation histologique de cette masse lipomateuse profonde",
+        gesteRetenu: "microbiopsie percutanée sous guidage échographique de la fesse gauche",
+        objectifs: "diagnostique",
+        principesNom: "la microbiopsie percutanée sous guidage échographique",
+        benefices: "caractérisation histologique et moléculaire (MDM2) de la lésion graisseuse profonde",
+        risques: "les risques d'hématome, d'infection et de douleur transitoire",
+        terrainSuivi: "une lésion graisseuse profonde de la fesse gauche",
+        gesteRealise: "la microbiopsie sous échographie de la lésion graisseuse profonde de la fesse gauche",
+        indicationInitiale: "une lésion graisseuse profonde de la fesse gauche adressée par le Pr Biau",
+        detailsProcedure: "une microbiopsie percutanée sous guidage échographique de la fesse gauche"
+      },
+      "rouxdavid": {
+        civiliteNom: "M. ROUX David", fem: false, age: "[<âge>]", defaultMode: "preop",
+        motif: "une lésion osseuse hypermétabolique de la crête iliaque au TEP-scanner (associée à des lésions vertébrales T4 et L5)",
+        terrain: "une suspicion de néoplasie pulmonaire (CBPNC) sans preuve histologique et un antécédent de sclérose en plaques (adressé par le Dr H. Rostane, GHEF Meaux)",
+        arguments: "l'accessibilité de la lésion de la crête iliaque pour obtenir une preuve histologique",
+        gesteRetenu: "biopsie osseuse percutanée du bassin (crête iliaque) sous guidage scanographique en HDJ",
+        objectifs: "diagnostique",
+        principesNom: "la biopsie osseuse percutanée sous contrôle scanographique",
+        benefices: "documentation histologique et moléculaire de la lésion osseuse secondaire",
+        risques: "les risques d'hématome, d'infection et de douleur post-procédurale",
+        terrainSuivi: "une suspicion de métastase osseuse iliaque d'origine pulmonaire",
+        gesteRealise: "la biopsie osseuse de la crête iliaque sous contrôle scanographique",
+        indicationInitiale: "une lésion hypermétabolique de la crête iliaque dans un contexte de masse pulmonaire",
+        detailsProcedure: "une biopsie osseuse percutanée de la crête iliaque sous guidage scanographique"
+      },
+      "vermerenyohann": {
+        civiliteNom: "M. VERMEREN Yohann", fem: false, age: "48", defaultMode: "preop",
+        motif: "une formation lipomateuse intramusculaire glutéale droite",
+        terrain: "un suivi spécialisé (adressé par le Dr Émilie Desportes Finot)",
+        arguments: "le caractère profond intramusculaire de la formation lipomateuse glutéale droite nécessitant une vérification histologique",
+        gesteRetenu: "biopsie percutanée de la formation lipomateuse intramusculaire glutéale droite",
+        objectifs: "diagnostique",
+        principesNom: "la biopsie percutanée sous guidage radiologique",
+        benefices: "caractérisation histologique précise de la lésion lipomateuse",
+        risques: "les risques d'hématome glutéal, d'infection et de douleur sciatique ou locale transitoire",
+        terrainSuivi: "une formation lipomateuse intramusculaire glutéale droite",
+        gesteRealise: "la biopsie percutanée de la formation lipomateuse glutéale droite",
+        indicationInitiale: "une formation lipomateuse intramusculaire glutéale droite",
+        detailsProcedure: "une biopsie percutanée de la région glutéale droite"
+      },
+      "chatelain": {
+        civiliteNom: "Mme CHATELAIN [<Prénom>]", fem: true, age: "66", defaultMode: "preop",
+        motif: "une suspicion de descellement sur prothèse totale de hanche (PTH) droite",
+        terrain: "un suivi en chirurgie orthopédique (adressée par le Dr Simon Corsia)",
+        arguments: "la nécessité d'éliminer une infection péri-prothétique à distance de toute antibiothérapie",
+        gesteRetenu: "ponction articulaire de la hanche droite sur PTH sous contrôle scopique au poste C",
+        objectifs: "diagnostique (analyse bactériologique et cytologique du liquide articulaire)",
+        principesNom: "la ponction articulaire de hanche sous contrôle radioscopique",
+        benefices: "documentation bactériologique fiable avant prise en charge orthopédique",
+        risques: "les risques d'hématome, d'infection et de ponction blanche",
+        terrainSuivi: "une prothèse totale de hanche droite (suspicion de descellement)",
+        gesteRealise: "la ponction articulaire de hanche droite sous contrôle scopique",
+        indicationInitiale: "un bilan de descellement de PTH droite à la recherche d'une infection",
+        detailsProcedure: "une ponction articulaire de la hanche droite sous scopie au poste C"
+      },
+      "charvinmelanie": {
+        civiliteNom: "Mme CHARVIN Mélanie", fem: true, age: "[<âge>]", defaultMode: "suivi",
+        motif: "une lésion de la cuisse [<nature et côté à préciser>] contrôlée par IRM",
+        terrain: "[<terrain à préciser>]",
+        arguments: "les données cliniques et de l'IRM de contrôle de la cuisse",
+        gesteRetenu: "[<geste retenu au niveau de la cuisse à préciser>]",
+        objectifs: "antalgique et de contrôle local",
+        principesNom: "[<nom de l'intervention à préciser>]",
+        benefices: "soulagement douloureux et contrôle local",
+        risques: "les risques d'hématome, d'infection et de récidive locale",
+        terrainSuivi: "une lésion de la cuisse réévaluée par IRM",
+        gesteRealise: "[<geste réalisé au niveau de la cuisse à préciser>]",
+        indicationInitiale: "une lésion symptomatique de la cuisse",
+        detailsProcedure: "[<détails de la procédure au niveau de la cuisse à préciser>]"
+      },
+      "afonsoyanis": {
+        civiliteNom: "M. AFONSO Yanis", fem: false, age: "[<âge>]", defaultMode: "suivi",
+        motif: "une lésion du bassin [<nature et côté à préciser>] suivie par scanner TDM",
+        terrain: "[<terrain à préciser>]",
+        arguments: "l'évolution clinique et l'aspect scanographique du bassin",
+        gesteRetenu: "[<geste retenu au niveau du bassin à préciser>]",
+        objectifs: "antalgique et de consolidation osseuse",
+        principesNom: "[<nom de l'intervention à préciser>]",
+        benefices: "consolidation osseuse et sédation douloureuse",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "une lésion osseuse du bassin contrôlée par scanner",
+        gesteRealise: "[<geste réalisé au niveau du bassin à préciser>]",
+        indicationInitiale: "une atteinte osseuse du bassin",
+        detailsProcedure: "[<détails de la procédure au niveau du bassin à préciser>]"
+      },
+      "achirkatia": {
+        civiliteNom: "Mme ACHIR Katia", fem: true, age: "[<âge>]", defaultMode: "suivi",
+        motif: "une pathologie de l'avant-pied [<côté à préciser>] contrôlée par IRM",
+        terrain: "[<terrain à préciser>]",
+        arguments: "l'évolution clinique et l'IRM de contrôle de l'avant-pied",
+        gesteRetenu: "[<geste retenu au niveau de l'avant-pied à préciser>]",
+        objectifs: "antalgique",
+        principesNom: "[<nom de l'intervention à préciser>]",
+        benefices: "soulagement douloureux à l'appui",
+        risques: "les risques d'hématome, d'infection et d'hypoesthésie",
+        terrainSuivi: "une pathologie de l'avant-pied réévaluée par IRM",
+        gesteRealise: "[<geste réalisé au niveau de l'avant-pied à préciser>]",
+        indicationInitiale: "une lésion douloureuse de l'avant-pied",
+        detailsProcedure: "[<détails de la procédure au niveau de l'avant-pied à préciser>]"
+      },
+      "cathelinstephane": {
+        civiliteNom: "M. CATHELIN Stéphane", fem: false, age: "[<âge>]", defaultMode: "suivi",
+        motif: "une lésion rachidienne lombaire (L2-L4) traitée par cryothérapie",
+        terrain: "[<terrain à préciser>]",
+        arguments: "le contrôle IRM lombaire injecté à 6 semaines post-cryothérapie",
+        gesteRetenu: "cryothérapie percutanée rachidienne lombaire",
+        objectifs: "antalgique et de contrôle local",
+        principesNom: "la cryothérapie percutanée sous guidage scanographique",
+        benefices: "contrôle local et sédation des douleurs lombaires",
+        risques: "les risques hémorragique, infectieux et neurologique",
+        terrainSuivi: "un suivi post-cryothérapie rachidienne lombaire (L2-L4)",
+        gesteRealise: "la cryothérapie percutanée rachidienne lombaire",
+        indicationInitiale: "une lésion rachidienne lombaire [<nature à préciser>]",
+        detailsProcedure: "une cryothérapie percutanée lombaire sous guidage scanographique"
+      },
       "warraichfaiza": {
         civiliteNom: "Mme WARRAICH Faiza", fem: true, age: "30", defaultMode: "preop",
         motif: "un tableau clinique (douleurs nocturnes soulagées par le kétoprofène) et scintigraphique typique d'ostéome ostéoïde du tibia proximal gauche",
@@ -4135,7 +4982,7 @@ html_template = """<!DOCTYPE html>
       }
       const master = findPatientMasterRecord(ev.patient, ev.ipp) || {};
       const rawName = String(master["Identité Patient"] || ev.patient || "[Nom, Prénom à préciser]").trim();
-      const isFem = /\\b(mme|mlle|madame|mademoiselle)\\b/i.test(rawName) || /\\b(née le|patiente)\\b/i.test(String(master["Coordonnées / DDN"] || "") + " " + String(master["Instructions & Remarques Cliniques"] || ""));
+      const isFem = /\\b(mme|mlle|madame|mademoiselle)\\b/i.test(rawName) || /\\b(née le|patiente|adressée|hospitalisée|informée)\\b/i.test(String(master["Coordonnées / DDN"] || "") + " " + String(master["Instructions & Remarques Cliniques"] || "") + " " + String(ev.remarques || "")) || /\\b(sophie|helene|hélène|valerie|valérie|joceline|faiza|paule|reem|laurence|corinne|marie|cécile|cecile|micheline|naima|julienne|maud|sandra|toscane|catherine|florence|nathalie|kawthar|amandine)\\b/i.test(rawName);
       let civiliteNom = rawName;
       if (!/^(m\\.|mr|mme|mlle)\\b/i.test(civiliteNom)) {
         civiliteNom = (isFem ? "Mme " : "M. ") + civiliteNom;
@@ -4164,23 +5011,28 @@ html_template = """<!DOCTYPE html>
       }
 
       const isSuiviDefault = /suivi|post[\\s\\-]|contrôle|récidive/i.test(interv + " " + String(ev.title || ""));
+      const cleanInterv = (interv && interv !== "-")
+        ? interv.replace(/\\s*\\(Geste\\s*\\d+\\/\\d+[^)]*\\)/gi, "").trim()
+        : "[<geste à préciser>]";
+      const docMatch = rem.match(/adressé[e]?\\s+par\\s+(?:le\\s+)?((?:Pr|Dr|Docteur|Professeur)\\.?\\s+(?:[A-ZÉÈÊËÀÂÎÏÔÙÛÇ][a-zéèêëàâîïôùûç\\-]*\\.?\\s*)+(?:(?:&|et)\\s*(?:Pr|Dr|Docteur|Professeur)\\.?\\s+(?:[A-ZÉÈÊËÀÂÎÏÔÙÛÇ][a-zéèêëàâîïôùûç\\-]*\\.?\\s*)+)?)/i);
+      const refDocStr = docMatch ? `un suivi spécialisé (adressé${isFem ? "e" : ""} par ${docMatch[1].trim()})` : "[<terrain / antécédents pertinents à préciser>]";
       return {
         civiliteNom,
         fem: isFem,
-        age,
+        age: age === "[À préciser]" ? "[<âge>]" : age,
         defaultMode: isSuiviDefault ? "suivi" : "preop",
-        motif: rem && rem !== "-" ? rem : "[motif / tableau clinique / imagerie à préciser]",
-        terrain: coord && coord !== "-" && !/^\\d/.test(coord) ? coord : "[terrain / antécédents pertinents à préciser]",
-        arguments: rem && rem !== "-" ? rem : "[arguments cliniques et paracliniques à préciser]",
-        gesteRetenu: interv !== "-" ? interv : "[geste retenu / niveau à préciser]",
-        objectifs: /biopsie/i.test(interv) ? "diagnostique" : "antalgique et thérapeutique",
-        principesNom: interv !== "-" ? interv : "[nom de l'intervention à préciser]",
-        benefices: /biopsie/i.test(interv) ? "caractérisation histologique précise" : "soulagement douloureux et de contrôle local",
+        motif: "[<lésion / motif clinique et imagerie à préciser>]",
+        terrain: refDocStr,
+        arguments: "[<arguments cliniques et paracliniques à préciser>]",
+        gesteRetenu: cleanInterv,
+        objectifs: /biopsie/i.test(cleanInterv) ? "diagnostique" : "antalgique et thérapeutique",
+        principesNom: cleanInterv,
+        benefices: /biopsie/i.test(cleanInterv) ? "caractérisation histologique précise" : "soulagement douloureux et de contrôle local",
         risques: "les risques hémorragique, infectieux, neurologique et d'échec ou de récidive",
-        terrainSuivi: rem && rem !== "-" ? rem : "[terrain / pathologie sous-jacente à préciser]",
-        gesteRealise: interv !== "-" ? interv : "[nom de l'intervention / niveaux traités à préciser]",
-        indicationInitiale: rem && rem !== "-" ? rem : "[indication initiale / tableau pré-opératoire à préciser]",
-        detailsProcedure: interv !== "-" ? interv : "[détails de la procédure à préciser]"
+        terrainSuivi: "[<pathologie / lésion suivie à préciser>]",
+        gesteRealise: cleanInterv,
+        indicationInitiale: "[<indication initiale à préciser>]",
+        detailsProcedure: cleanInterv
       };
     }
 
@@ -4201,7 +5053,7 @@ html_template = """<!DOCTYPE html>
       if (/morton/i.test(ctx)) return "cryo_morton";
       if (/desmo[ïi]de/i.test(ctx)) return "cryo_desmoide";
       if (/\\bect\\b|électrochimio|electrochimio|bléomycine|bleomycine/i.test(ctx)) return "ect";
-      if (/ostéocool|osteocool|\\bocp\\b/i.test(ctx)) return "osteocool";
+      if (/ostéocool|osteocool|\\bocp\\b|geste\\s+interventionnel\\s+rachidien/i.test(ctx)) return "osteocool";
       if (/ostéome\\s+ostéo[ïi]de|\\boo\\b|chondroblastome|ostéoblastome/i.test(ctx)) return "rf_oo";
       if (/génicul|genicul/i.test(ctx)) {
         if (/test\\s+anesth|bloc\\s+test/i.test(ctx) && !/radiofréquence|\\brf\\b|neurolyse|venom/i.test(`${ev.title || ""} ${(sEntry && sEntry.materiel) || ""}`)) {
@@ -4223,10 +5075,9 @@ html_template = """<!DOCTYPE html>
         if (/fracture|tassement|ostéopor/i.test(ctx)) return "vertebro_fracture";
         return "vertebro_secondaire";
       }
-      if (/alcoolisation|kyste\\s+essentiel/i.test(ctx)) return "alcoolisation_kyste";
-      if (ev.category === "biopsie" || /^biopsie/i.test(String(ev.title || "").trim()) || /biopsie/i.test(ctx)) return "biopsie";
       if (/cryo/i.test(ctx)) return "cryo_desmoide";
       if (/radiofréquence|\\brf\\b|thermoablation/i.test(ctx)) return "rf_oo";
+      if (ev.category === "biopsie" || /^biopsie/i.test(String(ev.title || "").trim()) || /biopsie/i.test(ctx)) return "biopsie";
       return "generic";
     }
 
@@ -4241,76 +5092,106 @@ html_template = """<!DOCTYPE html>
       const recuAccord = isFem ? "reçue" : "reçu";
       const revuAccord = isFem ? "revue" : "revu";
       const recontacteAccord = isFem ? "recontactée" : "recontacté";
-      const ageVal = (prof.age && !prof.age.includes("À préciser")) ? prof.age : "[<âge>]";
+      const adresseAccord = isFem ? "Adressée" : "Adressé";
+      const civNom = (prof.civiliteNom && !prof.civiliteNom.includes("À préciser"))
+        ? prof.civiliteNom
+        : (ev.patient || "[<Nom Prénom>]");
+      const ageVal = (prof.age && !prof.age.includes("À préciser")) ? prof.age : null;
       const matNote = (sEntry && sEntry.materiel && sEntry.materiel.trim()) ? sEntry.materiel.trim() : "";
-      const remNote = (sEntry && sEntry.remarques && sEntry.remarques.trim()) ? sEntry.remarques.trim() : "";
 
       const fullCtx = `${ev.title || ""} ${ev.remarques || ""} ${prof.motif || ""} ${prof.gesteRetenu || ""} ${prof.detailsProcedure || ""}`;
-      let side = "[<droite / gauche>]";
-      if (/\\bdroit(?:e|s)?\\b/i.test(fullCtx) && !/\\bgauche\\b/i.test(fullCtx)) side = "droit";
-      else if (/\\bgauche(?:s)?\\b/i.test(fullCtx) && !/\\bdroit(?:e|s)?\\b/i.test(fullCtx)) side = "gauche";
-      const sideFem = side === "droit" ? "droite" : (side === "gauche" ? "gauche" : "[<droite / gauche>]");
+      const levelMatch = fullCtx.match(/\\b([CTLS]\\d{1,2}(?:\\s*[–-]\\s*[CTLS]\\d{1,2})?)\\b/i);
+      const levelStr = levelMatch ? levelMatch[1].toUpperCase() : null;
+      const sideMatch = fullCtx.match(/\\b(droit|droite|gauche|bilatéral|bilatérale)\\b/i);
+      const sideStr = sideMatch ? sideMatch[1].toLowerCase() : null;
+      const docMatch = fullCtx.match(/adressé[e]?\\s+par\\s+(?:le\\s+)?((?:Pr|Dr|Docteur|Professeur)\\.?\\s+(?:[A-ZÉÈÊËÀÂÎÏÔÙÛÇ][a-zéèêëàâîïôùûç\\-]*\\.?\\s*)+(?:(?:&|et)\\s*(?:Pr|Dr|Docteur|Professeur)\\.?\\s+(?:[A-ZÉÈÊËÀÂÎÏÔÙÛÇ][a-zéèêëàâîïôùûç\\-]*\\.?\\s*)+)?)/i);
+      const refDoc = docMatch ? docMatch[1].trim() : null;
 
-      const levelMatch = fullCtx.match(/\\b([CTLS]\\d(?:\\s*[-–]\\s*[CTLS]\\d)?)\\b/i);
-      const levelStr = levelMatch ? levelMatch[1].toUpperCase() : "[<niveau>]";
-
-      const motifClean = (prof.motif && !prof.motif.includes("À préciser"))
-        ? prof.motif.replace(/^une?\\s+/i, "")
-        : "";
-
-      const compLine = remNote
-        ? `Pas de complication au cours ou au décours du geste (${remNote}).`
-        : "Pas de complication au cours ou au décours du geste.";
-
+      // 1. Ablation de tumeur desmoïde / Cryothérapie sous contrôle scanner (Trame Word sans inventer la topographie)
       if (gType === "cryo_desmoide") {
-        const indicLesion = motifClean ? `une ${motifClean}` : "une tumeur desmoïde [<localisation>]";
-        const aiguilles = matNote || "[<deux aiguilles IceRod / IceForce>]";
+        const isDesmoide = /desmo[ïi]de/i.test(fullCtx);
+        const hasBiopsie = /biopsie/i.test(fullCtx);
+        let desmoLoc = "[<localisation à préciser>]";
+        if (/flanc\\s+gauche/i.test(fullCtx)) desmoLoc = "du flanc gauche";
+        else if (/sus[\\s\\-]*claviculaire/i.test(fullCtx)) desmoLoc = "du creux sus-claviculaire";
+        else if (/paravertebral|paravertébral/i.test(fullCtx)) desmoLoc = `du nodule paravertébral ${sideStr || "[<côté>]"}`;
+        else if (/hanche/i.test(fullCtx)) desmoLoc = `de la hanche ${sideStr ? sideStr : "[<droite / gauche>]"}`;
+        else if (/tcg|cellules\\s+géantes/i.test(fullCtx)) desmoLoc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/chondroblastome/i.test(fullCtx)) desmoLoc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/masse\\s+pleurale|t7/i.test(fullCtx)) desmoLoc = "thoracique pariétale droite (T7)";
+        else if (/trapèze|trapeze/i.test(fullCtx)) desmoLoc = "du trapèze";
+
+        const titleLine1 = isDesmoide
+          ? "Ablation de tumeur desmoïde"
+          : (hasBiopsie ? "Biopsie et cryothérapie sous contrôle scanner" : "Cryothérapie sous contrôle scanner");
+        const titleLine2 = isDesmoide ? "Cryothérapie sous contrôle scanner" : "";
+        const indicLine = isDesmoide
+          ? `${patNom} de ${ageVal || "[<âge>]"} ans présentant une tumeur desmoïde ${desmoLoc}.`
+          : `${patNom} de ${ageVal || "[<âge>]"} ans présentant ${desmoLoc !== "[<localisation à préciser>]" ? `une lésion ${desmoLoc} [<nature à préciser>]` : "[<lésion / localisation à préciser>]"}${refDoc ? ` (${adresseAccord.toLowerCase()} par ${refDoc})` : ""}.`;
+        const conclLine = isDesmoide
+          ? `Cryothérapie de la tumeur desmoïde ${desmoLoc}, techniquement satisfaisante.`
+          : `${hasBiopsie ? "Biopsie et cryothérapie" : "Cryothérapie"} ${desmoLoc !== "[<localisation à préciser>]" ? desmoLoc : "de [<localisation>]"}, techniquement satisfaisante.`;
+
         return [
-          "Ablation de tumeur desmoïde",
-          "Cryothérapie sous contrôle scanner",
+          titleLine1,
+          ...(titleLine2 ? [titleLine2] : []),
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "Indication:",
-          `${patNom} de ${ageVal} ans présentant ${indicLesion}.`,
-          "Décision collégiale de traitement par cryothérapie",
+          indicLine,
+          `Décision collégiale de traitement par ${hasBiopsie ? "biopsie et cryothérapie" : "cryothérapie"}`,
+          "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
           "Informations du patient.",
           "Sous anesthésie générale.",
-          "Installation en décubitus.",
+          "Installation en [<décubitus / procubitus>].",
           "Repérage lésionnel par scanner.",
           "",
-          `Abord de la lésion sous contrôle scannographique et mise en place de ${aiguilles}`,
           "",
-          "Protection des tissus mous antérieurs et postérieurs à la tumeur desmoïde à l'aide d'injection sous contrôle échographique de sérum physiologique chauffé.",
+          ...(hasBiopsie ? ["[<Réalisation préalable de prélèvements biopsiques adressés en anatomopathologie.>]", ""] : []),
+          `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<deux aiguilles IceRod>]"}`,
+          "",
+          "",
+          ...(isDesmoide ? ["Protection des tissus mous à l'aide d'injection sous contrôle échographique / scannographique de [<sérum physiologique / hydrodissection / carbodissection>]."] : []),
           "Réalisation d'un premier cycle de cryothérapie pendant 10 minutes.",
-          "Réchauffement passif pendant 9 minutes et actif pendant 1 minute.",
-          "Réalisation d'un deuxième cycle de cryothérapie pendant 10 minutes.",
+          "Rechauffement passif pendant 9 minutes et actif pendant 1 minute. ",
+          "Réalisation d'un deuxième cycle de cryothérapie pendant 6 minutes.",
+          "",
           "",
           "Ablation du matériel.",
-          "Stéristrip, pansement sec.",
-          compLine,
+          "Stéristrip, pansement sec. ",
+          "Pas de complication au cours ou au décours du geste.",
+          "",
           "",
           "Conclusion:",
-          `Cryothérapie de ${motifClean ? "la " + motifClean : "la tumeur desmoïde"}, techniquement satisfaisante.`,
+          conclLine,
           "",
-          `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle.`,
           "",
-          "Dr T. LEFEVRE"
+          `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle. `,
+          "",
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 2. Ablation de névrome de Morton / Cryothérapie sous contrôle scanner
       if (gType === "cryo_morton") {
-        const espMatch = fullCtx.match(/\\b([23]\\s*(?:e|ème|eme)\\s*espace)\\b/i);
-        const espStr = espMatch ? espMatch[1] : "3ème espace interdigital";
-        const aiguille = matNote || "une aiguille IceSeed Cx 100mm";
+        const espMatch = fullCtx.match(/\\b([23])\\s*(?:e|ème)\\s*espace/i);
+        const espStr = espMatch ? `${espMatch[1]}ème espace interdigital` : "[<2ème / 3ème espace interdigital>]";
         return [
           "Ablation de névrome de Morton",
           "Cryothérapie sous contrôle scanner",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication:",
-          `${patNom} de ${ageVal} ans présentant un névrome de Morton du ${espStr} du pied ${side}.`,
-          "Echec de traitement médical et infiltratif.",
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant un névrome de Morton du ${espStr} du pied ${sideStr ? sideStr : "[<droit / gauche>]"}.`,
+          "Echec de traitement médical et infiltratif. ",
+          "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
@@ -4319,68 +5200,92 @@ html_template = """<!DOCTYPE html>
           "Installation en décubitus.",
           "Repérage lésionnel par échographie et scanner.",
           "",
-          `Abord de la lésion sous contrôle échographique et mise en place de ${aiguille}`,
+          "",
+          `Abord de la lésion sous contrôle échographique et mise en place d'${matNote || "une aiguille IceSeed Cx 100mm"}`,
+          "",
           "",
           "Réalisation d'un premier cycle de cryothérapie pendant 30 secondes à 5%",
           "Réalisation d'un cycle de 4 minutes à 30%",
           "",
+          "",
           "Ablation du matériel.",
-          "Stéristrip, pansement sec.",
-          compLine,
+          "Stéristrip, pansement sec. ",
+          "Pas de complication au cours ou au décours du geste.",
+          "",
           "",
           "Conclusion:",
           "Cryothérapie techniquement satisfaisante.",
           "",
-          "Dr T. LEFEVRE"
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 3. Electrochimiothérapie sous contrôle scanner (Trame Word sans inventer la lésion ni le médecin adresseur)
       if (gType === "ect") {
-        const indicTxt = motifClean ? `une ${motifClean}` : "[<une lésion secondaire résistante aux traitements systémiques>]";
-        const aiguilles = matNote || "6 aiguilles [<17G 16cm 40mm>]";
+        const ectSite = /pied/i.test(fullCtx) ? "du pied" : "de [<localisation à préciser>]";
         return [
           "Electrochimiothérapie sous contrôle scanner",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication:",
-          `${patNom} de ${ageVal} ans présentant ${indicTxt}.`,
-          "Décision collégiale de traitement par électrochimiothérapie à visée antalgique et de contrôle carcinologique local.",
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant [<nature et localisation de la lésion à préciser>].`,
+          "Décision collégiale de traitement par électrochimiothérapie [<à visée antalgique>] [<à visée de contrôle carcinologique local>].",
+          `${adresseAccord} par ${refDoc || "le Docteur [<médecin adresseur>]"}`,
+          "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
           "Informations du patient.",
           "Sous anesthésie générale.",
-          "Installation en décubitus.",
+          "Installation en [<décubitus / procubitus>].",
           "Repérage lésionnel par scanner.",
           "",
-          `Abord de la lésion sous contrôle scannographique et mise en place de ${aiguilles}`,
           "",
-          "Injection de 15mg/m2 de Bléomycine IV.",
+          `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<nombre>] aiguilles [<17G 16cm 40mm>]"} `,
+          "",
+          "",
+          "Injection de 15mg/m2 de Bléomycine IV. ",
+          "",
           "",
           "[<Réalisation d'un premier cycle de traitement.",
-          "Pull back de 3cm de l'ensemble des électrodes et réalisation d'un deuxième cycle de traitement.>]",
+          "Pull back de [<...>] cm de l'ensemble des électrodes et réalisation d'un deuxième cycle de traitement.>]",
+          "",
           "",
           "Ablation du matériel.",
-          "Pansement sec.",
-          compLine,
+          "Pansement sec. ",
+          "Pas de complication au cours ou au décours du geste.",
+          "",
           "",
           "Conclusion:",
-          `Electrochimiothérapie de ${motifClean ? "la " + motifClean : "[<la lésion>]"} techniquement satisfaisante.`,
+          `Electrochimiothérapie ${ectSite} techniquement satisfaisante.`,
           "",
-          `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle à 2 mois.`,
           "",
+          `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle à 2 mois. `,
+          "",
+          "",
+          "Pr A. FEYDY ",
+          "Pr A. DOHAN",
+          "Dr MP TALABARD ",
           "Dr T. LEFEVRE"
         ].join("\\n");
       }
 
+      // 4. INJECTION THERAPEUTIQUE de STEROÏDE / EPIDURALE PAR VOIE INTERLAMAIRE / SOUS SCANNER
       if (gType === "infiltration_epidurale") {
         return [
           "INJECTION THERAPEUTIQUE de STEROÏDE",
-          "EPIDURALE PAR VOIE INTERLAMAIRE",
-          "SOUS SCANNER",
+          "EPIDURALE PAR VOIE INTERLAMAIRE ",
+          "SOUS SCANNER ",
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          `Lomboradiculalgie ${motifClean ? "(" + motifClean + ")" : "[<>]"}`,
+          "Lomboradiculalgie [<>]",
           `${patNom} ${recuAccord} en consultation de radiologie interventionnelle préalable`,
+          "",
           "",
           "Pas d’antécédent de chirurgie rachidienne, pas de traitement anticoagulant ou de trouble de l’hémostase primaire, et pas d’allergie grave à un produit de contraste iodé",
           "",
@@ -4392,60 +5297,77 @@ html_template = """<!DOCTYPE html>
           "Décubitus ventral avec cale ventrale",
           "Asepsie cutanée : Première désinfection cutanée à la Bétadine® alcoolique. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
           "",
-          "- Repérage scannographique",
-          `- Ponction par voie interlamaire ${levelStr !== "[<niveau>]" ? levelStr : "[<L3-L4>]"} de l'espace épidural, sous pression continue`,
+          "",
+          " - Repérage scannographique",
+          "",
+          `- Ponction par voie interlamaire ${levelStr ? levelStr : "[<étage>]"} de l'espace épidural, sous pression continue `,
           "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe au sein de l'espace épidural, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
+          "",
           "",
           "CONCLUSION",
           "Procédure sans particularité",
           "Absence de complication per et post-procédure",
           "Conseils d’usage : repos relatif, et absence d’activité sportive.",
-          `${patNom} prévenu${isFem ? "e" : ""} de la possible recrudescence des douleurs pendant 24-48h`,
+          `${patNom} prévenu${isFem ? "e" : ""}  de la possible recrudescence des douleurs pendant 24-48h`,
           "Nous sommes à votre disposition pour réitérer la procédure en cas d’amélioration incomplète des symptômes",
           "",
-          "Dr T. LEFEVRE"
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 5. INJECTION THERAPEUTIQUE de STEROÏDE / INTER ARTICULAIRE POSTERIEURE / SOUS SCANNER
       if (gType === "infiltration_iap") {
         return [
           "INJECTION THERAPEUTIQUE de STEROÏDE",
           "INTER ARTICULAIRE POSTERIEURE",
-          "SOUS SCANNER",
+          "SOUS SCANNER ",
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          "Lombalgies",
+          "Lombalgie sur arthropathie facettaire postérieure ",
+          "",
+          "",
           "Pas d’antécédent de chirurgie rachidienne, pas de traitement anticoagulant ou de trouble de l’hémostase primaire, et pas d’allergie grave à un produit de contraste iodé",
           "",
           "TECHNIQUE ET RESULTAT",
+          "Clichés standards :",
+          "Aspect normal de la trame osseuse",
           "",
           "Procédure interventionnelle :",
           "Décubitus ventral avec cale ventrale",
-          "Asepsie cutanée : Première désinfection cutanée à la Bétadine® alcoolique. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
+          "Asepsie cutanée : Première désinfection cutanée au Bactiseptic. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
           "",
-          "- Repérage scannographique",
-          `- Ponction par voie postérieure des articulaires ${levelStr !== "[<niveau>]" ? levelStr : "[<L4-L5>]"}`,
-          "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe dans le récessus articulaire, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
+          "",
+          " - Repérage scannographique ",
+          `- Ponction par voie postérieure des articulaires ${levelStr ? levelStr : "[<étage>]"}`,
+          "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe dans le recessus articulaire, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
+          "",
           "",
           "CONCLUSION",
           "Procédure sans particularité",
           "Absence de complication per et post-procédure",
           "Conseils d’usage : repos relatif, et absence d’activité sportive.",
-          `${patNom} prévenu${isFem ? "e" : ""} de la possible recrudescence des douleurs pendant 24-48h`,
+          `${patNom} prévenu${isFem ? "e" : ""}  de la possible recrudescence des douleurs pendant 24-48h`,
           "Nous sommes à votre disposition pour réitérer la procédure en cas d’amélioration incomplète des symptômes",
           "",
-          "Dr T. LEFEVRE"
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 6. INJECTION THERAPEUTIQUE de STEROÏDE / NERF GRAND OCCIPITAL / SOUS SCANNER
       if (gType === "infiltration_arnold") {
         return [
           "INJECTION THERAPEUTIQUE de STEROÏDE",
           "NERF GRAND OCCIPITAL",
-          "SOUS SCANNER",
+          "SOUS SCANNER ",
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          `Névralgie d'Arnold ${sideFem}`,
+          "Névralgie d'Arnold [<droite>] [<gauche>]",
           "",
           "TECHNIQUE ET RESULTAT",
           "",
@@ -4453,30 +5375,37 @@ html_template = """<!DOCTYPE html>
           "Décubitus ventral avec cale ventrale",
           "Asepsie cutanée : Première désinfection cutanée au Bactiseptic. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
           "",
-          "- Repérage scannographique",
+          "",
+          " - Repérage scannographique ",
           "- Ponction par voie postérieure à hauteur de l'épineuse de C1, entre le muscle oblique caudal inférieur de la tête et le muscle semi-épineux.",
           "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe dans l'espace inter-musculaire, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
+          "",
           "",
           "CONCLUSION",
           "Procédure sans particularité",
           "Absence de complication per et post-procédure",
           "Conseils d’usage : repos relatif, et absence d’activité sportive.",
-          `${patNom} prévenu${isFem ? "e" : ""} de la possible recrudescence des douleurs pendant 24-48h`,
+          "",
+          "",
+          `${patNom} prévenu${isFem ? "e" : ""}  de la possible recrudescence des douleurs pendant 24-48h`,
           "Nous sommes à votre disposition pour réitérer la procédure en cas d’amélioration incomplète des symptômes",
           "",
-          "Dr T. LEFEVRE"
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 7. Ostéocool sous contrôle scanner (Trame Word sans inventer le primitif ni de fuite discale)
       if (gType === "osteocool") {
-        const indicTxt = motifClean ? `une ${motifClean}` : `[<une lésion vertébrale de ${levelStr} dans un contexte oncologique>]`;
-        const matStr = matNote || "[<2 trocards 10G>] et [<deux sondes OCP 20mm>]";
         return [
           "Ostéocool sous contrôle scanner",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication:",
-          `${patNom} de ${ageVal} ans présentant ${indicTxt}.`,
-          "Décision collégiale de traitement par radiofréquence [<à visée de contrôle carcinologique local et antalgique>] et cimentoplastie.",
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant une lésion vertébrale de ${levelStr || "[<niveau>]"} [<contexte clinique / histologique à préciser>].`,
+          "Décision collégiale de traitement par radiofréquence [<à visée antalgique / de contrôle carcinologique local>] et cimentoplastie.",
+          "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
@@ -4485,315 +5414,347 @@ html_template = """<!DOCTYPE html>
           "Installation en procubitus.",
           "Repérage lésionnel par scanner.",
           "",
-          `Abord de la lésion sous contrôle scannographique et mise en place de ${matStr}`,
+          "",
+          `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<2 trocards 10G>] et [<deux sondes OCP 20mm>]"}`,
+          "",
           "",
           "Réalisation d'un premier cycle de traitement de [<15min>] à [<70°>]",
-          "Préparation du ciment Vertaplex et injection de [<4cc>] de ciment dans le corps vertébral, avec un bon remplissage de plateau à plateau.",
-          "Pas de fuite épidurale ou discale significative.",
+          "Préparation du ciment Vertaplex et injection de [<...>] cc de ciment dans le corps vertébral, avec un bon remplissage de plateau à plateau.",
+          "[<Pas de fuite discale ni épidurale.>]",
+          "",
           "",
           "Ablation du matériel.",
-          "Pansement sec.",
-          compLine,
+          "Pansement sec. ",
+          "Pas de complication au cours ni au décours du geste.",
+          "",
           "",
           "Conclusion:",
-          "Radiofréquence par Ostéocool et cimentoplastie sans complication.",
+          `Radiofréquence par Ostéocool et cimentoplastie de ${levelStr || "[<niveau>]"} sans complication. `,
           "",
-          `${lePat} sera ${revuAccord} en consultation dans un mois.`,
           "",
-          "Dr T. LEFEVRE"
+          `${lePat} sera ${revuAccord} en consultation dans un mois. `,
+          "",
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
-      if (gType === "rf_genicules") {
+      // 8. Radiofréquence d'ablation nerveuse / Nerfs géniculés
+      if (gType === "rf_genicules" || gType === "test_anesth_genicule") {
         return [
           "Radiofréquence d'ablation nerveuse",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication",
-          `Gonalgies persistantes (${side !== "[<droite / gauche>]" ? "genou " + side : "genou [<droit / gauche>]"}): indication à une neurolyse des nerfs géniculés`,
+          "Gonalgies persistantes: indication à une neurolyse des nerfs géniculés",
           "Deux tests anesthésiques réalisés le [<>] et le [<>]",
           "EVA basale: [<>]",
+          "",
           "1er bloc test: [<>]",
-          "2nd bloc test: [<>]",
+          "2nd bloc test:[<>]",
+          "",
           "",
           "Technique",
           "Installation en décubitus",
           "Repérage sous échographie.",
-          "En conditions d'asepsie stricte.",
-          "Anesthésie cutanée et sous cutanée avec l'injection de 10cc de Xylocaïne.",
-          `Mise en place de 3 canules ${matNote || "Venom 20G"} au contact des nerfs géniculés supéro-médial, supéro-latéral et inféro-médial`,
-          "Test sensitif et moteur: pas de douleur ni de réaction motrice.",
+          "En conditions d'asepsie stricte. ",
+          "Anesthésie cutanée et sous cutanée avec l'injection de 10cc de Xylocaïne. ",
+          "Mise en place de 3 canules Venom 20G au contact des nerfs géniculés supéro-médial, supéro-latéral et inféro-médial",
+          "Test sensitif et moteur: pas de douleur ni de réaction motrice. ",
           "",
-          "Injection de 5cc de Xylocaïne 1% et 5cc de Naropeïne 2.5%.",
+          "",
+          "Injection de 5cc de Xylocaïne 1% et 5cc de Naropeïne 2.5%. ",
           "Réalisation de 2 cycles de RF continue à 60° - 60s",
-          "Injection de 2cc d'Hydrocortancyl sur chaque zone d'ablation.",
+          "Injection de 2cc de d'Hydrocortancyl sur chaque zone d'ablation. ",
+          "",
           "",
           "Retrait du matériel. Pansement sec.",
           "Pas de complication au décours.",
           "",
+          "",
           "Conclusion",
           "Neurolyse des nerfs géniculés techniquement satisfaisante",
-          "Sans complication",
-          "Téléconsultation dans 3 semaines.",
+          "Sans complication [<>]",
+          "Téléconsultation dans 3 semaines. ",
           "",
           "Dr T. LEFEVRE"
         ].join("\\n");
       }
 
+      // 9. Ablation Ostéome Ostéoïde / Chondroblastome — Radiofréquence sous contrôle scanner
       if (gType === "rf_oo") {
-        const indicTxt = motifClean ? `une ${motifClean}` : "une lésion suspecte d'ostéome ostéoïde / chondroblastome [<localisation>]";
-        const sondeStr = matNote || "Covidien 10mm - 150mm";
+        const isChondro = /chondroblastome/i.test(fullCtx);
+        let lesionTitle = isChondro ? "Ablation de Chondroblastome" : "Ablation Ostéome Ostéoïde";
+        let lesionDesc = isChondro ? "un chondroblastome" : "un ostéome ostéoïde";
+        let siteDesc = "[<localisation à préciser>]";
+        if (/genou/i.test(fullCtx)) siteDesc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/coude/i.test(fullCtx)) siteDesc = `du coude ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/tibia\\s+proximal\\s+gauche/i.test(fullCtx)) siteDesc = "du tibia proximal gauche";
+        else if (/tibia/i.test(fullCtx)) siteDesc = `du tibia ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/astragale|talus/i.test(fullCtx)) siteDesc = `de l'astragale ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (levelStr) siteDesc = `de ${levelStr}`;
+
+        const extraDetail = /distance.*lame\\s+sous[\\s\\-]*chondrale/i.test(fullCtx)
+          ? " (à distance de la lame sous-chondrale)"
+          : "";
+
         return [
-          "Ablation Ostéome Ostéoïde / Lésion osseuse bénigne",
+          lesionTitle,
           "Radiofréquence sous contrôle scanner",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication:",
-          `${patNom} de ${ageVal} ans présentant ${indicTxt}.`,
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant ${lesionDesc} ${siteDesc}${extraDetail}. `,
           "Décision de traitement par radiofréquence.",
+          "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
           "Informations du patient.",
           "Sous anesthésie générale.",
-          "Installation adaptée au repérage.",
+          "Installation en [<décubitus / procubitus>].",
           "Repérage lésionnel par scanner.",
           "",
-          "Abord de la lésion à l'aide d'une coaxiale [<Arrow 11G 6cm / Bonopty>].",
-          `Positionnement de l'aiguille de radiofréquence ${sondeStr} au sein de la lésion.`,
-          "Réalisation d'un cycle de radiofréquence ablative à [<85-90°>] pendant 6 minutes.",
+          "",
+          "Abord de la lésion à l'aide d'une coaxiale [<Arrow 11G 6cm>] par voie [<voie d'abord>].",
+          "",
+          "",
+          "[<Réalisation d'une biopsie à l'aide d'une tréphine 13G.>]",
+          `Positionnement de l'aiguille de radiofréquence ${matNote || "[<Covidien 7mm / 10mm - 150mm>]"} au sein de la lésion.`,
+          "Réalisation d'un cycle de radiofréquence ablative à 85° pendant 6 minutes.",
+          "",
           "",
           "Ablation du matériel.",
-          "Stéristrip, pansement sec.",
-          compLine,
+          "Pansement sec. ",
+          "Pas de complication au cours ou au décours du geste.",
+          "",
           "",
           "Conclusion:",
-          `Radiofréquence de ${motifClean ? "la " + motifClean : "la lésion osseuse"}, techniquement satisfaisante.`,
+          `Radiofréquence ${isChondro ? "du chondroblastome" : "de l'ostéome ostéoïde"} ${siteDesc}, techniquement satisfaisante.`,
           "",
-          `${lePat} sera ${revuAccord} dans 3 mois en consultation.`,
           "",
-          "Dr T. LEFEVRE"
+          `${lePat} sera ${revuAccord} dans 3 mois en consultation. `,
+          "",
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 10. Radiofréquence d'ablation nerveuse / RF pulsée ou Cryoneurolyse nerf périphérique
       if (gType === "rf_nerf_pulse") {
-        const nerfMatch = fullCtx.match(/nerf\\s+([a-zàâçéèêëîïôûùüÿñæœ\\-]+(?:\\s+[a-zàâçéèêëîïôûùüÿñæœ\\-]+){0,2})/i);
-        const nerfNom = nerfMatch ? `nerf ${nerfMatch[1]}` : "nerf [<fémoro-cutané / clunéal / intercostal>]";
-        const isCryoNerf = /cryo/i.test(fullCtx);
-        if (isCryoNerf) {
-          return [
-            "Cryoneurolyse percutanée sous contrôle scanner",
-            "",
-            "Indication:",
-            `${patNom} de ${ageVal} ans présentant ${motifClean ? "des " + motifClean.replace(/^des\\s+/i, "") : "des douleurs neuropathiques rebelles dans le territoire du " + nerfNom}.`,
-            "Bloc test anesthésique préalable positif.",
-            "",
-            "Technique - Résultats:",
-            `${patNom} précédemment ${vuAccord} en consultation.`,
-            "Informations du patient.",
-            "Sous anesthésie locale.",
-            "Repérage par échographie et scanner.",
-            `Abord sous contrôle scannographique et mise en place d'une sonde de cryothérapie (${matNote || "[<IceSeed / IceSphere>]"}) au contact du ${nerfNom}.`,
-            "Réalisation des cycles de cryoneurolyse avec bonne couverture de la cible nerveuse et respect des structures adjacentes.",
-            "",
-            "Ablation du matériel. Stéristrip, pansement sec.",
-            compLine,
-            "",
-            "Conclusion:",
-            `Cryoneurolyse du ${nerfNom} techniquement satisfaisante.`,
-            "Téléconsultation de suivi à 1 mois.",
-            "",
-            "Dr T. LEFEVRE"
-          ].join("\\n");
-        }
+        const isIntercostal = /intercostal/i.test(fullCtx);
+        const nerfDesc = isIntercostal
+          ? `nerf intercostal ${sideStr || "[<droit / gauche>]"}`
+          : "nerf [<fémoro-cutané superficiel / nerf à préciser>]";
         return [
           "Radiofréquence d'ablation nerveuse",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication",
-          `Douleur neuropathique sur une lésion du ${nerfNom}.`,
+          `Douleur neuropathique sur une lésion du ${nerfDesc}.`,
           "Deux tests anesthésiques réalisés le [<>] et le [<>]",
           "EVA basale: [<>]",
           "1er bloc test: [<>]",
-          "2nd bloc test: [<>]",
+          "2nd bloc test:[<>]",
           "",
-          "Technique",
-          "Installation en décubitus",
-          "Repérage sous échographie.",
-          "En conditions d'asepsie stricte.",
-          "Anesthésie cutanée et sous cutanée avec l'injection de 2cc de Xylocaïne.",
-          `Mise en place d'une canule ${matNote || "Venom 20G"} au contact du nerf.`,
-          "Test sensitif et moteur: pas de douleur ni de réaction motrice.",
-          "",
-          "Injection de 5cc de Xylocaïne.",
-          "Réalisation de 2 cycles de RF pulsée à 42° - 120s par cycle.",
-          "Injection de 3cc d'Hydrocortancyl et 5cc de Naropeïne 2.5% au contact de la zone d'ablation.",
-          "",
-          "Retrait du matériel. Pansement sec.",
-          "Pas de complication au décours.",
-          "",
-          "Conclusion",
-          `RF pulsée du ${nerfNom}.`,
-          "",
-          "Téléconsultation dans 3 semaines.",
-          "",
-          "Dr T. LEFEVRE"
-        ].join("\\n");
-      }
-
-      if (gType === "rf_facettaire") {
-        return [
-          "Radiofréquence d'ablation nerveuse",
-          "",
-          "Indication",
-          `Syndrome facettaire de topographie ${levelStr !== "[<niveau>]" ? levelStr : "[<>]"}.`,
-          "Deux tests anesthésiques réalisés le [<>] et le [<>]",
-          "EVA basale: [<>]",
-          "1er bloc test: [<>]",
-          "2nd bloc test: [<>]",
           "",
           "Technique",
           "Installation en décubitus",
           "Repérage sous échographie / scanner.",
-          "En conditions d'asepsie stricte.",
-          "Anesthésie cutanée et sous cutanée avec l'injection de 10cc de Xylocaïne.",
-          `Mise en place d'une canule ${matNote || "Venom 20G"} au contact du rameau médial.`,
-          "Test sensitif et moteur: pas de douleur ni de réaction motrice.",
+          "En conditions d'asepsie stricte. ",
+          "Anesthésie cutanée et sous cutanée avec l'injection de 2cc de Xylocaïne. ",
+          "Mise en place d'une canule Venom 20G au contact du nerf. ",
+          "Test sensitif et moteur: pas de douleur ni de réaction motrice. ",
           "",
-          "Injection de 5cc de Xylocaïne 1% et 5cc de Naropeïne 2.5%.",
-          "Réalisation de 1 cycle de RF continue à 80° - 90s",
-          "Injection de 2cc d'Hydrocortancyl sur chaque zone d'ablation.",
+          "",
+          "Injection de 5cc de Xylocaïne. ",
+          "Réalisation de 2 cycles de RF pulsée à 42° - 120s par cycle. ",
+          "Injection de 3cc de d'Hydrocortancyl et 5cc de Naropeine 2.5% au contact de la zone d'ablation. ",
+          "",
           "",
           "Retrait du matériel. Pansement sec.",
           "Pas de complication au décours.",
           "",
+          "",
           "Conclusion",
-          `Rhizolyse ${levelStr !== "[<niveau>]" ? levelStr : "[<>]"}`,
-          "Sans complication",
-          "Téléconsultation dans 3 semaines.",
+          `RF pulsée du ${nerfDesc}. `,
+          "",
+          "",
+          "Téléconsultation dans 3 semaines. ",
           "",
           "Dr T. LEFEVRE"
         ].join("\\n");
       }
 
+      // 11. Radiofréquence d'ablation nerveuse / Syndrome facettaire / Rhizolyse
+      if (gType === "rf_facettaire") {
+        return [
+          "Radiofréquence d'ablation nerveuse",
+          "",
+          `${patNom} : ${civNom}`,
+          "",
+          "Indication",
+          "Syndrome facettaire de topographie [<>].",
+          "Deux tests anesthésiques réalisés le [<>] et le [<>]",
+          "EVA basale: [<>]",
+          "1er bloc test: [<>]",
+          "2nd bloc test:[<>]",
+          "",
+          "",
+          "Technique",
+          "Installation en décubitus",
+          "Repérage sous échographie.",
+          "En conditions d'asepsie stricte. ",
+          "Anesthésie cutanée et sous cutanée avec l'injection de 10cc de Xylocaïne. ",
+          "Mise en place d'une canule Venom 20G au contact du nerf. ",
+          "Test sensitif et moteur: pas de douleur ni de réaction motrice. ",
+          "",
+          "",
+          "Injection de 5cc de Xylocaïne 1% et 5cc de Naropeïne 2.5%. ",
+          "Réalisation de 1 cycle de RF continue à 80° - 90s",
+          "Injection de 2cc de d'Hydrocortancyl sur chaque zone d'ablation. ",
+          "",
+          "",
+          "Retrait du matériel. Pansement sec.",
+          "Pas de complication au décours.",
+          "",
+          "",
+          "Conclusion",
+          "Rhizolyse [<>]",
+          "Sans complication ",
+          "Téléconsultation dans 3 semaines. ",
+          "",
+          "Dr T. LEFEVRE"
+        ].join("\\n");
+      }
+
+      // 12. Test anesthésique / Douleur péri-trochantérienne
       if (gType === "test_trochanter") {
         return [
           "Test anesthésique",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication",
-          `Douleur péri-trochantérienne ${sideFem}`,
+          "Douleur péri-trochantérienne [<droite >][<gauche>]",
           "Premier test anesthésique.",
           "EVA basale [<>]/10",
           "",
+          "",
           "Technique",
           "Installation en procubitus",
-          "En conditions d'asepsie stricte.",
+          "En conditions d'asepsie stricte. ",
           "Mise en place d'une aiguille 20G au contact du grand trochanter, sur le trajet théorique des branches sensitives du nerf fémoral",
           "",
-          "Injection de 2cc de Visipaque pour confirmer l'absence d'opacification vasculaire",
-          "Injection d'un mélange 2/3 1/3 Naropéine 7.5% et Xylocaïne 1% (10cc)",
+          "",
+          "Injection de 2cc de Visipaque pour confirmer l'absence d'opacification vasculaire ",
+          "Injection d'un mélange 2/3 1/3 Naropéine 7.5% et Xylocaine 1% (10cc)",
+          "",
           "",
           "Retrait du matériel. Pansement sec.",
           "Pas de complication au décours.",
+          "",
           "",
           "Conclusion",
           "Test anesthésique techniquement satisfaisant.",
           "",
-          `${lePat} doit suivre l'évolution de sa douleur pendant 4 à 6h après le test et sera ${recontacteAccord} dans 3 semaines`,
+          `${lePat} doit suivre l'évolution sa douleur pendant 4 à 6h après le test et sera ${recontacteAccord} dans 3 semaines `,
           "",
-          "Dr T. LEFEVRE"
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD (CCA) "
         ].join("\\n");
       }
 
-      if (gType === "test_anesth_genicule") {
-        return [
-          "Test anesthésique des nerfs géniculés",
-          "",
-          "Indication",
-          `Gonalgies rebelles sur gonarthrose (${side !== "[<droite / gauche>]" ? "genou " + side : "genou [<droit / gauche>]"}): bloc test pré-thérapeutique avant éventuelle radiofréquence des nerfs géniculés.`,
-          "EVA basale [<>]/10",
-          "",
-          "Technique",
-          "Installation en décubitus dorsal",
-          "Repérage sous guidage échographique en conditions d'asepsie stricte.",
-          "Mise en place d'aiguilles 20G au contact des nerfs géniculés supéro-médial, supéro-latéral et inféro-médial.",
-          "Injection d'un mélange Naropéine 7.5% et Xylocaïne 1%.",
-          "",
-          "Retrait du matériel. Pansement sec.",
-          "Pas de complication au décours.",
-          "",
-          "Conclusion",
-          "Test anesthésique des nerfs géniculés techniquement satisfaisant.",
-          `${lePat} doit suivre l'évolution de sa douleur pendant 4 à 6h après le test et sera ${recontacteAccord} en consultation.`,
-          "",
-          "Dr T. LEFEVRE"
-        ].join("\\n");
-      }
-
+      // 13. Test anesthésique / Syndrome facettaire
       if (gType === "test_facettaire") {
         return [
           "Test anesthésique",
           "",
+          `${patNom} : ${civNom}`,
+          "",
           "Indication",
-          `Syndrome facettaire de topographie ${levelStr !== "[<niveau>]" ? levelStr : "[<L4-L5 / L5-S1>]"} ${sideFem}.`,
+          "Syndrome facettaire de topographie [<L5-S1 droite>].",
           "Premier test anesthésique.",
-          "EVA basale [<7-8/10>]",
+          "EVA basale [<.../10>]",
+          "",
           "",
           "Technique",
           "Installation en procubitus",
-          "En conditions d'asepsie stricte.",
-          `Mise en place d'une aiguille 20G en regard des articulaires postérieures ${levelStr !== "[<niveau>]" ? levelStr : "[<L4-L5 et L5-S1>]"}`,
-          "Contrôle scanographique du bon positionnement des aiguilles.",
+          "En conditions d'asepsie stricte. ",
+          "Mise en place d'une aiguille 20G dans les gouttières transverso-sacrées [<droites >][< L5-S1>] et[< L4-L5>]",
+          "Contrôle scannographique du bon positionnement des aiguilles.",
           "",
-          "Injection d'un mélange 2/3 1/3 Naropéine 7.5% et Xylocaïne 1%",
+          "",
+          "Injection d'un mélange 2/3 1/3 Naropéine 7.5% et Xylocaine 1%",
+          "",
           "",
           "Retrait du matériel. Pansement sec.",
           "Pas de complication au décours.",
           "",
+          "",
           "Conclusion",
           "Test anesthésique techniquement satisfaisant.",
-          `${lePat} doit suivre l'évolution de sa douleur pendant 4 à 6h après le test.`,
+          `${lePat} doit suivre l'évolution sa douleur pendant 4 à 6h après le test. `,
           "",
           "Dr T. LEFEVRE"
         ].join("\\n");
       }
 
+      // 14. VERTEBROPLASTIE PERCUTANEE / Lésion secondaire (Sans inventer "cancer pulmonaire EGFR muté" ni "Fuite épidurale")
       if (gType === "vertebro_secondaire") {
-        const indicTxt = motifClean ? capFirstLetter(motifClean) : `Lésion secondaire de ${levelStr} dans un contexte oncologique.`;
         return [
-          "VERTEBROPLASTIE PERCUTANEE",
+          "VERTEBROPLASTIE PERCUTANEE ",
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          indicTxt,
+          `Lésion secondaire de ${levelStr || "[<niveau>]"} dans un contexte de [<contexte carcinologique à préciser>].`,
           "Pas d’antécédent de chirurgie rachidienne",
           "Pas de traitement anticoagulant ou de trouble de l’hémostase primaire, et pas d’allergie grave à un produit de contraste iodé",
+          "",
           "",
           "TECHNIQUE ET RESULTAT",
           "Sous anesthésie générale",
           "Décubitus ventral",
-          "Asepsie cutanée : Première désinfection cutanée à la Chlorhexidine. Deuxième passage après séchage.",
+          "Asepsie cutanée : Première désinfection cutanée à la Chlorexidine. Deuxième passage après séchage. ",
           "Mise en place d’un champ chirurgical fenêtré",
-          `_ Abord du corps vertébral de ${levelStr} sous contrôle scanographique`,
-          `_ Mise en place de trocards osseux ${matNote || "Arrow 6cm"}`,
+          `_ Abord [<unipédiculaire / bipédiculaire>] du corps vertébral de ${levelStr || "[<niveau>]"} sous contrôle scanographique`,
+          "_ Mise en place de trocards osseux Arrow 6cm ",
           "_ Préparation du ciment",
           "_ Remplissage du système Vertaplex",
-          "_ Injection de [<2cc>] de ciment au sein de la lésion sous contrôles scanner répétés",
-          "Pas de fuite discale ou épidurale.",
+          "_ Injection de [<2cc>] de ciment au sein du corps vertébral sous contrôles scanner répétés",
+          "Pas de fuite discale ni épidurale. ",
           "",
-          "Absence de complication per et post-procédure, notamment pas de déficit moteur ou sensitif.",
+          "Absence de complication per et post-procédure, notamment pas de déficit moteur ou sensitif. ",
           "Conseils d’usage : repos relatif, lever possible, antalgique si douleur",
           "",
-          "Dr T. LEFEVRE"
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 15. VERTEBROPLASTIE PERCUTANEE / Fracture vertébrale
       if (gType === "vertebro_fracture") {
         return [
-          "VERTEBROPLASTIE PERCUTANEE",
+          "VERTEBROPLASTIE PERCUTANEE ",
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          `Fracture vertébrale de ${levelStr} avec perte de hauteur du plateau supérieur / inférieur`,
+          `Fracture vertébrale de ${levelStr || "[<niveau>]"} avec perte de hauteur du plateau [<supérieur / inférieur>] `,
           "Il s'y associe un signal de type oedémateux de la médullaire osseuse.",
           `${patNom} ${recuAccord} en consultation de radiologie interventionnelle préalable`,
           "Pas d’antécédent de chirurgie rachidienne",
           "Pas de traitement anticoagulant ou de trouble de l’hémostase primaire, et pas d’allergie grave à un produit de contraste iodé",
+          "",
+          "",
           "",
           "TECHNIQUE ET RESULTAT",
           "RADIOGRAPHIES :",
@@ -4802,142 +5763,111 @@ html_template = """<!DOCTYPE html>
           "PROCÉDURE INTERVENTIONNELLE :",
           `Informations ${isFem ? "de la patiente" : "du patient"}`,
           "Décubitus ventral",
-          "Asepsie cutanée : Première désinfection cutanée à la Bétadine®. Deuxième passage après séchage.",
+          "Asepsie cutanée : Première désinfection cutanée à la Bétadine®. Deuxième passage après séchage. ",
           "Mise en place d’un champ chirurgical fenêtré",
-          "_ Anesthésie loco-régionale / générale",
-          "_ Abord postéro-latéral",
-          `_ Ponction par voie pédiculaire du corps vertébral de ${levelStr}`,
-          "_ Contrôle scopique / scanographique en temps réel",
-          `_ Mise en place d'un système ${matNote || "TAM KIT 3mm - 152mm"}`,
+          "_ Anesthésie loco-régionale ",
+          "_ Abord postéro-latéral [<gauche / droit>]",
+          `_ Ponction par voie pédiculaire [<gauche / droite>] du corps vertébral de ${levelStr || "[<niveau>]"}`,
+          "_ Contrôle scopique en temps réel",
+          "_ Mise en place d'un système TAM KIT 3mm - 152mm",
           "_ Préparation du ciment",
           "_ Remplissage du système Vertaplex",
           "_ Injection de [<2cc>] de ciment au sein du foyer fracturaire",
           "Pas de fuite épidurale ou discale",
           "",
           "Absence de complication per et post-procédure",
-          "Conseils d’usage : repos relatif, lever possible, antalgique si douleur",
+          "Conseils d’usage : repos relatif, levé possible, antalgique si douleur",
           "",
-          "Dr T. LEFEVRE"
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD "
         ].join("\\n");
       }
 
+      // 16. CIMENTOPLASTIE VISSAGE PERCUTANEE (Sans inventer "léiomyosarcome du caecum")
       if (gType === "vissage_cimento") {
-        const indicTxt = motifClean ? capFirstLetter(motifClean) : "[<Lésion secondaire ou fragilisante du bassin dans un contexte oncologique / post-radique.>]";
+        const vissageLoc = /aile\\s+iliaque/i.test(fullCtx)
+          ? "de l'aile iliaque [<côté>] (post-radiothérapie)"
+          : "[<localisation et contexte à préciser>]";
         return [
-          "CIMENTOPLASTIE VISSAGE PERCUTANEE",
+          "CIMENTOPLASTIE VISSAGE PERCUTANEE ",
+          "",
+          `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          indicTxt,
-          "Indication de vissage à visée de consolidation et antalgique",
+          `Lésion / fragilité osseuse ${vissageLoc}.`,
+          "Indication de vissage à visée de consolidation préventive",
+          "",
           "",
           "TECHNIQUE ET RESULTAT",
           "Sous anesthésie générale",
-          "Décubitus dorsal / ventral adapté",
-          "Asepsie cutanée : Première désinfection cutanée à la Chlorhexidine. Deuxième passage après séchage.",
+          "Décubitus dorsal",
+          "Asepsie cutanée : Première désinfection cutanée à la Chlorexidine. Deuxième passage après séchage. ",
           "Mise en place d’un champ chirurgical fenêtré",
-          "_ Réalisation d'un CBCT / scanner de repérage",
-          "_ Abord sous guidage scanographique / needle guidance",
+          "_ Réalisation d'un CBCT de repérage",
+          "_ Abord antérieur sous needle guidance",
           "_ Mise en place d'un trocard osseux TOCR 8G 150mm",
-          "_ Mise en place d'une broche guide de Kirschner 300mm",
-          `_ Retrait du trocard et mise en place d'une vis ${matNote || "[<Asnis 8mm 70mm>]"}`,
-          "_ Contrôle CBCT / scanner",
-          "_ Cathétérisation de la vis par un trocard osseux TCD 11G 150mm",
+          "_ Mise en place d'une aiguille de Kirchner guide wire 300mm",
+          `_ Retrait du trocard et mise en place d'une vis ${matNote || "[<Asnis 8mm ...mm>]"}`,
+          "_ Contrôle CBCT",
+          "[<_ Catéthérisation de la vis par un trocard osseux TCD 11G 150mm ",
           "_ Préparation du ciment Vertaplex",
-          "_ Injection de quelques cc à l'extrémité distale de la vis et remplissage osseux",
-          "_ Contrôle final",
-          "_ Désinfection du point d'entrée et fermeture par [<2>] points de suture au Vicryl 3 et colle biologique",
+          "_ Injection de quelques cc à l'extrémité distale de la vis",
+          "_ Contrôle CBCT>]",
+          "",
+          "_ Désinfection du point d'entrée et fermeture par [<2>] points de suture au Vycril 3 et colle biologique",
           "_ Pansement sec",
+          "",
           "",
           "Absence de complication per et post-procédure",
           "",
+          "",
           "SUITES OPÉRATOIRES:",
           "Repos relatif, lever possible, antalgique si douleur",
-          "Ablation des points dans 10 jours",
+          "Ablation des points dans 10 jours ",
           "Téléconsultation dans un mois",
           "",
-          "Dr T. LEFEVRE"
+          "",
+          "Dr T. LEFEVRE",
+          "Dr MP TALABARD (CCA)"
         ].join("\\n");
       }
 
-      if (gType === "alcoolisation_kyste") {
-        return [
-          "ALCOOLISATION PERCUTANEE DE KYSTE OSSEUX",
-          "SOUS CONTROLE SCANNER",
-          "",
-          "INDICATION:",
-          `${patNom} de ${ageVal} ans présentant ${motifClean ? "un " + motifClean : "un kyste osseux essentiel [<localisation>]"}.`,
-          "Indication d'alcoolisation percutanée (+/- cimentoplastie) à visée de sclérose kystique et de consolidation osseuse.",
-          "",
-          "TECHNIQUE - RESULTATS:",
-          `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
-          "Sous anesthésie générale.",
-          "Repérage lésionnel par scanner.",
-          "Asepsie chirurgicale stricte et champage stérile.",
-          `Abord de la cavité kystique sous contrôle scanographique (${matNote || "[<trocart osseux>]"}).`,
-          "Aspiration du contenu kystique et kystographie de contrôle éliminant toute fuite veineuse ou extra-osseuse.",
-          "Alcoolisation séquentielle selon protocole puis rinçage.",
-          "",
-          "Ablation du matériel. Pansement sec.",
-          compLine,
-          "",
-          "CONCLUSION:",
-          "Alcoolisation percutanée du kyste osseux techniquement satisfaisante, sans complication.",
-          `${lePat} sera ${revuAccord} en consultation avec imagerie de contrôle.`,
-          "",
-          "Dr T. LEFEVRE"
-        ].join("\\n");
-      }
-
-      if (gType === "biopsie") {
-        const isEcho = /échograph|\\bécho\\b/i.test(fullCtx);
-        const trocart = matNote || (isEcho ? "[<Tru-Cut 14G / 16G>]" : "[<Bonopty 13G / Laredo 11G / Tru-Cut 14G>]");
-        return [
-          `BIOPSIE PERCUTANEE SOUS CONTROLE ${isEcho ? "ECHOGRAPHIQUE" : "SCANNER"}`,
-          "",
-          "INDICATION:",
-          `${patNom} de ${ageVal} ans présentant ${motifClean ? "une " + motifClean : "[<lésion à caractériser>]"}.`,
-          "Indication de biopsie percutanée à visée diagnostique anatomopathologique.",
-          "",
-          "TECHNIQUE - RESULTATS:",
-          `${patNom} informé${isFem ? "e" : ""} de la procédure et recueil du consentement.`,
-          "Asepsie cutanée en deux temps et mise en place d'un champ stérile.",
-          "Anesthésie locale plan par plan à la Xylocaïne 1%.",
-          `Repérage ${isEcho ? "échographique" : "scannographique"} de la cible lésionnelle.`,
-          `Abord percutané et mise en place du système coaxial / aiguille (${trocart}).`,
-          "Réalisation de multiples carottes biopsiques représentatives conditionnées en formol pour analyse anatomopathologique.",
-          "",
-          "Retrait du matériel. Stéristrip et pansement sec.",
-          compLine,
-          "",
-          "CONCLUSION:",
-          `Biopsie percutanée de ${motifClean ? "la " + motifClean : "la lésion"} techniquement satisfaisante, sans complication.`,
-          "",
-          "Dr T. LEFEVRE"
-        ].join("\\n");
-      }
-
+      // Par défaut / autres gestes
       return [
-        `${(ev.title || prof.gesteRetenu || "COMPTE RENDU OPERATOIRE").toUpperCase()}`,
-        "SOUS CONTROLE RADIOLOGIQUE",
+        `${ev.title || "Geste interventionnel sous contrôle scanner"}`,
+        "",
+        `${patNom} : ${civNom}`,
         "",
         "Indication:",
-        `${patNom} de ${ageVal} ans présentant ${motifClean || "[<indication clinique et radiologique>]"}.`,
+        `${patNom} de ${ageVal || "[<âge>]"} ans présentant [<indication à préciser>].`,
+        "",
         "",
         "Technique - Résultats:",
-        `${patNom} précédemment ${vuAccord} en consultation.`,
+        `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
         "Informations du patient.",
-        "En conditions d'asepsie chirurgicale stricte.",
-        "Repérage lésionnel sous guidage radiologique.",
-        `Abord ciblé de la lésion (${matNote || "[<matériel utilisé>]"}).`,
-        "Réalisation du geste thérapeutique avec contrôle d'imagerie satisfaisant.",
+        "Sous anesthésie [<générale / locale>].",
+        "Installation en [<décubitus / procubitus>].",
+        "Repérage lésionnel par scanner.",
         "",
-        "Ablation du matériel. Pansement sec.",
-        compLine,
+        "",
+        `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<matériel à préciser>]"}`,
+        "",
+        "",
+        "Ablation du matériel.",
+        "Pansement sec. ",
+        "Pas de complication au cours ou au décours du geste.",
+        "",
         "",
         "Conclusion:",
-        "Procédure techniquement satisfaisante, sans complication.",
+        "Geste techniquement satisfaisant, sans complication immédiate.",
         "",
-        "Dr T. LEFEVRE"
+        "",
+        `${lePat} sera ${revuAccord} en consultation. `,
+        "",
+        "",
+        "Dr T. LEFEVRE",
+        "Dr MP TALABARD "
       ].join("\\n");
     }
 
@@ -5057,6 +5987,9 @@ html_template = """<!DOCTYPE html>
       let dateHospit = "";
       if ((ev.category === "acte" || ev.category === "biopsie") && ev.dateStr && /\\d{2}\\/\\d{2}\\/\\d{4}/.test(ev.dateStr)) {
         dateHospit = ev.dateStr;
+      } else if ((ev.category === "acte" || ev.category === "biopsie") && ev.isoDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(ev.isoDate)) {
+        const [y, m, d] = ev.isoDate.split("-");
+        dateHospit = `${d}/${m}/${y}`;
       }
       if (!dateHospit && patNorm) {
         for (const a of (appData.actes || [])) {
@@ -5170,17 +6103,18 @@ html_template = """<!DOCTYPE html>
       if (mode === "crh") {
         // Mode 3 : Compte Rendu d'Hospitalisation (CRH) — Concis, sans répétition, douleurs & impact fonctionnel, zéro matériel technique, signature Dr T. Lefevre
         const { dateHospit, anesth, guidage } = findPatientInterventionDateAndAnesth(ev, prof);
-        const ageChunk = (prof.age && !prof.age.includes("À préciser")) ? `, ${prof.age} ans,` : " ([âge à préciser])";
-        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [Date à préciser]";
-        const rawGeste = prof.gesteRealise && !prof.gesteRealise.includes("À préciser")
+        const isUnknownVal = (v) => !v || /à préciser|\[<.*>\]/i.test(String(v));
+        const ageChunk = !isUnknownVal(prof.age) ? `, ${prof.age} ans,` : " ([<âge>])";
+        const dateChunk = dateHospit ? `le ${dateHospit}` : "le [<date>]";
+        const rawGeste = !isUnknownVal(prof.gesteRealise)
           ? prof.gesteRealise
-          : (prof.gesteRetenu || "[geste réalisé à préciser]");
+          : (prof.gesteRetenu || "[<geste réalisé à préciser>]");
         const gesteCourt = rawGeste
           .replace(/\\s+sous\\s+(?:guidage\\s+|contrôle\\s+)?(?:scanographique|scanner|échographique|échographie|scopique|anesthésie\\s+générale|anesthésie\\s+locale|AG|AL)(?:\\s+et\\s+sous\\s+[^,.)]+)?/gi, "")
           .replace(/\\s+en\\s+HDJ(?:\\s+radio\\s*B)?/gi, "")
           .trim();
 
-        const terrainClause = (prof.terrain && !prof.terrain.includes("À préciser"))
+        const terrainClause = !isUnknownVal(prof.terrain)
           ? ` sur un terrain de ${prof.terrain}`
           : "";
         const procContext = `${rawGeste} ${prof.detailsProcedure || ""}`;
@@ -5290,7 +6224,7 @@ html_template = """<!DOCTYPE html>
       const linesSuivi = [
         "Chère Consœur, Cher Confrère,",
         "",
-        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation de ${gesteSuiviCourt}.`,
+        `Nous avons revu en consultation de suivi ${prof.civiliteNom}, ${ageAccord} de ${prof.age} ans, ${suiviAccord} pour ${prof.terrainSuivi}, suite à la réalisation ${gesteSuiviCourt.replace(/^le\\s+/i, "du ").replace(/^la\\s+/i, "de la ").replace(/^l\'/i, "de l\'").replace(/^(?!du\\s|de\\s)/i, "de ")}.`,
         "",
         `Pour rappel, ce geste avait été réalisé devant ${indicInitSuivi}, ${suitesRappelClause}.`,
         "",
@@ -5494,16 +6428,17 @@ html_template = """<!DOCTYPE html>
 
     function renderEventCard(ev, showDate = false, inSuiviTab = false) {
       if (ev.category === "marie-garde") {
+        const shortRem = ev.remarques && ev.remarques.length <= 50 ? ev.remarques : "";
         return `
           <div class="event-card type-marie-garde">
-            <div class="event-top">
-              <span class="event-time-badge" style="background:#DB2777; color:#FFF; border-color:#BE185D;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+              <div style="display:flex; align-items:center; gap:6px; min-width:0;">
+                <span class="event-time-badge" style="background:#DB2777; color:#FFF; border-color:#BE185D; font-size:9.5px; padding:1px 6px;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+                <span class="marie-ev-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.title}</span>
+              </div>
               <span class="pill pill-marie">${ev.badgeLabel}</span>
             </div>
-            <div class="event-patient" style="color:#9D174D; font-size:15px;"><span>🚨 ${ev.title}</span></div>
-            <div class="event-title" style="color:#BE185D; font-weight:700;">${ev.patient}</div>
-            ${ev.lieu ? `<div class="event-meta" style="color:#9D174D;"><span>📍 ${ev.lieu}</span></div>` : ""}
-            ${ev.remarques ? `<div style="font-size:11.5px; color:#831843; margin-top:5px; font-weight:600;">${ev.remarques}</div>` : ""}
+            ${shortRem ? `<div class="marie-ev-rem">${shortRem}</div>` : ""}
           </div>
         `;
       }
@@ -5518,7 +6453,7 @@ html_template = """<!DOCTYPE html>
             <div class="event-patient"><span>${ev.title}</span></div>
             <div class="event-title">${ev.patient}</div>
             ${ev.lieu ? `<div class="event-meta"><span>${ev.lieu}</span>${shortDocRdv ? `<span class="doc-tag">${shortDocRdv}</span>` : ""}</div>` : ""}
-            ${ev.remarques ? `<div style="font-size:11px; color:#B45309; margin-top:4px; font-weight:600;">${ev.remarques}</div>` : ""}
+            ${ev.remarques ? `<div class="mail-ev-rem">${ev.remarques}</div>` : ""}
           </div>
         `;
       }
@@ -5558,7 +6493,7 @@ html_template = """<!DOCTYPE html>
             ${ev.ipp && ev.ipp !== "Non spécifié" ? `<span class="event-ipp">${ev.ipp}</span>` : ""}
           </div>
           ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
-          ${subLine ? `<div style="font-size:11px; color:#64748B; margin-top:3px;">${subLine}</div>` : ""}
+          ${subLine ? `<div style="font-size:11px; color:var(--text-muted); margin-top:3px;">${subLine}</div>` : ""}
           ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
           ${renderBlocNotesHtml(ev, cardPrefix)}
         </div>
@@ -5618,40 +6553,34 @@ html_template = """<!DOCTYPE html>
 
     const MARIE_GARDES_STATIC = {
       "2026-11-02": {
-        shortChip: "Lun. 02 nov. (23h)",
-        shortHours: "Jusqu'à 23h",
+        shortChip: "02/11 (23h)",
+        shortHours: "23h",
         shortTag: "Marie 23h",
-        bannerText: "Demi-garde jusqu'à 23h00 (organisation familiale / Émile)"
+        bannerText: "Demi-garde jusqu'à 23h"
       },
       "2026-11-07": {
-        shortChip: "Sam. 07 nov. (9h–21h)",
-        shortHours: "09h – 21h",
+        shortChip: "07/11 (9-21h)",
+        shortHours: "9h–21h",
         shortTag: "Marie 9-21h",
-        bannerText: "Garde aux urgences de 09h00 à 21h00"
+        bannerText: "Urgences 9h–21h"
       },
       "2026-11-17": {
-        shortChip: "Mar. 17 nov. (Garde)",
-        shortHours: "Garde complète",
-        shortTag: "Marie Garde",
-        bannerText: "Garde complète (organisation familiale / Émile)"
+        shortChip: "17/11 (24h)",
+        shortHours: "24h",
+        shortTag: "Marie 24h",
+        bannerText: "Garde 24h"
       },
       "2026-11-21": {
-        shortChip: "Sam. 21 nov. (7h30)",
-        shortHours: "Dès 07h30",
+        shortChip: "21/11 (7h30)",
+        shortHours: "7h30",
         shortTag: "Marie 7h30",
-        bannerText: "Formation étudiants à partir de 07h30 (organisation familiale / Émile)"
+        bannerText: "Formation dès 7h30"
       },
       "2026-12-17": {
-        shortChip: "Jeu. 17 déc. (Garde)",
-        shortHours: "Garde complète",
-        shortTag: "Marie Garde",
-        bannerText: "Garde complète (organisation familiale / Émile)"
-      },
-      "2026-12-23": {
-        shortChip: "Mer. 23 déc. (Demi)",
-        shortHours: "Demi-garde",
-        shortTag: "Marie Demi",
-        bannerText: "Demi-garde (organisation familiale / Émile)"
+        shortChip: "17/12 (24h)",
+        shortHours: "24h",
+        shortTag: "Marie 24h",
+        bannerText: "Garde 24h"
       }
     };
 
@@ -5663,11 +6592,11 @@ html_template = """<!DOCTYPE html>
         if (/marie\s*(parizot)?.*garde|garde.*marie\s*(parizot)?/i.test(txt)) {
           const [y, m, d] = rdv.isoDate.split("-").map(Number);
           const dt = new Date(y, m - 1, d, 12, 0, 0);
-          const lbl = dt.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" });
+          const lbl = dt.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
           map[rdv.isoDate] = {
             shortChip: `${lbl} (${rdv.horaire || "Garde"})`,
             shortHours: rdv.horaire || "Garde",
-            shortTag: "Garde Marie",
+            shortTag: "Marie",
             bannerText: rdv.title || rdv.patient || "Garde Marie"
           };
         }
@@ -5692,7 +6621,7 @@ html_template = """<!DOCTYPE html>
       const marieDates = Object.keys(marieMap).sort();
       const marieChips = marieDates.map(iso => {
         const mg = marieMap[iso];
-        return `<button class="garde-chip-marie ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">🚨 ${mg.shortChip}</button>`;
+        return `<button class="garde-chip-marie ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">${mg.shortChip}</button>`;
       }).join("");
 
       const chips = myDates.map(iso => {
@@ -5702,7 +6631,7 @@ html_template = """<!DOCTYPE html>
         return `<button class="garde-chip ${iso === selIso ? "active" : ""}" onclick="selectDayFromCalendar('${iso}')">${lbl}</button>`;
       }).join("");
 
-      stripEl.innerHTML = `<span class="garde-strip-lbl-marie">🚨 Gardes Marie</span>${marieChips}<a class="garde-strip-lbl" href="https://docs.google.com/spreadsheets/d/1_XCqFLamiYM02RamAfc1khawt-jU3RG0CUU20x_M_Lw/edit" target="_blank" rel="noopener">Gardes TL ↗</a>${chips}`;
+      stripEl.innerHTML = `<span class="garde-strip-lbl-marie">Marie</span>${marieChips}<a class="garde-strip-lbl" href="https://docs.google.com/spreadsheets/d/1_XCqFLamiYM02RamAfc1khawt-jU3RG0CUU20x_M_Lw/edit" target="_blank" rel="noopener">Gardes TL ↗</a>${chips}`;
     }
 
     function renderGardeBannerHtml(iso) {
@@ -5711,7 +6640,7 @@ html_template = """<!DOCTYPE html>
       if (mg) {
         out += `
           <div class="garde-banner is-marie">
-            <span>🚨 <strong>GARDE MARIE</strong> — ${mg.bannerText}</span>
+            <span><strong>Garde Marie</strong> · ${mg.bannerText}</span>
             <span class="pill pill-marie">${mg.shortHours}</span>
           </div>
         `;
@@ -5743,12 +6672,12 @@ html_template = """<!DOCTYPE html>
       const g = getGardeForIso(iso);
       if (dow === 0 || dow === 6) {
         if (g && g.is_tl) return { lbl: "🚨 TL", cls: "post-liberal" };
-        if (mg) return { lbl: "🚨 Marie", cls: "post-marie" };
-        if (g && g.noms && g.noms.length) {
+        if (mg) return { lbl: mg.shortTag, cls: "post-marie" };
+        if (agendaScope === "all" && g && g.noms && g.noms.length) {
           const shortG = g.noms[0].replace(/^Dr\s+/i, "").split(" ")[0];
-          return { lbl: `🚨 ${shortG}`, cls: "post-liberal" };
+          return { lbl: shortG, cls: "post-cs" };
         }
-        return { lbl: "Garde", cls: "post-libre" };
+        return { lbl: "WE", cls: "post-libre" };
       }
       if (mg) return { lbl: mg.shortTag, cls: "post-marie" };
       if (g && g.is_tl) return { lbl: "Garde", cls: "post-liberal" };
@@ -5824,7 +6753,7 @@ html_template = """<!DOCTYPE html>
 
           const totalRdv = nbGestes + nbCs;
           let badges = "";
-          if (nbMarieGardes > 0) badges += `<span class="wsc-tag pill-marie">🚨 ${nbMarieGardes} Garde${nbMarieGardes > 1 ? "s" : ""} Marie</span>`;
+          if (nbMarieGardes > 0) badges += `<span class="wsc-tag pill-marie">Marie (${nbMarieGardes})</span>`;
           if (nbGestes > 0) badges += `<span class="wsc-tag pill-acte">${nbGestes} Geste${nbGestes > 1 ? "s" : ""}</span>`;
           if (nbCs > 0) badges += `<span class="wsc-tag pill-cs">${nbCs} CS/Exam</span>`;
           if (hasGarde) badges += `<span class="wsc-tag pill-danger">Garde TL</span>`;
@@ -5858,7 +6787,7 @@ html_template = """<!DOCTYPE html>
         return;
       }
 
-      // En mode JOUR : Barre des jours défilable horizontalement (Lundi -> Vendredi en grand + Samedi/Dimanche en petit avec juste les gardes)
+      // En mode JOUR : Barre des jours défilable horizontalement (Lundi -> Vendredi en grand + Samedi/Dimanche en petit)
       const existingDayScroll = document.getElementById("day-strip-scroll");
       const prevDayScrollLeft = existingDayScroll ? existingDayScroll.scrollLeft : null;
 
@@ -5886,9 +6815,12 @@ html_template = """<!DOCTYPE html>
         if (isWe) {
           const weSub = (mg && g && g.is_tl)
             ? "Marie+TL"
-            : (mg ? "🚨 Marie" : (g && g.noms && g.noms.length > 1 ? g.noms[1].split(" ")[0] : ""));
+            : (mg ? mg.shortHours : (agendaScope === "all" && g && g.noms && g.noms.length > 1 ? g.noms[1].split(" ")[0] : ""));
+          const weTitle = (agendaScope === "all" && g && g.noms)
+            ? `Garde ${dowLbl} ${dayNum} : ${g.noms.join(" / ")}`
+            : (g && g.is_tl ? `Garde TL ${dowLbl} ${dayNum}` : (mg ? `Garde Marie (${mg.shortHours})` : `${dowLbl} ${dayNum}`));
           cellsHtml += `
-            <div class="ws-day is-weekend ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""} ${mg ? "is-marie-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')" title="Garde ${dowLbl} ${dayNum} : ${g && g.noms ? g.noms.join(" / ") : "—"}">
+            <div class="ws-day is-weekend ${iso === selIso ? "active" : ""} ${g && g.is_tl ? "is-garde" : ""} ${mg ? "is-marie-garde" : ""}" id="ws-day-${iso}" data-month="${monthFull}" onclick="selectDayFromWeekStrip('${iso}')" title="${weTitle}">
               <span class="ws-dow">${dowLbl}</span>
               <span class="ws-num">${dayNum}</span>
               <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
@@ -5901,7 +6833,7 @@ html_template = """<!DOCTYPE html>
               <span class="ws-dow">${dowLbl}</span>
               <span class="ws-num">${dayNum}<span class="ws-mon">${monthShort}</span></span>
               <span class="ws-vac ${tag.cls}">${tag.lbl}</span>
-              <span class="ws-cnt">${mg ? "🚨 Marie" : (evCnt > 0 ? evCnt + " RDV" : "·")}</span>
+              <span class="ws-cnt">${evCnt > 0 ? evCnt + " RDV" : "·"}</span>
             </div>
           `;
         }
@@ -5994,6 +6926,35 @@ html_template = """<!DOCTYPE html>
         const genVac = getGeneralPlanningForIso(iso);
         const dayEvents = allEvents.filter(e => e.isoDate === iso);
         const isWeekendDay = (selectedDate.getDay() === 0 || selectedDate.getDay() === 6);
+        const gDay = getGardeForIso(iso);
+
+        let weekendCardHtml = "";
+        if (isWeekendDay) {
+          if (gDay && gDay.is_tl) {
+            weekendCardHtml = `
+              <div class="vac-card vac-card-we">
+                <div class="vac-period">🚨 Week-end — De garde Imagerie Cochin</div>
+                <div class="vac-card-we-body">
+                  Garde Imagerie Cochin : Dr ${gDay.noms.join(" / ")}
+                </div>
+              </div>
+            `;
+          } else if (isGeneral) {
+            weekendCardHtml = `
+              <div class="vac-card">
+                <div class="vac-period">Week-end — Permanence des soins & Gardes</div>
+                <div class="post-pills"><span class="post-pill post-cs">Garde : Dr ${(gDay && gDay.noms && gDay.noms.length) ? gDay.noms.join(" / ") : "Non renseigné"}</span></div>
+              </div>
+            `;
+          } else {
+            weekendCardHtml = `
+              <div class="vac-card">
+                <div class="vac-period">Week-end (TL)</div>
+                <div class="post-pills"><span class="post-pill post-libre">Repos (hors garde Cochin)</span></div>
+              </div>
+            `;
+          }
+        }
 
         let html = `
           ${renderGardeBannerHtml(iso)}
@@ -6001,21 +6962,14 @@ html_template = """<!DOCTYPE html>
             <div class="vac-grid">
               <div class="vac-card">
                 <div class="vac-period">${isGeneral ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
-                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am")}</div>
               </div>
               <div class="vac-card">
                 <div class="vac-period">${isGeneral ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
-                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm")}</div>
               </div>
             </div>
-          ` : `
-            <div class="vac-card" style="background:#FFF1F2;border-color:#FECDD3;margin-bottom:8px;">
-              <div class="vac-period" style="color:#BE123C;">🚨 Week-end — Permanence des soins & Gardes uniquement</div>
-              <div style="font-size:12px;color:#881337;font-weight:700;">
-                Garde Imagerie Cochin : Dr ${(getGardeForIso(iso) && getGardeForIso(iso).noms && getGardeForIso(iso).noms.length) ? getGardeForIso(iso).noms.join(" / ") : "Non renseigné"}
-              </div>
-            </div>
-          `}
+          ` : weekendCardHtml}
           <div class="section-label">
             <span>${isGeneral ? "Patients du service" : "Patients & RDV"} (${dayEvents.length})</span>
           </div>
@@ -6036,7 +6990,7 @@ html_template = """<!DOCTYPE html>
         subEl.textContent = "";
         subEl.style.display = "none";
 
-        // 1. Vue synthétique mobile Lundi -> Vendredi (5 colonnes côte à côte) + Samedi/Dimanche en petit avec juste les gardes
+        // 1. Vue synthétique mobile Lundi -> Vendredi (5 colonnes côte à côte) + Samedi/Dimanche en petit
         let fiveColsHtml = "";
         for (let i = 0; i < 5; i++) {
           const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
@@ -6046,6 +7000,7 @@ html_template = """<!DOCTYPE html>
           const tag = getShortVacTagForDay(iso, cur);
           const dayEvs = allEvents.filter(e => e.isoDate === iso);
           const dowShort = cur.toLocaleDateString("fr-FR", { weekday: "short" }).replace(".", "");
+          const showWeekColGarde = (g && g.is_tl) || (isGeneral && g && g.noms && g.noms.length);
           fiveColsHtml += `
             <div class="v3-week-5col-cell ${g && g.is_tl ? "is-garde" : ""}" onclick="selectDayFromCalendar('${iso}')">
               <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -6053,8 +7008,7 @@ html_template = """<!DOCTYPE html>
                 <span style="font-size:11px;font-weight:800;color:var(--text);">${cur.getDate()}</span>
               </div>
               <span class="ws-vac ${tag.cls}" style="width:100%;text-align:center;font-size:8px;padding:2px 2px;">${tag.lbl}</span>
-              ${g && g.noms && g.noms.length ? `<div style="font-size:7.5px;color:#BE123C;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🚨 ${g.is_tl ? "Garde TL" : g.noms[0]}</div>` : ""}
-              ${mg ? `<div style="font-size:7.5px;color:#BE185D;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🚨 Marie</div>` : ""}
+              ${showWeekColGarde ? `<div class="we-pill-doc" style="font-size:7.5px;">${g.is_tl ? "🚨 Garde TL" : g.noms[0]}</div>` : ""}
               <div style="font-size:8px;color:var(--text-muted);text-align:center;">${dayEvs.length > 0 ? `${dayEvs.length} RDV` : "·"}</div>
             </div>
           `;
@@ -6067,21 +7021,31 @@ html_template = """<!DOCTYPE html>
         const mgSat = getMarieGardeForIso(satIso);
         const mgSun = getMarieGardeForIso(sunIso);
 
+        const formatWePillText = (gWe, mgWe) => {
+          const parts = [];
+          if (gWe && gWe.is_tl) parts.push("🚨 Garde TL");
+          else if (isGeneral && gWe && gWe.noms && gWe.noms.length) parts.push(`Garde : Dr ${gWe.noms.join("/")}`);
+          if (mgWe) parts.push(`Marie (${mgWe.shortHours})`);
+          return parts.length > 0 ? parts.join(" • ") : "Repos";
+        };
+        const satPillCls = (gSat && gSat.is_tl) ? "is-garde" : (mgSat ? "is-marie-garde" : "");
+        const sunPillCls = (gSun && gSun.is_tl) ? "is-garde" : (mgSun ? "is-marie-garde" : "");
+
         let html = `
           <div class="v3-week-5col-grid">${fiveColsHtml}</div>
           <div class="v3-weekend-gardes-bar">
-            <div class="v3-weekend-garde-pill" onclick="selectDayFromCalendar('${satIso}')">
-              <span style="font-weight:800;color:#9F1239;">SAM. ${sat.getDate()}/${sat.getMonth() + 1}</span>
-              <span style="font-weight:700;color:#BE123C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🚨 Garde : ${gSat && gSat.noms && gSat.noms.length ? "Dr " + gSat.noms.join("/") : "—"}${mgSat ? " • 🚨 Marie" : ""}</span>
+            <div class="v3-weekend-garde-pill ${satPillCls}" onclick="selectDayFromCalendar('${satIso}')">
+              <span class="we-pill-day">SAM. ${sat.getDate()}/${sat.getMonth() + 1}</span>
+              <span class="we-pill-doc">${formatWePillText(gSat, mgSat)}</span>
             </div>
-            <div class="v3-weekend-garde-pill" onclick="selectDayFromCalendar('${sunIso}')">
-              <span style="font-weight:800;color:#9F1239;">DIM. ${sun.getDate()}/${sun.getMonth() + 1}</span>
-              <span style="font-weight:700;color:#BE123C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🚨 Garde : ${gSun && gSun.noms && gSun.noms.length ? "Dr " + gSun.noms.join("/") : "—"}${mgSun ? " • 🚨 Marie" : ""}</span>
+            <div class="v3-weekend-garde-pill ${sunPillCls}" onclick="selectDayFromCalendar('${sunIso}')">
+              <span class="we-pill-day">DIM. ${sun.getDate()}/${sun.getMonth() + 1}</span>
+              <span class="we-pill-doc">${formatWePillText(gSun, mgSun)}</span>
             </div>
           </div>
         `;
 
-        // 2. Cartes détaillées du Lundi au Vendredi uniquement (les Samedi et Dimanche sont affichés en petit avec juste les gardes)
+        // 2. Cartes détaillées du Lundi au Vendredi uniquement
         for (let i = 0; i < 5; i++) {
           const cur = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i, 12, 0, 0);
           const iso = dateToIso(cur);
@@ -6094,9 +7058,9 @@ html_template = """<!DOCTYPE html>
 
           let gardeBadge = `<span class="pill pill-cs">${dayEvs.length} RDV</span>`;
           if (mg && g && g.is_tl) {
-            gardeBadge = `<span class="pill pill-marie">🚨 MARIE (${mg.shortHours})</span> <span class="pill pill-danger">DE GARDE TL</span>`;
+            gardeBadge = `<span class="pill pill-marie">Marie (${mg.shortHours})</span> <span class="pill pill-danger">DE GARDE TL</span>`;
           } else if (mg) {
-            gardeBadge = `<span class="pill pill-marie">🚨 GARDE MARIE (${mg.shortHours})</span>`;
+            gardeBadge = `<span class="pill pill-marie">Marie (${mg.shortHours})</span>`;
           } else if (g && g.is_tl) {
             gardeBadge = `<span class="pill pill-danger">DE GARDE</span>`;
           } else if (isGeneral && g && g.noms && g.noms.length) {
@@ -6105,7 +7069,7 @@ html_template = """<!DOCTYPE html>
 
           const cardStyle = (g && g.is_tl)
             ? "border-color:#EF4444;background:rgba(239,68,68,0.08);"
-            : (mg ? "border:1.5px solid #EC4899;background:rgba(236,72,153,0.10);box-shadow:0 0 12px rgba(236,72,153,0.18);" : "");
+            : (mg ? "border-left:3px solid #EC4899;" : "");
 
           html += `
             <div class="week-day-card" style="${cardStyle}">
@@ -6114,8 +7078,8 @@ html_template = """<!DOCTYPE html>
                 <div style="display:flex;gap:4px;align-items:center;">${gardeBadge}</div>
               </div>
               <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
-                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral)}</div>
-                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am", false)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm", false)}</div>
               </div>
               ${dayEvs.map(ev => renderEventCard(ev, false)).join("")}
             </div>
@@ -6157,7 +7121,7 @@ html_template = """<!DOCTYPE html>
           if (g && g.is_tl) {
             tagHtml = `<div class="month-vac-tag" style="background:rgba(220,38,38,0.35);color:#FCA5A5;">GARDE</div>`;
           } else if (mg) {
-            tagHtml = `<div class="month-vac-tag post-marie">🚨 ${mg.shortTag}</div>`;
+            tagHtml = `<div class="month-vac-tag post-marie">${mg.shortTag}</div>`;
           } else if (isGeneral && g && g.noms && g.noms.length && (dow === 0 || dow === 6)) {
             tagHtml = `<div class="month-vac-tag" style="background:rgba(59,130,246,0.2);color:#93C5FD;">${g.noms[0].slice(0, 6)}</div>`;
           } else if (dow >= 1 && dow <= 5 && cellDate >= new Date(2026, 10, 2)) {
@@ -6198,7 +7162,7 @@ html_template = """<!DOCTYPE html>
           const deskCntHtml = (g && g.is_tl)
             ? `<span class="month-desk-cnt" style="background:rgba(239,68,68,0.28);color:#FCA5A5;">GARDE</span>`
             : (mg
-                ? `<span class="month-desk-cnt" style="background:#DB2777;color:#FFF;">🚨 MARIE</span>`
+                ? `<span class="month-desk-cnt" style="background:#DB2777;color:#FFF;">Marie</span>`
                 : (evs.length > 0 ? `<span class="month-desk-cnt">${evs.length} RDV</span>` : ""));
 
           const deskEvsHtml = evs.length > 0
@@ -6239,8 +7203,8 @@ html_template = """<!DOCTYPE html>
           </div>
           ${renderGardeBannerHtml(selectedIso)}
           <div class="vac-grid">
-            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral)}</div></div>
-            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral)}</div></div>
+            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral, "am")}</div></div>
+            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral, "pm")}</div></div>
           </div>
           ${selEvs.map(ev => renderEventCard(ev, false)).join("")}
         `;
@@ -6451,10 +7415,10 @@ html_template = """<!DOCTYPE html>
             <div style="font-size:11.5px; color:var(--primary); font-weight:700;" onclick="openPatientModal('${safePatientAttr}')">
               ${a["Médecin Demandeur (Service)"] || "-"}
             </div>
-            <div style="font-size:12px; color:#334155; margin-top:4px; font-weight:500;" onclick="openPatientModal('${safePatientAttr}')">
+            <div class="ev-body-txt" style="font-size:12px; margin-top:4px; font-weight:500;" onclick="openPatientModal('${safePatientAttr}')">
               ${a["Motif de l'avis / Question clinique"] || ""}
             </div>
-            <div style="font-size:11.5px; color:#15803D; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
+            <div class="ev-rep-txt" style="font-size:11.5px; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
               <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
             </div>
             <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -6573,6 +7537,7 @@ html_template = """<!DOCTYPE html>
         const nextStatus = isRep ? "Non répondu" : "Répondu";
         const emailAddr = q["Email Expéditeur"] || "";
         const subj = encodeURIComponent("RE: " + (q["Sujet / Objet"] || ""));
+        const sKeyAttr = escHtmlAttr(encodeURIComponent(getPersoStableKey(q)));
         return `
           <div class="event-card" style="border-left-color:${isRep ? "var(--success)" : "var(--perso-msg)"};">
             <div class="event-top">
@@ -6588,13 +7553,13 @@ html_template = """<!DOCTYPE html>
             <div style="font-size:11.5px; color:var(--primary); font-weight:700;">
               De : ${q["Expéditeur"] || "-"}
             </div>
-            <div style="font-size:12.5px; color:#334155; margin-top:5px; font-weight:500;">
+            <div class="ev-body-txt" style="font-size:12.5px; margin-top:5px; font-weight:500;">
               ${q["Question / Action demandée"] || ""}
             </div>
             ${q["Date Réponse / Note"] ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">📌 ${q["Date Réponse / Note"]}</div>` : ""}
             <div style="margin-top:8px; display:flex; justify-content:flex-end; gap:6px;">
               ${emailAddr ? `<a class="btn-icon" style="text-decoration:none;" href="mailto:${escHtmlAttr(encodeURIComponent(emailAddr).replace(/%40/g, "@"))}?subject=${subj}">✉️ Répondre</a>` : ""}
-              <button class="btn-icon" onclick="togglePersoStatus(${q._row || (idx + 9)}, '${nextStatus}')">
+              <button class="btn-icon" onclick="togglePersoStatus('${sKeyAttr}', '${nextStatus}')">
                 ${isRep ? "↩️ Marquer À répondre" : "✅ Marquer Répondu"}
               </button>
             </div>
@@ -6603,28 +7568,39 @@ html_template = """<!DOCTYPE html>
       }).join("");
     }
 
-    async function togglePersoStatus(row, newStatus) {
-      const rowNum = Number(row);
+    async function togglePersoStatus(keyOrRow, newStatus) {
+      let targetKey = "";
+      try {
+        targetKey = decodeURIComponent(String(keyOrRow || ""));
+      } catch (e) {
+        targetKey = String(keyOrRow || "");
+      }
+      const rowNum = /^\d+$/.test(targetKey) ? Number(targetKey) : 0;
       const nowIso = new Date().toISOString();
       let savedMap = {};
       try {
         savedMap = JSON.parse(localStorage.getItem(STORAGE_PERSO_KEY) || "{}");
       } catch (e) {}
+      for (const k of Object.keys(savedMap)) {
+        if (/^\d+$/.test(k)) delete savedMap[k];
+      }
 
       const statusEntry = { status: newStatus, updated_at: nowIso };
-      savedMap[rowNum] = statusEntry;
-      savedMap[String(rowNum)] = statusEntry;
+      let stableKey = targetKey.includes("__") ? targetKey : "";
 
-      let stableKey = "";
       for (const item of (appData.Questions_perso || [])) {
-        if (Number(item._row) === rowNum) {
+        const itemKey = getPersoStableKey(item);
+        if ((stableKey && itemKey === stableKey) || (!stableKey && rowNum > 0 && Number(item._row) === rowNum)) {
           item["Statut"] = newStatus;
-          stableKey = getPersoStableKey(item);
-          if (stableKey) savedMap[stableKey] = statusEntry;
+          stableKey = itemKey;
         }
       }
+      if (stableKey) {
+        savedMap[stableKey] = statusEntry;
+      }
       for (const defItem of (DEFAULT_QUESTIONS_PERSO || [])) {
-        if (Number(defItem._row) === rowNum || (stableKey && getPersoStableKey(defItem) === stableKey)) {
+        const defKey = getPersoStableKey(defItem);
+        if ((stableKey && defKey === stableKey) || (!stableKey && rowNum > 0 && Number(defItem._row) === rowNum)) {
           defItem["Statut"] = newStatus;
         }
       }
@@ -6638,7 +7614,11 @@ html_template = """<!DOCTYPE html>
         if (cachedRaw) {
           const cachedObj = JSON.parse(cachedRaw);
           if (cachedObj && cachedObj.data) {
-            cachedObj.data.perso_status = Object.assign({}, cachedObj.data.perso_status || {}, savedMap);
+            const cleanPersoStatus = Object.assign({}, cachedObj.data.perso_status || {}, savedMap);
+            for (const k of Object.keys(cleanPersoStatus)) {
+              if (/^\d+$/.test(k)) delete cleanPersoStatus[k];
+            }
+            cachedObj.data.perso_status = cleanPersoStatus;
             localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedObj));
           }
         }
@@ -6648,11 +7628,15 @@ html_template = """<!DOCTYPE html>
       renderPersoTab();
 
       // Synchroniser dans PropertiesService d'Apps Script pour persistance multi-appareils (iPhone / Mac) sans créer d'onglet dans le Sheet
-      try {
-        const patchObj = { [String(rowNum)]: statusEntry };
-        if (stableKey) patchObj[stableKey] = statusEntry;
-        await callApi("set_perso_status", { patch: patchObj });
-      } catch (e) {}
+      if (stableKey) {
+        const btnArrow = document.getElementById("btn-sync-arrow");
+        if (btnArrow) btnArrow.classList.add("spinning");
+        try {
+          await callApi("set_perso_status", { patch: { [stableKey]: statusEntry } });
+        } catch (e) {} finally {
+          if (btnArrow) btnArrow.classList.remove("spinning");
+        }
+      }
     }
 
     // CS & IMAGERIE
@@ -7020,22 +8004,22 @@ html_template = """<!DOCTYPE html>
           const canCall = rawTel.length >= 10;
           const isDectOnly = (item.phone || "").toUpperCase().includes("DECT");
           html += `
-            <div style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; box-shadow:0 1px 2px rgba(15,23,42,0.03);">
+            <div class="ann-card">
               <div style="min-width:0; flex:1;">
-                <div style="font-size:13px; font-weight:700; color:#0F172A; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                <div style="font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <span>${esc(item.name)}</span>
-                  ${item.custom ? `<span style="font-size:9px; padding:1px 6px; border-radius:99px; background:#DCFCE7; color:#15803D; border:1px solid #86EFAC;">Perso</span>` : ``}
+                  ${item.custom ? `<span class="pill pill-success" style="font-size:9px; padding:1px 6px;">Perso</span>` : ``}
                 </div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(item.role || "")}</div>
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
                 ${canCall
-                  ? `<a href="tel:${rawTel}" style="text-decoration:none; background:#F0F9FF; border:1px solid #7DD3FC; color:#0369A1; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px; display:inline-flex; align-items:center; gap:5px;">📞 ${esc(item.phone)}</a>`
-                  : `<span style="background:#FFFBEB; border:1px solid #FCD34D; color:#B45309; font-weight:800; font-size:12px; padding:5px 10px; border-radius:9px;">📟 ${esc(item.phone)}</span>`
+                  ? `<a href="tel:${rawTel}" class="ann-call-btn">📞 ${esc(item.phone)}</a>`
+                  : `<span class="ann-dect-badge">📟 ${esc(item.phone)}</span>`
                 }
                 <div style="display:flex; align-items:center; gap:6px;">
-                  ${item.short ? `<span style="font-size:10px; font-weight:700; color:#475569; background:#F1F5F9; padding:2px 7px; border-radius:6px; border:1px solid #CBD5E1;">Poste / DECT : <strong style="color:#0F172A;">${esc(item.short)}</strong></span>` : ``}
-                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:#DC2626; font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
+                  ${item.short ? `<span class="ann-short-badge">Poste / DECT : <strong>${esc(item.short)}</strong></span>` : ``}
+                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:var(--danger); font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
                 </div>
               </div>
             </div>`;
@@ -7049,7 +8033,7 @@ html_template = """<!DOCTYPE html>
       const body = document.getElementById("modal-body");
       if (!body) return;
       body.innerHTML = `
-        <div style="font-size:16px; font-weight:800; color:#0F172A; margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
+        <div style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Nom / Salle / Correspondant *</label>
@@ -7119,6 +8103,35 @@ html_template = """<!DOCTYPE html>
       renderAnnuaireTab();
     }
 
+    const STORAGE_THEME_KEY = "cochin_theme_v1";
+
+    function syncThemeButtonIcon() {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      const moon = document.getElementById("icon-theme-moon");
+      const sun = document.getElementById("icon-theme-sun");
+      const btn = document.getElementById("btn-theme-toggle");
+      if (moon) moon.style.display = isDark ? "none" : "block";
+      if (sun) sun.style.display = isDark ? "block" : "none";
+      if (btn) {
+        btn.title = isDark ? "Passer en mode clair" : "Passer en mode sombre";
+        btn.setAttribute("aria-label", isDark ? "Passer en mode clair" : "Passer en mode sombre");
+      }
+      const metaTheme = document.getElementById("meta-theme-color");
+      if (metaTheme) metaTheme.setAttribute("content", isDark ? "#0B1120" : "#F8FAFC");
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      if (isDark) {
+        document.documentElement.removeAttribute("data-theme");
+        try { localStorage.setItem(STORAGE_THEME_KEY, "light"); } catch (_) {}
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+        try { localStorage.setItem(STORAGE_THEME_KEY, "dark"); } catch (_) {}
+      }
+      syncThemeButtonIcon();
+    }
+
     function switchTab(tab) {
       currentTab = tab;
       ["agenda", "activite", "avis", "perso", "suivi", "patients", "annuaire"].forEach(t => {
@@ -7143,6 +8156,7 @@ html_template = """<!DOCTYPE html>
     }
 
     window.addEventListener("DOMContentLoaded", () => {
+      syncThemeButtonIcon();
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("./sw.js").catch(() => {});
       }

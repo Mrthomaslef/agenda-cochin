@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#101827" />
+      <stop offset="100%" stop-color="#1b263b" />
+    </linearGradient>
+    <radialGradient id="glowAmber" cx="80%" cy="10%" r="70%">
+      <stop offset="0%" stop-color="#ffbe3d" stop-opacity="0.30" />
+      <stop offset="100%" stop-color="#ffbe3d" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="glowCoral" cx="15%" cy="85%" r="70%">
+      <stop offset="0%" stop-color="#ff5e6c" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#ff5e6c" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="45%">
+      <stop offset="0%" stop-color="#ffbe3d" />
+      <stop offset="80%" stop-color="#ff5e6c" />
+    </linearGradient>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M 64 0 L 0 0 0 64" fill="none" stroke="#ffe4b5" stroke-opacity="0.09" stroke-width="2" />
+    </pattern>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bgGrad)" />
+  <rect width="512" height="512" fill="url(#glowAmber)" />
+  <rect width="512" height="512" fill="url(#glowCoral)" />
+  <rect width="512" height="512" fill="url(#grid)" />
+
+  <text
+    x="256"
+    y="222"
+    text-anchor="middle"
+    fill="#fff8f0"
+    stroke="#fff8f0"
+    stroke-width="7.5"
+    stroke-linejoin="round"
+    paint-order="stroke fill"
+    font-family="Helvetica Neue, Arial, sans-serif"
+    font-weight="bold"
+    font-size="94"
+    letter-spacing="1.5"
+  >AGENDA</text>
+
+  <text
+    x="256"
+    y="376"
+    text-anchor="middle"
+    fill="url(#textGrad)"
+    stroke="url(#textGrad)"
+    stroke-width="9"
+    stroke-linejoin="round"
+    paint-order="stroke fill"
+    font-family="Helvetica Neue, Arial, sans-serif"
+    font-weight="bold"
+    font-size="124"
+    letter-spacing="1"
+  >Cochin</text>
+</svg>
