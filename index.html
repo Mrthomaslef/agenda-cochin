@@ -4555,7 +4555,7 @@
       }
       const master = findPatientMasterRecord(ev.patient, ev.ipp) || {};
       const rawName = String(master["Identité Patient"] || ev.patient || "[Nom, Prénom à préciser]").trim();
-      const isFem = /\b(mme|mlle|madame|mademoiselle)\b/i.test(rawName) || /\b(née le|patiente)\b/i.test(String(master["Coordonnées / DDN"] || "") + " " + String(master["Instructions & Remarques Cliniques"] || ""));
+      const isFem = /\b(mme|mlle|madame|mademoiselle)\b/i.test(rawName) || /\b(née le|patiente|adressée|hospitalisée|informée)\b/i.test(String(master["Coordonnées / DDN"] || "") + " " + String(master["Instructions & Remarques Cliniques"] || "") + " " + String(ev.remarques || "")) || /\b(sophie|helene|hélène|valerie|valérie|joceline|faiza|paule|reem|laurence|corinne|marie|cécile|cecile|micheline|naima|julienne|maud|sandra|toscane|catherine|florence|nathalie|kawthar|amandine)\b/i.test(rawName);
       let civiliteNom = rawName;
       if (!/^(m\.|mr|mme|mlle)\b/i.test(civiliteNom)) {
         civiliteNom = (isFem ? "Mme " : "M. ") + civiliteNom;
@@ -4668,34 +4668,60 @@
       const matNote = (sEntry && sEntry.materiel && sEntry.materiel.trim()) ? sEntry.materiel.trim() : "";
 
       const fullCtx = `${ev.title || ""} ${ev.remarques || ""} ${prof.motif || ""} ${prof.gesteRetenu || ""} ${prof.detailsProcedure || ""}`;
-      const levelMatch = fullCtx.match(/\b([CTLS]\d(?:\s*[–-]\s*[CTLS]\d)?)\b/i);
+      const levelMatch = fullCtx.match(/\b([CTLS]\d{1,2}(?:\s*[–-]\s*[CTLS]\d{1,2})?)\b/i);
       const levelStr = levelMatch ? levelMatch[1].toUpperCase() : null;
+      const sideMatch = fullCtx.match(/\b(droit|droite|gauche|bilatéral|bilatérale)\b/i);
+      const sideStr = sideMatch ? sideMatch[1].toLowerCase() : null;
+      const docMatch = fullCtx.match(/adressé[e]?\s+par\s+(?:le\s+)?((?:Pr|Dr|Docteur|Professeur)\.?\s+(?:[A-ZÉÈÊËÀÂÎÏÔÙÛÇ][a-zéèêëàâîïôùûç\-]*\.?\s*)+(?:(?:&|et)\s*(?:Pr|Dr|Docteur|Professeur)\.?\s+(?:[A-ZÉÈÊËÀÂÎÏÔÙÛÇ][a-zéèêëàâîïôùûç\-]*\.?\s*)+)?)/i);
+      const refDoc = docMatch ? docMatch[1].trim() : null;
 
-      // 1. Ablation de tumeur desmoïde / Cryothérapie sous contrôle scanner (Trame exacte Word)
+      // 1. Ablation de tumeur desmoïde / Cryothérapie sous contrôle scanner (Trame Word sans inventer la topographie)
       if (gType === "cryo_desmoide") {
+        const isDesmoide = /desmo[ïi]de/i.test(fullCtx);
+        const hasBiopsie = /biopsie/i.test(fullCtx);
+        let desmoLoc = "[<localisation à préciser>]";
+        if (/flanc\s+gauche/i.test(fullCtx)) desmoLoc = "du flanc gauche";
+        else if (/sus[\s\-]*claviculaire/i.test(fullCtx)) desmoLoc = "du creux sus-claviculaire";
+        else if (/paravertebral|paravertébral/i.test(fullCtx)) desmoLoc = `du nodule paravertébral ${sideStr || "[<côté>]"}`;
+        else if (/tcg|cellules\s+géantes/i.test(fullCtx)) desmoLoc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/chondroblastome/i.test(fullCtx)) desmoLoc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/masse\s+pleurale|t7/i.test(fullCtx)) desmoLoc = "thoracique pariétale droite (T7)";
+
+        const titleLine1 = isDesmoide
+          ? "Ablation de tumeur desmoïde"
+          : (hasBiopsie ? "Biopsie et cryothérapie sous contrôle scanner" : "Cryothérapie sous contrôle scanner");
+        const titleLine2 = isDesmoide ? "Cryothérapie sous contrôle scanner" : "";
+        const indicLine = isDesmoide
+          ? `${patNom} de ${ageVal || "[<âge>]"} ans présentant une tumeur desmoïde ${desmoLoc}.`
+          : `${patNom} de ${ageVal || "[<âge>]"} ans présentant [<lésion / localisation à préciser>]${refDoc ? ` (${adresseAccord.toLowerCase()} par ${refDoc})` : ""}.`;
+        const conclLine = isDesmoide
+          ? `Cryothérapie de la tumeur desmoïde ${desmoLoc}, techniquement satisfaisante.`
+          : `${hasBiopsie ? "Biopsie et cryothérapie" : "Cryothérapie"} de [<localisation>], techniquement satisfaisante.`;
+
         return [
-          "Ablation de tumeur desmoïde",
-          "Cryothérapie sous contrôle scanner",
+          titleLine1,
+          ...(titleLine2 ? [titleLine2] : []),
           "",
           `${patNom} : ${civNom}`,
           "",
           "Indication:",
-          `${patNom} de ${ageVal || "[<44>]"} ans présentant une tumeur desmoïde de la paroi thoracique postérieure gauche.`,
-          "Décision collégiale de traitement par cryothérapie",
+          indicLine,
+          `Décision collégiale de traitement par ${hasBiopsie ? "biopsie et cryothérapie" : "cryothérapie"}`,
           "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
           "Informations du patient.",
           "Sous anesthésie générale.",
-          "Installation en décubitus.",
+          "Installation en [<décubitus / procubitus>].",
           "Repérage lésionnel par scanner.",
           "",
           "",
-          `Abord de la lésion sous contrôle scannographique et mise en place  de ${matNote || "deux aiguilles IceRod"}`,
+          ...(hasBiopsie ? ["[<Réalisation préalable de prélèvements biopsiques adressés en anatomopathologie.>]", ""] : []),
+          `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<deux aiguilles IceRod>]"}`,
           "",
           "",
-          "Protection des tissus mous antérieurs et postérieurs à la tumeur desmoïde à l'aide d'injection sous contrôle échographique de sérum physiologique chauffé.",
+          ...(isDesmoide ? ["Protection des tissus mous à l'aide d'injection sous contrôle échographique / scannographique de [<sérum physiologique / hydrodissection / carbodissection>]."] : []),
           "Réalisation d'un premier cycle de cryothérapie pendant 10 minutes.",
           "Rechauffement passif pendant 9 minutes et actif pendant 1 minute. ",
           "Réalisation d'un deuxième cycle de cryothérapie pendant 6 minutes.",
@@ -4707,7 +4733,7 @@
           "",
           "",
           "Conclusion:",
-          "Cryothérapie de la tumeur desmoïde thoracique postérieur, techniquement satisfaisante.",
+          conclLine,
           "",
           "",
           `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle. `,
@@ -4718,8 +4744,10 @@
         ].join("\n");
       }
 
-      // 2. Ablation de névrome de Morton / Cryothérapie sous contrôle scanner (Trame exacte Word)
+      // 2. Ablation de névrome de Morton / Cryothérapie sous contrôle scanner
       if (gType === "cryo_morton") {
+        const espMatch = fullCtx.match(/\b([23])\s*(?:e|ème)\s*espace/i);
+        const espStr = espMatch ? `${espMatch[1]}ème espace interdigital` : "[<2ème / 3ème espace interdigital>]";
         return [
           "Ablation de névrome de Morton",
           "Cryothérapie sous contrôle scanner",
@@ -4727,7 +4755,7 @@
           `${patNom} : ${civNom}`,
           "",
           "Indication:",
-          `${patNom} de [<${ageVal || "66 "} >]ans présentant un névrome de Morton du 3ème espace interdigital du pied [<gauche>].`,
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant un névrome de Morton du ${espStr} du pied ${sideStr ? sideStr : "[<droit / gauche>]"}.`,
           "Echec de traitement médical et infiltratif. ",
           "",
           "",
@@ -4760,42 +4788,36 @@
         ].join("\n");
       }
 
-      // 3. Electrochimiothérapie sous contrôle scanner (Trame exacte Word)
+      // 3. Electrochimiothérapie sous contrôle scanner (Trame Word sans inventer la lésion ni le médecin adresseur)
       if (gType === "ect") {
+        const ectSite = /pied/i.test(fullCtx) ? "du pied" : "de [<localisation à préciser>]";
         return [
           "Electrochimiothérapie sous contrôle scanner",
           "",
           `${patNom} : ${civNom}`,
           "",
           "Indication:",
-          `${patNom} de ${ageVal || "[<77>]"} ans présentant [<une épidurite métastatique résistante à la radiothérapie>].`,
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant [<nature et localisation de la lésion à préciser>].`,
           "Décision collégiale de traitement par électrochimiothérapie [<à visée antalgique>] [<à visée de contrôle carcinologique local>].",
-          `${adresseAccord} par le Docteur [<BOUDOU-ROUQUETTE >]`,
+          `${adresseAccord} par ${refDoc || "le Docteur [<médecin adresseur>]"}`,
           "",
           "",
           "Technique - Résultats:",
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
           "Informations du patient.",
           "Sous anesthésie générale.",
-          "Installation en décubitus.",
+          "Installation en [<décubitus / procubitus>].",
           "Repérage lésionnel par scanner.",
           "",
           "",
-          `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "6 aiguilles [<17G 16cm 40mm>]"} `,
+          `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<nombre>] aiguilles [<17G 16cm 40mm>]"} `,
           "",
           "",
           "Injection de 15mg/m2 de Bléomycine IV. ",
           "",
           "",
           "[<Réalisation d'un premier cycle de traitement.",
-          "Pull back de 3cm de l'ensemble des électrodes et réalisation d'un deuxième cycle de traitement.",
-          "Repositionnement de 6 aiguilles sur la partie distale de la lésion",
-          "Réalisation d'un premier cycle de traitement.",
-          "Pull back de 3cm de l'ensemble des électrodes et réalisation d'un deuxième cycle de traitement.",
-          "Mise en place de 4 aiguilles 17G 12cm 2cm en regard du nodule sous cutané de la face médiale de cuisse. ",
-          "Réalisation d'un cycle de traitement >]",
-          "",
-          "",
+          "Pull back de [<...>] cm de l'ensemble des électrodes et réalisation d'un deuxième cycle de traitement.>]",
           "",
           "",
           "Ablation du matériel.",
@@ -4804,7 +4826,7 @@
           "",
           "",
           "Conclusion:",
-          "Electrochimiothérapie de [<la cuisse gauche>] techniquement satisfaisante.",
+          `Electrochimiothérapie ${ectSite} techniquement satisfaisante.`,
           "",
           "",
           `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle à 2 mois. `,
@@ -4817,7 +4839,7 @@
         ].join("\n");
       }
 
-      // 4. INJECTION THERAPEUTIQUE de STEROÏDE / EPIDURALE PAR VOIE INTERLAMAIRE / SOUS SCANNER (Trame exacte Word)
+      // 4. INJECTION THERAPEUTIQUE de STEROÏDE / EPIDURALE PAR VOIE INTERLAMAIRE / SOUS SCANNER
       if (gType === "infiltration_epidurale") {
         return [
           "INJECTION THERAPEUTIQUE de STEROÏDE",
@@ -4844,7 +4866,7 @@
           "",
           " - Repérage scannographique",
           "",
-          `- Ponction par voie interlamaire [<${levelStr || "L3-L4"}>] de l'espace épidurale, sous pression continue `,
+          `- Ponction par voie interlamaire ${levelStr ? levelStr : "[<étage>]"} de l'espace épidural, sous pression continue `,
           "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe au sein de l'espace épidural, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
           "",
           "",
@@ -4860,7 +4882,7 @@
         ].join("\n");
       }
 
-      // 5. INJECTION THERAPEUTIQUE de STEROÏDE / INTER ARTICULAIRE POSTERIEURE / SOUS SCANNER (Trame exacte Word)
+      // 5. INJECTION THERAPEUTIQUE de STEROÏDE / INTER ARTICULAIRE POSTERIEURE / SOUS SCANNER
       if (gType === "infiltration_iap") {
         return [
           "INJECTION THERAPEUTIQUE de STEROÏDE",
@@ -4870,21 +4892,22 @@
           `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          "Lombalgies",
+          "Lombalgie sur arthropathie facettaire postérieure ",
+          "",
+          "",
           "Pas d’antécédent de chirurgie rachidienne, pas de traitement anticoagulant ou de trouble de l’hémostase primaire, et pas d’allergie grave à un produit de contraste iodé",
           "",
           "TECHNIQUE ET RESULTAT",
+          "Clichés standards :",
+          "Aspect normal de la trame osseuse",
           "",
           "Procédure interventionnelle :",
-          "Pour mémoire, disque L5-S1 vestigial avec dernier disque mobile en L4-L5, arthrosique",
-          "",
-          "",
           "Décubitus ventral avec cale ventrale",
-          "Asepsie cutanée : Première désinfection cutanée à la Bétadine® alcoolique. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
+          "Asepsie cutanée : Première désinfection cutanée au Bactiseptic. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
           "",
           "",
           " - Repérage scannographique ",
-          `- Ponction par voie postéireure des articulaires [<${levelStr || "L4-L5"}>]`,
+          `- Ponction par voie postérieure des articulaires ${levelStr ? levelStr : "[<étage>]"}`,
           "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe dans le recessus articulaire, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
           "",
           "",
@@ -4900,7 +4923,7 @@
         ].join("\n");
       }
 
-      // 6. INJECTION THERAPEUTIQUE de STEROÏDE / NERF GRAND OCCIPITAL / SOUS SCANNER (Trame exacte Word)
+      // 6. INJECTION THERAPEUTIQUE de STEROÏDE / NERF GRAND OCCIPITAL / SOUS SCANNER
       if (gType === "infiltration_arnold") {
         return [
           "INJECTION THERAPEUTIQUE de STEROÏDE",
@@ -4915,16 +4938,12 @@
           "TECHNIQUE ET RESULTAT",
           "",
           "Procédure interventionnelle :",
-          "",
-          "",
-          "",
-          "",
           "Décubitus ventral avec cale ventrale",
           "Asepsie cutanée : Première désinfection cutanée au Bactiseptic. Deuxième passage après séchage. Mise en place d’un champ chirurgical fenêtré",
           "",
           "",
           " - Repérage scannographique ",
-          "- Ponction par voie postéireure à hauteur de l'épineuse de C1, entre le muscle oblique caudal inférieur de la tête et le muscle semi-épineux.",
+          "- Ponction par voie postérieure à hauteur de l'épineuse de C1, entre le muscle oblique caudal inférieur de la tête et le muscle semi-épineux.",
           "- Injection de 2cc de produit de contraste hydrosoluble non neuro-toxique qui passe dans l'espace inter-musculaire, sans opacification vasculaire, puis injection de 2cc d'Hydrocortancyl",
           "",
           "",
@@ -4942,7 +4961,7 @@
         ].join("\n");
       }
 
-      // 7. Ostéocool sous contrôle scanner (Trame exacte Word)
+      // 7. Ostéocool sous contrôle scanner (Trame Word sans inventer le primitif ni de fuite discale)
       if (gType === "osteocool") {
         return [
           "Ostéocool sous contrôle scanner",
@@ -4950,8 +4969,8 @@
           `${patNom} : ${civNom}`,
           "",
           "Indication:",
-          `${patNom} de [<${ageVal || "65"}>] ans présentant [<une lésion vertébrale de ${levelStr || "T12"} dans un contexte d'adénocarcinome pulmonaire métastatique>].`,
-          "Décision collégiale de traitement par radiofréquence  [<à visée de contrôle carcinologique local>] et cimentoplastie.",
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant une lésion vertébrale de ${levelStr || "[<niveau>]"} [<contexte clinique / histologique à préciser>].`,
+          "Décision collégiale de traitement par radiofréquence [<à visée antalgique / de contrôle carcinologique local>] et cimentoplastie.",
           "",
           "",
           "Technique - Résultats:",
@@ -4966,10 +4985,8 @@
           "",
           "",
           "Réalisation d'un premier cycle de traitement de [<15min>] à [<70°>]",
-          "Préparation du ciment Vertaplex et injection de 4cc de ciment dans le corps vertébral, avec un bon remplissage de plateau à plateau.",
-          "Minime fuite discale sans conséquence. ",
-          "",
-          "",
+          "Préparation du ciment Vertaplex et injection de [<...>] cc de ciment dans le corps vertébral, avec un bon remplissage de plateau à plateau.",
+          "[<Pas de fuite discale ni épidurale.>]",
           "",
           "",
           "Ablation du matériel.",
@@ -4978,7 +4995,7 @@
           "",
           "",
           "Conclusion:",
-          "Radiofréquence par Ostéocool et cimentoplastie sans complication. ",
+          `Radiofréquence par Ostéocool et cimentoplastie de ${levelStr || "[<niveau>]"} sans complication. `,
           "",
           "",
           `${lePat} sera ${revuAccord} en consultation dans un mois. `,
@@ -4989,7 +5006,7 @@
         ].join("\n");
       }
 
-      // 8. Radiofréquence d'ablation nerveuse / Nerfs géniculés (Trame exacte Word)
+      // 8. Radiofréquence d'ablation nerveuse / Nerfs géniculés
       if (gType === "rf_genicules" || gType === "test_anesth_genicule") {
         return [
           "Radiofréquence d'ablation nerveuse",
@@ -5032,16 +5049,31 @@
         ].join("\n");
       }
 
-      // 9. Ablation Ostéome Ostéoïde / Radiofréquence sous contrôle scanner (Trame exacte Word)
+      // 9. Ablation Ostéome Ostéoïde / Chondroblastome — Radiofréquence sous contrôle scanner
       if (gType === "rf_oo") {
+        const isChondro = /chondroblastome/i.test(fullCtx);
+        let lesionTitle = isChondro ? "Ablation de Chondroblastome" : "Ablation Ostéome Ostéoïde";
+        let lesionDesc = isChondro ? "un chondroblastome" : "un ostéome ostéoïde";
+        let siteDesc = "[<localisation à préciser>]";
+        if (/genou/i.test(fullCtx)) siteDesc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/coude/i.test(fullCtx)) siteDesc = `du coude ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/tibia\s+proximal\s+gauche/i.test(fullCtx)) siteDesc = "du tibia proximal gauche";
+        else if (/tibia/i.test(fullCtx)) siteDesc = `du tibia ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/astragale|talus/i.test(fullCtx)) siteDesc = `de l'astragale ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (levelStr) siteDesc = `de ${levelStr}`;
+
+        const extraDetail = /distance.*lame\s+sous[\s\-]*chondrale/i.test(fullCtx)
+          ? " (à distance de la lame sous-chondrale)"
+          : "";
+
         return [
-          "Ablation Ostéome Ostéoïde",
+          lesionTitle,
           "Radiofréquence sous contrôle scanner",
           "",
           `${patNom} : ${civNom}`,
           "",
           "Indication:",
-          `${patNom} de ${ageVal || "[<56>]"} ans présentant une lésion inflammatoire du processus articulaire inférieur gauche de T1, suspecte d'ostéome ostéoïde. `,
+          `${patNom} de ${ageVal || "[<âge>]"} ans présentant ${lesionDesc} ${siteDesc}${extraDetail}. `,
           "Décision de traitement par radiofréquence.",
           "",
           "",
@@ -5049,27 +5081,25 @@
           `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
           "Informations du patient.",
           "Sous anesthésie générale.",
-          "Installation en procubitus.",
+          "Installation en [<décubitus / procubitus>].",
           "Repérage lésionnel par scanner.",
           "",
           "",
-          "Abord de la lésion à l'aide d'une coaxiale Arrow 11G 6cm par voie antéro-latérale.",
+          "Abord de la lésion à l'aide d'une coaxiale [<Arrow 11G 6cm>] par voie [<voie d'abord>].",
           "",
           "",
-          "Réalisation d'une biopsie à l'aide d'une tréphine 13G: prélèvement non contributif non adressé en anatomopathologie.",
-          `Positionnement de l'aiguille de radiofréquence ${matNote || "Covidien 10mm - 150mm"} au sein de la lésion.`,
-          "Réalisation d'un premier cycle de radiofréquence ablative  à 85° pendant 6 minutes.",
+          "[<Réalisation d'une biopsie à l'aide d'une tréphine 13G.>]",
+          `Positionnement de l'aiguille de radiofréquence ${matNote || "[<Covidien 7mm / 10mm - 150mm>]"} au sein de la lésion.`,
+          "Réalisation d'un cycle de radiofréquence ablative à 85° pendant 6 minutes.",
           "",
           "",
           "Ablation du matériel.",
-          "Stéristrip, pansement sec. ",
+          "Pansement sec. ",
           "Pas de complication au cours ou au décours du geste.",
           "",
           "",
-          "",
-          "",
           "Conclusion:",
-          "Radiofréquence de la lésion rachidienne de T1 gauche, compatible avec un ostéome ostéoïde.",
+          `Radiofréquence ${isChondro ? "du chondroblastome" : "de l'ostéome ostéoïde"} ${siteDesc}, techniquement satisfaisante.`,
           "",
           "",
           `${lePat} sera ${revuAccord} dans 3 mois en consultation. `,
@@ -5080,15 +5110,19 @@
         ].join("\n");
       }
 
-      // 10. Radiofréquence d'ablation nerveuse / RF pulsée nerf périphérique (Trame exacte Word)
+      // 10. Radiofréquence d'ablation nerveuse / RF pulsée ou Cryoneurolyse nerf périphérique
       if (gType === "rf_nerf_pulse") {
+        const isIntercostal = /intercostal/i.test(fullCtx);
+        const nerfDesc = isIntercostal
+          ? `nerf intercostal ${sideStr || "[<droit / gauche>]"}`
+          : "nerf [<fémoro-cutané superficiel / nerf à préciser>]";
         return [
           "Radiofréquence d'ablation nerveuse",
           "",
           `${patNom} : ${civNom}`,
           "",
           "Indication",
-          "Douleur neuropathique sur une lésion du nerf [<fémoro-cutané superficiel gauche>].",
+          `Douleur neuropathique sur une lésion du ${nerfDesc}.`,
           "Deux tests anesthésiques réalisés le [<>] et le [<>]",
           "EVA basale: [<>]",
           "1er bloc test: [<>]",
@@ -5097,7 +5131,7 @@
           "",
           "Technique",
           "Installation en décubitus",
-          "Repérage sous échographie.",
+          "Repérage sous échographie / scanner.",
           "En conditions d'asepsie stricte. ",
           "Anesthésie cutanée et sous cutanée avec l'injection de 2cc de Xylocaïne. ",
           "Mise en place d'une canule Venom 20G au contact du nerf. ",
@@ -5114,7 +5148,7 @@
           "",
           "",
           "Conclusion",
-          "RF pulsée du nerf [<fémoro-cutané superficiel gauche>]. ",
+          `RF pulsée du ${nerfDesc}. `,
           "",
           "",
           "Téléconsultation dans 3 semaines. ",
@@ -5123,7 +5157,7 @@
         ].join("\n");
       }
 
-      // 11. Radiofréquence d'ablation nerveuse / Syndrome facettaire / Rhizolyse (Trame exacte Word)
+      // 11. Radiofréquence d'ablation nerveuse / Syndrome facettaire / Rhizolyse
       if (gType === "rf_facettaire") {
         return [
           "Radiofréquence d'ablation nerveuse",
@@ -5165,7 +5199,7 @@
         ].join("\n");
       }
 
-      // 12. Test anesthésique / Douleur péri-trochantérienne (Trame exacte Word)
+      // 12. Test anesthésique / Douleur péri-trochantérienne
       if (gType === "test_trochanter") {
         return [
           "Test anesthésique",
@@ -5181,10 +5215,10 @@
           "Technique",
           "Installation en procubitus",
           "En conditions d'asepsie stricte. ",
-          "Mise en place d'une aiguille 20G au contac du grand trochanter, sur le trajet théorique des branches sensitives du nerf fémoral",
+          "Mise en place d'une aiguille 20G au contact du grand trochanter, sur le trajet théorique des branches sensitives du nerf fémoral",
           "",
           "",
-          "Injection de 22cc de Visipaque pour confirmer l'absence d'opacification vasculaire ",
+          "Injection de 2cc de Visipaque pour confirmer l'absence d'opacification vasculaire ",
           "Injection d'un mélange 2/3 1/3 Naropéine 7.5% et Xylocaine 1% (10cc)",
           "",
           "",
@@ -5203,7 +5237,7 @@
         ].join("\n");
       }
 
-      // 13. Test anesthésique / Syndrome facettaire (Trame exacte Word)
+      // 13. Test anesthésique / Syndrome facettaire
       if (gType === "test_facettaire") {
         return [
           "Test anesthésique",
@@ -5213,14 +5247,14 @@
           "Indication",
           "Syndrome facettaire de topographie [<L5-S1 droite>].",
           "Premier test anesthésique.",
-          "EVA basale [<7-8/10>]",
+          "EVA basale [<.../10>]",
           "",
           "",
           "Technique",
           "Installation en procubitus",
           "En conditions d'asepsie stricte. ",
           "Mise en place d'une aiguille 20G dans les gouttières transverso-sacrées [<droites >][< L5-S1>] et[< L4-L5>]",
-          "Scanographique du bon positionnement des aiguilles.",
+          "Contrôle scannographique du bon positionnement des aiguilles.",
           "",
           "",
           "Injection d'un mélange 2/3 1/3 Naropéine 7.5% et Xylocaine 1%",
@@ -5238,7 +5272,7 @@
         ].join("\n");
       }
 
-      // 14. VERTEBROPLASTIE PERCUTANEE / Lésion secondaire (Trame exacte Word)
+      // 14. VERTEBROPLASTIE PERCUTANEE / Lésion secondaire (Sans inventer "cancer pulmonaire EGFR muté" ni "Fuite épidurale")
       if (gType === "vertebro_secondaire") {
         return [
           "VERTEBROPLASTIE PERCUTANEE ",
@@ -5246,7 +5280,7 @@
           `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          `Lésion secondaire de ${levelStr || "T2"} dans un contexte de cancer pulmonaire EGFR muté d'emblée métastatique osseux.`,
+          `Lésion secondaire de ${levelStr || "[<niveau>]"} dans un contexte de [<contexte carcinologique à préciser>].`,
           "Pas d’antécédent de chirurgie rachidienne",
           "Pas de traitement anticoagulant ou de trouble de l’hémostase primaire, et pas d’allergie grave à un produit de contraste iodé",
           "",
@@ -5256,13 +5290,12 @@
           "Décubitus ventral",
           "Asepsie cutanée : Première désinfection cutanée à la Chlorexidine. Deuxième passage après séchage. ",
           "Mise en place d’un champ chirurgical fenêtré",
-          `_ Abord bipédiculaire du corps vertébral de ${levelStr || "T1"} sous contrôle scanographique`,
+          `_ Abord [<unipédiculaire / bipédiculaire>] du corps vertébral de ${levelStr || "[<niveau>]"} sous contrôle scanographique`,
           "_ Mise en place de trocards osseux Arrow 6cm ",
           "_ Préparation du ciment",
           "_ Remplissage du système Vertaplex",
-          "_ Injection de 2cc de ciment au sein du foyer fracturaire sous contrôle scanner répétés",
-          "Pas de fuite discale. ",
-          "Fuite épidurale latérale et foraminale droite. ",
+          "_ Injection de [<2cc>] de ciment au sein du corps vertébral sous contrôles scanner répétés",
+          "Pas de fuite discale ni épidurale. ",
           "",
           "Absence de complication per et post-procédure, notamment pas de déficit moteur ou sensitif. ",
           "Conseils d’usage : repos relatif, lever possible, antalgique si douleur",
@@ -5273,7 +5306,7 @@
         ].join("\n");
       }
 
-      // 15. VERTEBROPLASTIE PERCUTANEE / Fracture vertébrale (Trame exacte Word)
+      // 15. VERTEBROPLASTIE PERCUTANEE / Fracture vertébrale
       if (gType === "vertebro_fracture") {
         return [
           "VERTEBROPLASTIE PERCUTANEE ",
@@ -5281,7 +5314,7 @@
           `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          `Fracture vertébrale de [<${levelStr || ""}>] avec  perte de hauteur du plateau supérieur / inférieur `,
+          `Fracture vertébrale de ${levelStr || "[<niveau>]"} avec perte de hauteur du plateau [<supérieur / inférieur>] `,
           "Il s'y associe un signal de type oedémateux de la médullaire osseuse.",
           `${patNom} ${recuAccord} en consultation de radiologie interventionnelle préalable`,
           "Pas d’antécédent de chirurgie rachidienne",
@@ -5299,13 +5332,13 @@
           "Asepsie cutanée : Première désinfection cutanée à la Bétadine®. Deuxième passage après séchage. ",
           "Mise en place d’un champ chirurgical fenêtré",
           "_ Anesthésie loco-régionale ",
-          "_ Abord postéro-latéral gauche",
-          `_ Ponction par voie pédiculaire gauche du corps vertébral de [<${levelStr || ""}>]`,
+          "_ Abord postéro-latéral [<gauche / droit>]",
+          `_ Ponction par voie pédiculaire [<gauche / droite>] du corps vertébral de ${levelStr || "[<niveau>]"}`,
           "_ Contrôle scopique en temps réel",
           "_ Mise en place d'un système TAM KIT 3mm - 152mm",
           "_ Préparation du ciment",
           "_ Remplissage du système Vertaplex",
-          "_ Injection de 2cc de ciment au sein du foyer fracturaire",
+          "_ Injection de [<2cc>] de ciment au sein du foyer fracturaire",
           "Pas de fuite épidurale ou discale",
           "",
           "Absence de complication per et post-procédure",
@@ -5317,15 +5350,18 @@
         ].join("\n");
       }
 
-      // 16. CIMENTOPLASTIE VISSAGE PERCUTANEE (Trame exacte Word)
+      // 16. CIMENTOPLASTIE VISSAGE PERCUTANEE (Sans inventer "léiomyosarcome du caecum")
       if (gType === "vissage_cimento") {
+        const vissageLoc = /aile\s+iliaque/i.test(fullCtx)
+          ? "de l'aile iliaque [<côté>] (post-radiothérapie)"
+          : "[<localisation et contexte à préciser>]";
         return [
           "CIMENTOPLASTIE VISSAGE PERCUTANEE ",
           "",
           `${patNom} : ${civNom}`,
           "",
           "INDICATION",
-          "[<Lésion secondaire de la colonne antérieure du cotyle dans un contexte de léiomyosarcome du caecum métastatique osseux et hépatique.>]",
+          `Lésion / fragilité osseuse ${vissageLoc}.`,
           "Indication de vissage à visée de consolidation préventive",
           "",
           "",
@@ -5338,13 +5374,12 @@
           "_ Abord antérieur sous needle guidance",
           "_ Mise en place d'un trocard osseux TOCR 8G 150mm",
           "_ Mise en place d'une aiguille de Kirchner guide wire 300mm",
-          `_ Retrait du trocard et mise en place d'une vis ${matNote || "[<Asnis 8mm 70mm>]"}`,
+          `_ Retrait du trocard et mise en place d'une vis ${matNote || "[<Asnis 8mm ...mm>]"}`,
           "_ Contrôle CBCT",
-          "_ Catéthérisation de la vis par un trocard osseux TCD 11G 150mm ",
-          "[<_ Abord direct de la lésion tumorale par un trajet parallèle au premier à l'aide d'un second trocard TCD 11G 150mm>]",
+          "[<_ Catéthérisation de la vis par un trocard osseux TCD 11G 150mm ",
           "_ Préparation du ciment Vertaplex",
-          "_ Injection de quelques cc à l'extrémité distale de la vis et remplissage de l'os sain et de la lésion tumorale ",
-          "_ Contrôle CBCT",
+          "_ Injection de quelques cc à l'extrémité distale de la vis",
+          "_ Contrôle CBCT>]",
           "",
           "_ Désinfection du point d'entrée et fermeture par [<2>] points de suture au Vycril 3 et colle biologique",
           "_ Pansement sec",
@@ -5359,51 +5394,42 @@
           "Téléconsultation dans un mois",
           "",
           "",
-          "",
-          "",
           "Dr T. LEFEVRE",
           "Dr MP TALABARD (CCA)"
         ].join("\n");
       }
 
-      // Par défaut / autres gestes : Trame Cryothérapie / RF du Word avec le nom du patient
+      // Par défaut / autres gestes
       return [
-        "Ablation de tumeur desmoïde",
-        "Cryothérapie sous contrôle scanner",
+        `${ev.title || "Geste interventionnel sous contrôle scanner"}`,
         "",
         `${patNom} : ${civNom}`,
         "",
         "Indication:",
-        `${patNom} de ${ageVal || "[<44>]"} ans présentant [<indication>].`,
-        "Décision collégiale de traitement par cryothérapie",
+        `${patNom} de ${ageVal || "[<âge>]"} ans présentant [<indication à préciser>].`,
         "",
         "",
         "Technique - Résultats:",
         `${patNom} précédemment ${vuAccord} en consultation et consultation d'anesthésie.`,
         "Informations du patient.",
-        "Sous anesthésie générale.",
-        "Installation en décubitus.",
+        "Sous anesthésie [<générale / locale>].",
+        "Installation en [<décubitus / procubitus>].",
         "Repérage lésionnel par scanner.",
         "",
         "",
-        `Abord de la lésion sous contrôle scannographique et mise en place  de ${matNote || "deux aiguilles IceRod"}`,
-        "",
-        "",
-        "Réalisation d'un premier cycle de cryothérapie pendant 10 minutes.",
-        "Rechauffement passif pendant 9 minutes et actif pendant 1 minute. ",
-        "Réalisation d'un deuxième cycle de cryothérapie pendant 6 minutes.",
+        `Abord de la lésion sous contrôle scannographique et mise en place de ${matNote || "[<matériel à préciser>]"}`,
         "",
         "",
         "Ablation du matériel.",
-        "Stéristrip, pansement sec. ",
+        "Pansement sec. ",
         "Pas de complication au cours ou au décours du geste.",
         "",
         "",
         "Conclusion:",
-        "Cryothérapie techniquement satisfaisante.",
+        "Geste techniquement satisfaisant, sans complication immédiate.",
         "",
         "",
-        `${lePat} sera ${revuAccord} en consultation avec une IRM de contrôle. `,
+        `${lePat} sera ${revuAccord} en consultation. `,
         "",
         "",
         "Dr T. LEFEVRE",
