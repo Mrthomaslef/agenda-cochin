@@ -24,6 +24,12 @@ def _clean_annuaire_entry(item):
     return out
 
 
+try:
+    from sync_annuaire import sync_annuaire
+    sync_annuaire(fetch_cloud=False)
+except Exception as _ann_err:
+    print("Warning: sync_annuaire skipped:", _ann_err)
+
 with open("/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_annuaire.json") as f:
     cochin_phone_directory = [_clean_annuaire_entry(item) for item in json.load(f)]
 
@@ -8117,18 +8123,127 @@ html_template = """<!DOCTYPE html>
     }
 
     let annuaireCatFilter = "all";
+    let annuaireCategoriesList = ["all"];
     const STORAGE_CUSTOM_ANNUAIRE_KEY = "cochin_custom_annuaire_v1";
+    let liveRemoteAnnuaire = null;
+
+    function esc(s) {
+      return escHtmlAttr(s);
+    }
+
+    function normalizeAnnuaireKey(str) {
+      return String(str || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\\u0300-\\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    function deriveCochinPhoneAndPoste(phoneInput, posteInput) {
+      let phone = String(phoneInput || "").trim();
+      let poste = String(posteInput || "").trim();
+      if (!phone && poste) {
+        const m5 = poste.match(/\\b1(\\d{2})(\\d{2})\\b/);
+        if (m5) phone = `01 58 41 ${m5[1]} ${m5[2]}`;
+      }
+      if (!poste && phone) {
+        const digits = phone.replace(/\\D/g, "");
+        if (digits.length === 10 && digits.startsWith("015841")) {
+          poste = "1" + digits.slice(6);
+        } else if (/^1\\d{4}$/.test(digits)) {
+          poste = digits;
+          phone = `01 58 41 ${digits.slice(1, 3)} ${digits.slice(3, 5)}`;
+        }
+      }
+      return { phone, poste };
+    }
 
     function getAllAnnuaireEntries() {
       let custom = [];
       try {
         custom = JSON.parse(localStorage.getItem(STORAGE_CUSTOM_ANNUAIRE_KEY) || "[]");
       } catch (e) { custom = []; }
-      return [...custom, ...(COCHIN_ANNUAIRE || [])];
+
+      const baseList = Array.isArray(COCHIN_ANNUAIRE) ? COCHIN_ANNUAIRE : [];
+      const remoteList = Array.isArray(liveRemoteAnnuaire) ? liveRemoteAnnuaire : [];
+
+      const byId = new Map();
+      const nameToId = new Map();
+      const order = [];
+
+      function upsertEntry(raw, isCustomOverride) {
+        if (!raw || typeof raw !== "object") return;
+        const name = String(raw.name || "").trim();
+        if (!name) return;
+        const normName = normalizeAnnuaireKey(name);
+        let id = String(raw.id || "").trim();
+        if (!id && normName && nameToId.has(normName)) {
+          id = nameToId.get(normName);
+        }
+        if (!id) {
+          id = "tel-" + (normName || Date.now());
+        }
+        if (raw.deleted) {
+          byId.delete(id);
+          return;
+        }
+        const derived = deriveCochinPhoneAndPoste(raw.phone, raw.poste || raw.short);
+        const merged = Object.assign({}, byId.get(id) || {}, raw, {
+          id,
+          name,
+          category: raw.category || (byId.get(id) && byId.get(id).category) || "Radiologie B — Secrétariats & Consoles",
+          role: raw.role !== undefined ? raw.role : ((byId.get(id) && byId.get(id).role) || ""),
+          phone: derived.phone || (byId.get(id) && byId.get(id).phone) || "",
+          poste: derived.poste || (byId.get(id) && (byId.get(id).poste || byId.get(id).short)) || "",
+          short: derived.poste || (byId.get(id) && (byId.get(id).poste || byId.get(id).short)) || "",
+          building: raw.building || (byId.get(id) && byId.get(id).building) || "",
+          fax: raw.fax || (byId.get(id) && byId.get(id).fax) || ""
+        });
+        if (isCustomOverride) merged.custom = true;
+        if (!byId.has(id)) order.push(id);
+        byId.set(id, merged);
+        if (normName) nameToId.set(normName, id);
+      }
+
+      baseList.forEach(item => upsertEntry(item, false));
+      remoteList.forEach(item => upsertEntry(item, false));
+      // Les entrées personnalisées ou modifiées remplacent systématiquement l'ancien numéro
+      custom.slice().reverse().forEach(item => upsertEntry(item, true));
+
+      const customIds = new Set(custom.filter(x => !x.deleted).map(x => x.id));
+      const topCustom = order.filter(id => byId.has(id) && customIds.has(id) && String(id).startsWith("cust_")).reverse();
+      const rest = order.filter(id => byId.has(id) && !topCustom.includes(id));
+      return [...topCustom, ...rest].map(id => byId.get(id));
+    }
+
+    async function syncLiveAnnuaireJson() {
+      const urls = [
+        "./cochin_annuaire.json?t=" + Date.now(),
+        "https://mrthomaslef.github.io/guide-interne-cochin-os/annuaire/annuaire-data.json?t=" + Date.now()
+      ];
+      const mergedRemote = [];
+      for (const u of urls) {
+        try {
+          const resp = await fetch(u, { cache: "no-store" });
+          if (resp.ok) {
+            const arr = await resp.json();
+            if (Array.isArray(arr)) mergedRemote.push(...arr);
+          }
+        } catch (_) {}
+      }
+      if (mergedRemote.length > 0) {
+        liveRemoteAnnuaire = mergedRemote;
+        if (currentTab === "annuaire") renderAnnuaireTab();
+      }
     }
 
     function setAnnuaireCategory(cat) {
       annuaireCatFilter = cat;
+      renderAnnuaireTab();
+    }
+
+    function setAnnuaireCategoryIdx(idx) {
+      annuaireCatFilter = annuaireCategoriesList[idx] || "all";
       renderAnnuaireTab();
     }
 
@@ -8138,21 +8253,30 @@ html_template = """<!DOCTYPE html>
       if (!container) return;
 
       const entries = getAllAnnuaireEntries();
-      const categories = ["all", ...Array.from(new Set(entries.map(e => e.category)))];
+      annuaireCategoriesList = ["all", ...Array.from(new Set(entries.map(e => e.category).filter(Boolean)))];
+      if (annuaireCatFilter !== "all" && !annuaireCategoriesList.includes(annuaireCatFilter)) {
+        annuaireCatFilter = "all";
+      }
       if (chipsContainer) {
-        chipsContainer.innerHTML = categories.map(cat => {
-          const label = cat === "all" ? `Tous (${entries.length})` : cat.replace("Radiologie B — ", "Radio B : ").replace("Services Partenaires ", "");
-          const safeCat = cat.replace(/'/g, "\\'");
-          return `<button class="chip ${annuaireCatFilter === cat ? 'active' : ''}" onclick="setAnnuaireCategory('${safeCat}')">${esc(label)}</button>`;
+        chipsContainer.innerHTML = annuaireCategoriesList.map((cat, idx) => {
+          const count = cat === "all" ? entries.length : entries.filter(e => e.category === cat).length;
+          const shortCat = cat === "all"
+            ? `Tous (${count})`
+            : `${cat.replace("Radiologie B — ", "Radio B : ").replace("Services Partenaires ", "Partenaires ")
+                .replace("Laboratoires, Pharmacie & Administration (DAM)", "Labos / Pharmacie / DAM")} (${count})`;
+          return `<button class="chip ${annuaireCatFilter === cat ? 'active' : ''}" onclick="setAnnuaireCategoryIdx(${idx})">${esc(shortCat)}</button>`;
         }).join("");
       }
 
       const q = (document.getElementById("annuaire-search")?.value || "").trim().toLowerCase();
+      const qDigits = q.replace(/\\s+/g, "");
       const filtered = entries.filter(e => {
         if (annuaireCatFilter !== "all" && e.category !== annuaireCatFilter) return false;
         if (!q) return true;
-        const hay = `${e.name || ""} ${e.role || ""} ${e.phone || ""} ${e.short || ""} ${e.category || ""}`.toLowerCase();
-        return hay.includes(q);
+        const posteStr = e.poste || e.short || "";
+        const hay = `${e.name || ""} ${e.role || ""} ${e.phone || ""} ${posteStr} ${e.building || ""} ${e.fax || ""} ${e.category || ""}`.toLowerCase();
+        const hayDigits = hay.replace(/\\s+/g, "");
+        return hay.includes(q) || (qDigits.length >= 3 && hayDigits.includes(qDigits));
       });
 
       if (!filtered.length) {
@@ -8173,26 +8297,35 @@ html_template = """<!DOCTYPE html>
           <div style="font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:var(--primary); margin:10px 0 6px 2px;">${esc(cat)} (${grouped[cat].length})</div>
           <div style="display:flex; flex-direction:column; gap:6px;">`;
         grouped[cat].forEach(item => {
+          const posteStr = item.poste || item.short || "";
+          const displayPhone = item.phone || posteStr || "";
           const rawTel = String(item.phone || "").replace(/[^0-9+]/g, "");
           const canCall = rawTel.length >= 10;
-          const isDectOnly = (item.phone || "").toUpperCase().includes("DECT");
+          const safeId = esc(item.id || "");
           html += `
             <div class="ann-card">
               <div style="min-width:0; flex:1;">
                 <div style="font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <span>${esc(item.name)}</span>
-                  ${item.custom ? `<span class="pill pill-success" style="font-size:9px; padding:1px 6px;">Perso</span>` : ``}
+                  ${item.custom ? `<span class="pill pill-success" style="font-size:9px; padding:1px 6px;">MAJ / Perso</span>` : ``}
                 </div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(item.role || "")}</div>
+                ${(item.building || item.fax) ? `
+                  <div style="font-size:10px; color:var(--text-muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; opacity:0.85;">
+                    ${item.building ? `<span>📍 ${esc(item.building)}</span>` : ``}
+                    ${item.fax ? `<span>📠 Fax : ${esc(item.fax)}</span>` : ``}
+                  </div>
+                ` : ``}
               </div>
               <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
                 ${canCall
-                  ? `<a href="tel:${rawTel}" class="ann-call-btn">📞 ${esc(item.phone)}</a>`
-                  : `<span class="ann-dect-badge">📟 ${esc(item.phone)}</span>`
+                  ? `<a href="tel:${rawTel}" class="ann-call-btn">📞 ${esc(displayPhone)}</a>`
+                  : `<span class="ann-dect-badge">📟 ${esc(displayPhone)}</span>`
                 }
-                <div style="display:flex; align-items:center; gap:6px;">
-                  ${item.short ? `<span class="ann-short-badge">Poste / DECT : <strong>${esc(item.short)}</strong></span>` : ``}
-                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${item.id}')" style="background:none; border:none; color:var(--danger); font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
+                <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                  ${posteStr ? `<span class="ann-short-badge">Poste / DECT : <strong>${esc(posteStr)}</strong></span>` : ``}
+                  <button onclick="openEditAnnuaireModal('${safeId}')" title="Modifier / Mettre à jour ce numéro" style="background:var(--bg-elevated); border:1px solid var(--border); border-radius:6px; color:var(--text-muted); font-size:10px; cursor:pointer; padding:2px 6px;">✏️</button>
+                  ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${safeId}')" title="Réinitialiser / Supprimer" style="background:none; border:none; color:var(--danger); font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
                 </div>
               </div>
             </div>`;
@@ -8202,36 +8335,48 @@ html_template = """<!DOCTYPE html>
       container.innerHTML = html;
     }
 
-    function openAddAnnuaireModal() {
+    function openAddAnnuaireModal(editEntry = null) {
       const body = document.getElementById("modal-body");
       if (!body) return;
+      const isEdit = !!(editEntry && editEntry.id);
+      const curCat = (editEntry && editEntry.category) || "Radiologie B — Secrétariats & Consoles";
+      const cats = [
+        "Radiologie B — Secrétariats & Consoles",
+        "Radiologie B — Équipe Médicale (Chefs & Seniors)",
+        "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
+        "Laboratoires, Pharmacie & Administration (DAM)"
+      ];
       body.innerHTML = `
-        <div style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:12px;">➕ Ajouter un numéro à l'annuaire</div>
+        <div style="font-size:16px; font-weight:800; color:var(--text); margin-bottom:12px;">
+          ${isEdit ? "✏️ Mettre à jour le numéro" : "➕ Ajouter ou mettre à jour un numéro"}
+        </div>
+        <input id="new-ann-id" type="hidden" value="${esc(isEdit ? editEntry.id : "")}" />
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Nom / Salle / Correspondant *</label>
-            <input id="new-ann-name" type="text" class="search-input" style="padding-left:12px;" placeholder="Ex: Console Scanner / Salle Staff..." />
+            <input id="new-ann-name" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? editEntry.name : "")}" placeholder="Ex: Dr Hippolyte Monnier / Console Scanner..." />
           </div>
           <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Catégorie</label>
             <select id="new-ann-cat" class="search-input" style="padding-left:12px;">
-              <option value="Radiologie B — Secrétariats & Consoles">Radiologie B — Secrétariats & Consoles</option>
-              <option value="Radiologie B — Équipe Médicale (Chefs & Seniors)">Radiologie B — Équipe Médicale (Chefs & Seniors)</option>
-              <option value="Services Partenaires (Ortho, Rhumato, Anesth, Anapath)">Services Partenaires (Ortho, Rhumato, Anesth, Anapath)</option>
-              <option value="Laboratoires, Pharmacie & Administration (DAM)">Laboratoires, Pharmacie & Administration (DAM)</option>
+              ${cats.map(c => `<option value="${esc(c)}" ${c === curCat ? "selected" : ""}>${esc(c)}</option>`).join("")}
             </select>
           </div>
           <div>
-            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Numéro complet (ex: 01 58 41 XX XX) ou DECT *</label>
-            <input id="new-ann-phone" type="text" class="search-input" style="padding-left:12px;" placeholder="Ex: 01 58 41 24 83" />
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Poste abrégé 5 chiffres / DECT (converti auto en 01 58 41 XX XX)</label>
+            <input id="new-ann-short" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.poste || editEntry.short || "") : "")}" placeholder="Ex: DECT 12503 ou 12483" />
           </div>
           <div>
-            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Poste abrégé 5 chiffres / DECT</label>
-            <input id="new-ann-short" type="text" class="search-input" style="padding-left:12px;" placeholder="Ex: 12483" />
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Numéro complet (ex: 01 58 41 XX XX)</label>
+            <input id="new-ann-phone" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.phone || "") : "")}" placeholder="Ex: 01 58 41 25 03 (auto si poste 1XXXX renseigné)" />
           </div>
           <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Fonction / Détails</label>
-            <input id="new-ann-role" type="text" class="search-input" style="padding-left:12px;" placeholder="Ex: Sous-sol Pavillon Ollier" />
+            <input id="new-ann-role" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.role || "") : "")}" placeholder="Ex: CCA Radio B / Sous-sol Pavillon Ollier" />
+          </div>
+          <div>
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Bâtiment / Localisation</label>
+            <input id="new-ann-building" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.building || "") : "")}" placeholder="Ex: Bâtiment Ollier / Albarran" />
           </div>
           <div style="display:flex; gap:8px; margin-top:6px;">
             <button class="chip" style="flex:1; padding:10px; text-align:center;" onclick="closeModal()">Annuler</button>
@@ -8242,26 +8387,48 @@ html_template = """<!DOCTYPE html>
       document.getElementById("patient-modal").classList.add("open");
     }
 
+    function openEditAnnuaireModal(id) {
+      const entry = getAllAnnuaireEntries().find(x => x.id === id);
+      if (entry) openAddAnnuaireModal(entry);
+    }
+
     function saveNewAnnuaireEntry() {
+      const existingId = (document.getElementById("new-ann-id")?.value || "").trim();
       const name = (document.getElementById("new-ann-name")?.value || "").trim();
       const category = document.getElementById("new-ann-cat")?.value || "Radiologie B — Secrétariats & Consoles";
-      const phone = (document.getElementById("new-ann-phone")?.value || "").trim();
-      const short = (document.getElementById("new-ann-short")?.value || "").trim();
+      const rawPhone = (document.getElementById("new-ann-phone")?.value || "").trim();
+      const rawShort = (document.getElementById("new-ann-short")?.value || "").trim();
       const role = (document.getElementById("new-ann-role")?.value || "").trim();
-      if (!name || !phone) {
-        alert("Veuillez renseigner au moins le nom et le numéro.");
+      const building = (document.getElementById("new-ann-building")?.value || "").trim();
+
+      const derived = deriveCochinPhoneAndPoste(rawPhone, rawShort);
+      if (!name || (!derived.phone && !derived.poste)) {
+        alert("Veuillez renseigner le nom ainsi qu'un numéro ou un poste/DECT.");
         return;
       }
+
+      let targetId = existingId;
+      if (!targetId) {
+        const norm = normalizeAnnuaireKey(name);
+        const match = (COCHIN_ANNUAIRE || []).find(x => normalizeAnnuaireKey(x.name) === norm);
+        if (match && match.id) targetId = match.id;
+      }
+      if (!targetId) targetId = "cust_" + Date.now();
+
       let custom = [];
       try { custom = JSON.parse(localStorage.getItem(STORAGE_CUSTOM_ANNUAIRE_KEY) || "[]"); } catch (e) { custom = []; }
+      custom = custom.filter(x => x.id !== targetId && normalizeAnnuaireKey(x.name) !== normalizeAnnuaireKey(name));
       custom.unshift({
-        id: "cust_" + Date.now(),
+        id: targetId,
         category,
         name,
-        role: role || "Ajout personnalisé",
-        phone,
-        short,
-        custom: true
+        role: role || "Mise à jour annuaire",
+        phone: derived.phone,
+        poste: derived.poste,
+        short: derived.poste,
+        building: building || "Hôpital Cochin",
+        custom: true,
+        updated_at: new Date().toISOString()
       });
       localStorage.setItem(STORAGE_CUSTOM_ANNUAIRE_KEY, JSON.stringify(custom));
       closeModal();
@@ -8315,6 +8482,7 @@ html_template = """<!DOCTYPE html>
       });
       updateBottomKpiActiveState();
       renderCurrentTab();
+      if (tab === "annuaire") syncLiveAnnuaireJson();
     }
 
     function renderCurrentTab() {
@@ -8335,9 +8503,13 @@ html_template = """<!DOCTYPE html>
       }
       initPullToRefresh();
       loadSuiviBlocMap(null);
+      syncLiveAnnuaireJson();
       document.addEventListener("visibilitychange", () => {
-        if (document.visibilityState === "visible" && localStorage.getItem(STORAGE_PIN_KEY)) {
-          syncFromCloud(false);
+        if (document.visibilityState === "visible") {
+          syncLiveAnnuaireJson();
+          if (localStorage.getItem(STORAGE_PIN_KEY)) {
+            syncFromCloud(false);
+          }
         }
       });
       appData.Questions_perso = loadPersoWithLocalStatus(null);
