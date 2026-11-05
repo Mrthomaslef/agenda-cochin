@@ -10,8 +10,22 @@ planning_path = "/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_pla
 with open(planning_path) as f:
     general_planning = json.load(f)
 
+def _clean_annuaire_entry(item):
+    out = {}
+    for k, v in item.items():
+        if k == "email":
+            continue
+        if isinstance(v, str):
+            v = re.sub(r"\s*\([A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}\)", "", v)
+            v = re.sub(r"\s*•\s*[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}", "", v)
+            v = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}\s*(?:•\s*)?", "", v)
+            v = re.sub(r"\(\s*:\s*\)", "", v).strip()
+        out[k] = v
+    return out
+
+
 with open("/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_annuaire.json") as f:
-    cochin_phone_directory = json.load(f)
+    cochin_phone_directory = [_clean_annuaire_entry(item) for item in json.load(f)]
 
 
 def js_json(obj):
@@ -2180,10 +2194,15 @@ html_template = """<!DOCTYPE html>
 
     <!-- TAB 3 : DEMANDES D'AVIS (SERVICE) -->
     <section id="tab-avis" style="display:none;">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="avis-search" placeholder="Rechercher patient, IPP, demandeur, motif..." oninput="renderAvisTab()" />
+      </div>
       <div class="chips-row">
         <button class="chip active" id="flt-avis-all" onclick="setAvisFilter('all')">Tous</button>
         <button class="chip" id="flt-avis-non" onclick="setAvisFilter('Non répondu')">Non répondu</button>
         <button class="chip" id="flt-avis-oui" onclick="setAvisFilter('Répondu')">Répondu</button>
+        <button class="chip" id="btn-avis-sort" onclick="toggleAvisSortOrder()" style="margin-left:auto;" title="Changer le sens de tri chronologique">🔽 Plus récents</button>
       </div>
       <div id="avis-list-container"></div>
     </section>
@@ -2391,6 +2410,15 @@ html_template = """<!DOCTYPE html>
 
     let actesFilter = "all";
     let avisFilter = "all";
+    const STORAGE_AVIS_SORT_KEY = "cochin_ri_avis_sort_v1";
+    let avisSortOrder = (() => {
+      try {
+        const s = localStorage.getItem("cochin_ri_avis_sort_v1");
+        return s === "asc" ? "asc" : "desc";
+      } catch (_) {
+        return "desc";
+      }
+    })();
     let persoFilter = "Non répondu";
     let csFilter = "all";
     let patientFilter = "all";
@@ -3161,12 +3189,65 @@ html_template = """<!DOCTYPE html>
       });
     }
 
+    function isAvisAnswered(st) {
+      const s = String(st || "").trim().toLowerCase();
+      return s.startsWith("répondu") || s.startsWith("repondu");
+    }
+
+    function getAvisSortMeta(a) {
+      const dd = String((a && a["Date Demande"]) || "").trim();
+      const dr = String((a && a["Date Réponse"]) || "").trim();
+      const isoDate = parseFrDateToIso(dd) || parseFrDateToIso(dr) || "";
+      const timeMatches = [...dd.matchAll(/(\\d{1,2})\\s*[h:]\\s*(\\d{0,2})/gi)];
+      let minutes = -1;
+      let hasExplicitTime = false;
+      if (timeMatches.length > 0) {
+        const tm = timeMatches[timeMatches.length - 1];
+        minutes = parseInt(tm[1], 10) * 60 + (tm[2] ? parseInt(tm[2], 10) : 0);
+        hasExplicitTime = true;
+      } else if (dr) {
+        const drIso = parseFrDateToIso(dr) || "";
+        if (!drIso || !isoDate || drIso === isoDate) {
+          const drTimeMatches = [...dr.matchAll(/(\\d{1,2})\\s*[h:]\\s*(\\d{0,2})/gi)];
+          if (drTimeMatches.length > 0) {
+            const tm = drTimeMatches[drTimeMatches.length - 1];
+            minutes = parseInt(tm[1], 10) * 60 + (tm[2] ? parseInt(tm[2], 10) : 0);
+          }
+        }
+      }
+      return {
+        isoDate: isoDate || "0000-00-00",
+        rawIso: isoDate,
+        minutes: minutes,
+        hasExplicitTime: hasExplicitTime,
+        row: Number((a && a._row) || 0)
+      };
+    }
+
+    function sortAvisChronologically(rows, order = avisSortOrder) {
+      const dir = order === "asc" ? 1 : -1;
+      return [...(rows || [])].sort((a, b) => {
+        const ma = getAvisSortMeta(a);
+        const mb = getAvisSortMeta(b);
+        if (ma.isoDate !== mb.isoDate) {
+          return dir * ma.isoDate.localeCompare(mb.isoDate);
+        }
+        if (ma.minutes >= 0 && mb.minutes >= 0 && ma.minutes !== mb.minutes) {
+          return dir * (ma.minutes - mb.minutes);
+        }
+        if (ma.hasExplicitTime !== mb.hasExplicitTime) {
+          return dir * (ma.hasExplicitTime ? 1 : -1);
+        }
+        return dir * (ma.row - mb.row);
+      });
+    }
+
     function applyLocalAvisStatus(avisRows) {
       let localAvis = {};
       try {
         localAvis = JSON.parse(localStorage.getItem(STORAGE_AVIS_KEY) || "{}");
       } catch (e) {}
-      return (avisRows || []).map(a => {
+      const mapped = (avisRows || []).map(a => {
         const key = String(a._row || "");
         const patKey = normName(a["Identité Patient"]);
         const override = localAvis[key] || (patKey ? localAvis[patKey] : null);
@@ -3179,6 +3260,7 @@ html_template = """<!DOCTYPE html>
         }
         return a;
       });
+      return sortAvisChronologically(mapped, avisSortOrder);
     }
 
     function cleanTimedRows(rows) {
@@ -3256,7 +3338,7 @@ html_template = """<!DOCTYPE html>
         document.getElementById("kpi-cs").textContent = appData.Consultations.length;
       }
 
-      const nonRepAvis = appData.Demandes_avis.filter(a => String(a["Statut Réponse"] || "").toLowerCase().includes("non")).length;
+      const nonRepAvis = appData.Demandes_avis.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
       document.getElementById("kpi-avis").textContent = nonRepAvis > 0 ? `${nonRepAvis} à rép.` : appData.Demandes_avis.length;
       const bAvis = document.getElementById("badge-avis-non");
       if (bAvis) {
@@ -3285,9 +3367,13 @@ html_template = """<!DOCTYPE html>
 
     function parseFrDateToIso(dStr) {
       if (!dStr) return null;
-      const m = String(dStr).trim().match(/^(\\d{1,2})[\\/\\-](\\d{1,2})[\\/\\-](\\d{4})$/);
-      if (!m) return null;
-      return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+      const s = String(dStr).trim();
+      const m = s.match(/^(\\d{1,2})[\\/\\-](\\d{1,2})[\\/\\-](\\d{4})$/);
+      if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+      const allMatches = [...s.matchAll(/(\\d{1,2})[\\/\\-](\\d{1,2})[\\/\\-](\\d{4})/g)];
+      if (!allMatches.length) return null;
+      const isos = allMatches.map(x => `${x[3]}-${x[2].padStart(2, "0")}-${x[1].padStart(2, "0")}`).sort();
+      return isos[isos.length - 1];
     }
 
     function dateToIso(d) {
@@ -7406,6 +7492,25 @@ html_template = """<!DOCTYPE html>
     }
 
     // DEMANDES D'AVIS (SERVICE)
+    function syncAvisSortButton() {
+      const btn = document.getElementById("btn-avis-sort");
+      if (!btn) return;
+      btn.textContent = avisSortOrder === "asc" ? "🔼 Plus anciens" : "🔽 Plus récents";
+      btn.title = avisSortOrder === "asc"
+        ? "Ordre chronologique : du plus ancien au plus récent (cliquer pour inverser)"
+        : "Ordre chronologique : du plus récent au plus ancien (cliquer pour inverser)";
+    }
+
+    function toggleAvisSortOrder() {
+      avisSortOrder = avisSortOrder === "asc" ? "desc" : "asc";
+      try {
+        localStorage.setItem(STORAGE_AVIS_SORT_KEY, avisSortOrder);
+      } catch (_) {}
+      appData.Demandes_avis = sortAvisChronologically(appData.Demandes_avis, avisSortOrder);
+      syncAvisSortButton();
+      renderAvisTab();
+    }
+
     function setAvisFilter(flt) {
       avisFilter = flt;
       document.getElementById("flt-avis-all").classList.toggle("active", flt === "all");
@@ -7414,57 +7519,90 @@ html_template = """<!DOCTYPE html>
       renderAvisTab();
     }
 
+    function renderAvisCardHtml(a) {
+      const st = String(a["Statut Réponse"] || "Non répondu");
+      const isRep = isAvisAnswered(st);
+      const safePatientAttr = encodeURIComponent(JSON.stringify({ name: a["Identité Patient"], ipp: a["N° Dossier / IPP"] }));
+      const nextStatus = isRep ? "Non répondu" : "Répondu";
+      const meta = getAvisSortMeta(a);
+      const dateReponse = String(a["Date Réponse"] || "").trim();
+      const avisEv = {
+        row: a._row || 0,
+        patient: a["Identité Patient"] || "",
+        ipp: a["N° Dossier / IPP"] || "",
+        isoDate: meta.rawIso || "",
+        category: /biopsie/i.test(String(a["Motif de l'avis / Question clinique"] || "") + " " + String(a["Décision & Suite donnée"] || "")) ? "biopsie" : "acte",
+        title: a["Motif de l'avis / Question clinique"] || "Demande d'avis"
+      };
+      return `
+        <div class="event-card" style="border-left-color:${isRep ? "var(--success)" : "var(--danger)"};">
+          <div class="event-top" onclick="openPatientModal('${safePatientAttr}')">
+            <span class="event-time-badge">📅 ${a["Date Demande"] || "-"}</span>
+            <span class="pill ${isRep ? "pill-success" : "pill-danger"}">${st}</span>
+          </div>
+          <div class="event-patient" onclick="openPatientModal('${safePatientAttr}')">
+            <span>${a["Identité Patient"] || "-"}</span>
+            <span class="event-ipp">${a["N° Dossier / IPP"] && a["N° Dossier / IPP"] !== "Non spécifié" ? a["N° Dossier / IPP"] : ""}</span>
+          </div>
+          <div style="font-size:11.5px; color:var(--primary); font-weight:700;" onclick="openPatientModal('${safePatientAttr}')">
+            ${a["Médecin Demandeur (Service)"] || "-"}
+          </div>
+          <div class="ev-body-txt" style="font-size:12px; margin-top:4px; font-weight:500;" onclick="openPatientModal('${safePatientAttr}')">
+            ${a["Motif de l'avis / Question clinique"] || ""}
+          </div>
+          <div class="ev-rep-txt" style="font-size:11.5px; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
+            <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"}${dateReponse ? ` (${dateReponse})` : ""} :</strong> ${a["Décision & Suite donnée"] || "-"}
+          </div>
+          <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <button class="btn-icon" onclick="toggleAvisStatus(${a._row}, '${nextStatus}')">
+              ${isRep ? "↩️ Non répondu" : "✅ Marquer Répondu"}
+            </button>
+          </div>
+          ${renderBlocNotesHtml(avisEv, `avis-${a._row || 0}-`)}
+        </div>
+      `;
+    }
+
     function renderAvisTab() {
+      syncAvisSortButton();
       const container = document.getElementById("avis-list-container");
-      let list = appData.Demandes_avis || [];
-      if (avisFilter !== "all") {
-        list = list.filter(a => String(a["Statut Réponse"] || "") === avisFilter);
+      if (!container) return;
+      const q = ((document.getElementById("avis-search") || {}).value || "").toLowerCase().trim();
+      let list = sortAvisChronologically(appData.Demandes_avis || [], avisSortOrder);
+      if (avisFilter === "Répondu") {
+        list = list.filter(a => isAvisAnswered(a["Statut Réponse"]));
+      } else if (avisFilter === "Non répondu") {
+        list = list.filter(a => !isAvisAnswered(a["Statut Réponse"]));
+      }
+      if (q) {
+        list = list.filter(a => JSON.stringify(a).toLowerCase().includes(q));
       }
       if (list.length === 0) {
         container.innerHTML = `<div class="empty-state">Aucune demande d'avis dans ce filtre.</div>`;
         return;
       }
-      container.innerHTML = list.map(a => {
-        const st = String(a["Statut Réponse"] || "Non répondu");
-        const isRep = st === "Répondu";
-        const safePatientAttr = encodeURIComponent(JSON.stringify({ name: a["Identité Patient"], ipp: a["N° Dossier / IPP"] }));
-        const nextStatus = isRep ? "Non répondu" : "Répondu";
-        const avisEv = {
-          row: a._row || 0,
-          patient: a["Identité Patient"] || "",
-          ipp: a["N° Dossier / IPP"] || "",
-          isoDate: parseFrDateToIso(a["Date Demande"]) || "",
-          category: /biopsie/i.test(String(a["Motif de l'avis / Question clinique"] || "") + " " + String(a["Décision & Suite donnée"] || "")) ? "biopsie" : "acte",
-          title: a["Motif de l'avis / Question clinique"] || "Demande d'avis"
-        };
-        return `
-          <div class="event-card" style="border-left-color:${isRep ? "var(--success)" : "var(--danger)"};">
-            <div class="event-top" onclick="openPatientModal('${safePatientAttr}')">
-              <span class="event-time-badge">📅 ${a["Date Demande"] || "-"}</span>
-              <span class="pill ${isRep ? "pill-success" : "pill-danger"}">${st}</span>
-            </div>
-            <div class="event-patient" onclick="openPatientModal('${safePatientAttr}')">
-              <span>${a["Identité Patient"] || "-"}</span>
-              <span class="event-ipp">${a["N° Dossier / IPP"] && a["N° Dossier / IPP"] !== "Non spécifié" ? a["N° Dossier / IPP"] : ""}</span>
-            </div>
-            <div style="font-size:11.5px; color:var(--primary); font-weight:700;" onclick="openPatientModal('${safePatientAttr}')">
-              ${a["Médecin Demandeur (Service)"] || "-"}
-            </div>
-            <div class="ev-body-txt" style="font-size:12px; margin-top:4px; font-weight:500;" onclick="openPatientModal('${safePatientAttr}')">
-              ${a["Motif de l'avis / Question clinique"] || ""}
-            </div>
-            <div class="ev-rep-txt" style="font-size:11.5px; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
-              <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"} :</strong> ${a["Décision & Suite donnée"] || "-"}
-            </div>
-            <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-              <button class="btn-icon" onclick="toggleAvisStatus(${a._row}, '${nextStatus}')">
-                ${isRep ? "↩️ Non répondu" : "✅ Marquer Répondu"}
-              </button>
-            </div>
-            ${renderBlocNotesHtml(avisEv, `avis-${a._row || 0}-`)}
-          </div>
-        `;
-      }).join("");
+
+      const dayGroups = [];
+      let curDayIso = null;
+      let curBucket = null;
+      for (const a of list) {
+        const meta = getAvisSortMeta(a);
+        const dKey = meta.rawIso || "nodate";
+        if (dKey !== curDayIso) {
+          curDayIso = dKey;
+          curBucket = { iso: meta.rawIso, label: formatDayGroupLabel(meta.rawIso), items: [] };
+          dayGroups.push(curBucket);
+        }
+        curBucket.items.push(a);
+      }
+
+      container.innerHTML = dayGroups.map(g => `
+        <div class="week-group-header">
+          <span>📅 ${g.label}</span>
+          <span class="pill pill-cs">${g.items.length} avis</span>
+        </div>
+        ${g.items.map(a => renderAvisCardHtml(a)).join("")}
+      `).join("");
     }
 
     async function toggleAvisStatus(row, newStatus) {
