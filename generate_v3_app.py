@@ -685,6 +685,13 @@ html_template = """<!DOCTYPE html>
     .event-card.type-biopsie  { border-left-color: var(--biopsie); background: linear-gradient(90deg, rgba(124,58,237,0.04) 0%, #FFFFFF 35%); }
     .event-card.type-cs       { border-left-color: var(--cs); background: linear-gradient(90deg, rgba(37,99,235,0.04) 0%, #FFFFFF 35%); }
     .event-card.type-img      { border-left-color: var(--img); background: linear-gradient(90deg, rgba(13,148,136,0.04) 0%, #FFFFFF 35%); }
+    .event-card.type-img-compact {
+      border-left: 3px solid var(--img);
+      padding: 5px 9px;
+      margin-bottom: 5px;
+      border-radius: 9px;
+      background: linear-gradient(90deg, rgba(13,148,136,0.05) 0%, #FFFFFF 45%);
+    }
     .event-card.type-mail-rdv { border-left-color: var(--mail-rdv); background: linear-gradient(90deg, rgba(217,119,6,0.06) 0%, #FFFFFF 45%); }
     .event-card.type-marie-garde {
       border: 1px solid #F472B6;
@@ -1777,6 +1784,7 @@ html_template = """<!DOCTYPE html>
     html[data-theme="dark"] .event-card.type-biopsie  { background: linear-gradient(90deg, rgba(124,58,237,0.15) 0%, #131C31 40%); }
     html[data-theme="dark"] .event-card.type-cs       { background: linear-gradient(90deg, rgba(37,99,235,0.15) 0%, #131C31 40%); }
     html[data-theme="dark"] .event-card.type-img      { background: linear-gradient(90deg, rgba(13,148,136,0.15) 0%, #131C31 40%); }
+    html[data-theme="dark"] .event-card.type-img-compact { background: linear-gradient(90deg, rgba(13,148,136,0.14) 0%, #131C31 45%); }
     html[data-theme="dark"] .event-card.type-mail-rdv { background: linear-gradient(90deg, rgba(217,119,6,0.16) 0%, #131C31 45%); }
     html[data-theme="dark"] .event-card.type-marie-garde {
       border-color: #EC4899;
@@ -3341,6 +3349,11 @@ html_template = """<!DOCTYPE html>
         const dt = String(r["Date"] || "").trim();
         if (!pat || dt.includes("SEMAINE")) return false;
         return true;
+      }).map(r => {
+        if (!r["Type d'acte / Consultation"] && r["Intervention"]) {
+          return { ...r, "Type d'acte / Consultation": r["Intervention"] };
+        }
+        return r;
       });
     }
 
@@ -6638,6 +6651,26 @@ html_template = """<!DOCTYPE html>
       const isTlDoc = /\bTL\b/.test(shortDoc);
       const shortLieu = formatShortLieu(ev);
 
+      // Bilans diagnostiques & CS Anesthésie (catégorie "img") : affichage compact en petit de façon générale
+      if (ev.category === "img") {
+        return `
+          <div class="event-card type-img type-img-compact" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+              <div style="display:flex; align-items:center; gap:5px; min-width:0; flex:1;">
+                <span class="event-time-badge" style="font-size:10px; padding:1px 6px; flex-shrink:0;">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
+                ${shortDoc ? `<span class="doc-tag ${isTlDoc ? "is-tl" : ""}" style="font-size:9.5px; padding:0 5px; flex-shrink:0;">${shortDoc}</span>` : ""}
+                <span style="font-size:11.5px; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${ev.patient}</span>
+                ${ev.title ? `<span style="font-size:11px; color:var(--text-muted); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">— ${ev.title}</span>` : ""}
+              </div>
+              <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                ${ev.ipp && ev.ipp !== "Non spécifié" ? `<span class="event-ipp" style="font-size:9.5px; padding:0 5px;">${ev.ipp}</span>` : ""}
+                <span class="pill ${pillClass}" style="font-size:8.5px; padding:1px 6px;">${ev.badgeLabel}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       // Pour les consultations : éviter de répéter "Consultation spécialisée" ou "Téléconsultation de suivi" puisque le badge indique déjà CS ou Télécs
       const isGenericCsTitle = ev.category === "cs" && /^(télé)?consultation\s*(spécialisée|de suivi|pré-interventionnelle|\/\s*cs)?$/i.test(String(ev.title || "").trim());
       const mainLine = isGenericCsTitle ? (ev.remarques || ev.title) : ev.title;
@@ -8137,13 +8170,34 @@ html_template = """<!DOCTYPE html>
       const pillClass = st === "Planifié" ? "pill-success" : (st.includes("IRM") ? "pill-warn" : "pill-danger");
       const anticoag = detectAnticoagAlert(`${p["Coordonnées / DDN"]} ${p["Instructions & Remarques Cliniques"]}`);
       const safePatientAttr = encodeURIComponent(JSON.stringify({ name: p["Identité Patient"], ipp: p["N° Dossier / IPP"] }));
+      const intervTxt = String(p["Type d'Intervention / Suivi"] || "");
+      const isPureDiagMaster = /\b(scanner|tdm|irm|pelvimétrie)\b/i.test(intervTxt) && !/\b(biopsie|microbiopsie|radiofréquence|rf\b|cryo|cimento|vertébro|vissage|alcoolisation|ect\b|électrochimio|infiltration|arthrographie|ponction|test\s+anesth|consultation|téléconsultation|télé-cs|\bcs\b|suivi\s+post)\b/i.test(intervTxt);
+
+      if (isPureDiagMaster) {
+        const ippVal = p["N° Dossier / IPP"] && p["N° Dossier / IPP"] !== "Non spécifié" ? p["N° Dossier / IPP"] : "";
+        return `
+          <div class="event-card type-img type-img-compact" onclick="openPatientModal('${safePatientAttr}')">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+              <div style="display:flex; align-items:center; gap:5px; min-width:0; flex:1;">
+                <span style="font-size:11.5px; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p["Identité Patient"]}</span>
+                <span style="font-size:11px; color:var(--text-muted); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">— ${intervTxt}</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+                ${ippVal ? `<span class="event-ipp" style="font-size:9.5px; padding:0 5px;">${ippVal}</span>` : ""}
+                <span class="pill ${pillClass}" style="font-size:8.5px; padding:1px 6px;">${st}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       const patEv = {
         row: p._row || 0,
         patient: p["Identité Patient"] || "",
         ipp: p["N° Dossier / IPP"] || "",
         isoDate: "",
-        category: /biopsie/i.test(String(p["Type d'Intervention / Suivi"] || "")) ? "biopsie" : "acte",
-        title: p["Type d'Intervention / Suivi"] || ""
+        category: /biopsie/i.test(intervTxt) ? "biopsie" : "acte",
+        title: intervTxt
       };
       const patPrefix = `pat-${currentTab || "doss"}-${p._row || 0}-${normName(patEv.patient).slice(0, 6)}-`;
 
@@ -8154,7 +8208,7 @@ html_template = """<!DOCTYPE html>
             <span class="pill ${pillClass}">${st}</span>
           </div>
           <div class="event-patient"><span>${p["Identité Patient"]}</span></div>
-          <div class="event-title">${p["Type d'Intervention / Suivi"] || "-"}</div>
+          <div class="event-title">${intervTxt || "-"}</div>
           <div style="font-size:11.5px; color:var(--primary); font-weight:600; margin-top:3px;">
             📅 ${p["Échéance / Rendez-vous"] || "-"}
           </div>
