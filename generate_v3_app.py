@@ -2575,8 +2575,7 @@ html_template = """<!DOCTYPE html>
               }
               var patName = String(obj['Identité Patient'] || '').trim();
               var dateCell = String(obj['Date'] || '').trim();
-              if (!patName && dateCell.indexOf('SEMAINE') !== -1) continue;
-              if (!patName && name !== "Demandes d'avis") continue;
+              if (!patName) continue;
               out.push(obj);
             }
             return out;
@@ -2710,10 +2709,34 @@ html_template = """<!DOCTYPE html>
               }
             }
           }
-          sh.getRange(targetRow, 7).setValue('${safeStatus}');
-          var curRep = sh.getRange(targetRow, 8).getDisplayValue();
-          if (!curRep || curRep.indexOf('En attente') !== -1 || curRep === 'Non spécifié' || curRep === '-') {
-            sh.getRange(targetRow, 8).setValue(${safeRep});
+          if (targetRow >= 9 && targetRow <= lastRow) {
+            sh.getRange(targetRow, 7).setValue('${safeStatus}');
+            var curRep = sh.getRange(targetRow, 8).getDisplayValue();
+            if (!curRep || curRep.indexOf('En attente') !== -1 || curRep === 'Non spécifié' || curRep === '-') {
+              sh.getRange(targetRow, 8).setValue(${safeRep});
+            }
+          }
+          var pNormSync = ${safePatNorm};
+          if (pNormSync) {
+            var subTabs = ["Avis Interventionnel", "Avis Diagnostic"];
+            for (var stIdx = 0; stIdx < subTabs.length; stIdx++) {
+              var subSh = ss.getSheetByName(subTabs[stIdx]);
+              if (subSh && subSh.getLastRow() >= 9) {
+                var subPats = subSh.getRange(9, 4, subSh.getLastRow() - 8, 1).getDisplayValues();
+                for (var sRow = 0; sRow < subPats.length; sRow++) {
+                  var sp = String(subPats[sRow][0] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                  if (sp && (sp.indexOf(pNormSync) !== -1 || pNormSync.indexOf(sp) !== -1)) {
+                    var rNum = 9 + sRow;
+                    subSh.getRange(rNum, 7).setValue('${safeStatus}');
+                    var cRep = subSh.getRange(rNum, 8).getDisplayValue();
+                    if (!cRep || cRep.indexOf('En attente') !== -1 || cRep === 'Non spécifié' || cRep === '-') {
+                      subSh.getRange(rNum, 8).setValue(${safeRep});
+                    }
+                    break;
+                  }
+                }
+              }
+            }
           }
           return { updatedRow: targetRow, newStatus: '${safeStatus}' };
         ` };
@@ -3212,7 +3235,7 @@ html_template = """<!DOCTYPE html>
 
     function getAvisCategory(a) {
       if (!a) return "diagnostic";
-      const explicit = String(a["Catégorie Avis"] || a["Catégorie"] || a._category || "").trim().toLowerCase();
+      const explicit = String(a["Catégorie Avis"] || a["Catégorie d'avis"] || a["Catégorie"] || a._category || "").trim().toLowerCase();
       if (explicit.includes("interv")) return "interventionnel";
       if (explicit.includes("diag")) return "diagnostic";
       const mot = String(a["Motif de l'avis / Question clinique"] || "");
