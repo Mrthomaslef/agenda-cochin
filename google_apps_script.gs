@@ -1143,7 +1143,8 @@ function syncPart1ToArchives_(ss) {
   }
 
   var chronoTabs = [
-    { name: "Demandes d'avis", cols: 9, kind: "avis" },
+    { name: "Avis Interventionnel", cols: 9, kind: "avis" },
+    { name: "Avis Diagnostic", cols: 9, kind: "avis" },
     { name: "Consultations", cols: 9, kind: "cs" },
     { name: "Imagerie & Anesthésie", cols: 9, kind: "img" },
     { name: "Biopsies", cols: 10, kind: "bio" },

@@ -257,8 +257,8 @@
     .kpi-strip {
       pointer-events: auto;
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 5px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 4px;
       width: 100%;
       max-width: 500px;
       background: rgba(255, 255, 255, 0.96);
@@ -2127,26 +2127,46 @@
       <div id="activite-list-container"></div>
     </section>
 
-    <!-- TAB 3 : DEMANDES D'AVIS (SERVICE) -->
-    <section id="tab-avis" style="display:none;">
+    <!-- PAGE 3A : DEMANDES D'AVIS INTERVENTIONNEL -->
+    <section id="tab-avis-interv" style="display:none;">
       <div class="agenda-controls">
         <div class="segmented">
-          <button class="seg-btn active" id="cat-avis-all" onclick="setAvisCategoryFilter('all')">Tous</button>
-          <button class="seg-btn" id="cat-avis-interventionnel" onclick="setAvisCategoryFilter('interventionnel')">🔪 Avis Interventionnel</button>
-          <button class="seg-btn" id="cat-avis-diagnostic" onclick="setAvisCategoryFilter('diagnostic')">🩻 Avis Diagnostic</button>
+          <button class="seg-btn active" id="page-btn-interv-1" onclick="switchTab('avis-interv')">🔪 Avis Interventionnel</button>
+          <button class="seg-btn" id="page-btn-diag-1" onclick="switchTab('avis-diag')">🩻 Avis Diagnostic →</button>
         </div>
       </div>
       <div class="search-box">
         <span class="search-icon">⌕</span>
-        <input type="text" class="search-input" id="avis-search" placeholder="Rechercher patient, IPP, demandeur, motif..." oninput="renderAvisTab()" />
+        <input type="text" class="search-input" id="avis-interv-search" placeholder="Rechercher un avis interventionnel (patient, IPP, geste...)" oninput="renderAvisTab()" />
       </div>
       <div class="chips-row">
-        <button class="chip active" id="flt-avis-all" onclick="setAvisFilter('all')">Tous</button>
-        <button class="chip" id="flt-avis-non" onclick="setAvisFilter('Non répondu')">Non répondu</button>
-        <button class="chip" id="flt-avis-oui" onclick="setAvisFilter('Répondu')">Répondu</button>
-        <button class="chip" id="btn-avis-sort" onclick="toggleAvisSortOrder()" style="margin-left:auto;" title="Changer le sens de tri chronologique">🔽 Plus récents</button>
+        <button class="chip active" id="flt-avis-interv-all" onclick="setAvisIntervFilter('all')">Tous</button>
+        <button class="chip" id="flt-avis-interv-non" onclick="setAvisIntervFilter('Non répondu')">Non répondu</button>
+        <button class="chip" id="flt-avis-interv-oui" onclick="setAvisIntervFilter('Répondu')">Répondu</button>
+        <button class="chip" id="btn-avis-interv-sort" onclick="toggleAvisSortOrder()" style="margin-left:auto;" title="Changer le sens de tri chronologique">🔽 Plus récents</button>
       </div>
-      <div id="avis-list-container"></div>
+      <div id="avis-interv-list-container"></div>
+    </section>
+
+    <!-- PAGE 3B : DEMANDES D'AVIS DIAGNOSTIC -->
+    <section id="tab-avis-diag" style="display:none;">
+      <div class="agenda-controls">
+        <div class="segmented">
+          <button class="seg-btn" id="page-btn-interv-2" onclick="switchTab('avis-interv')">← 🔪 Avis Interventionnel</button>
+          <button class="seg-btn active" id="page-btn-diag-2" onclick="switchTab('avis-diag')">🩻 Avis Diagnostic</button>
+        </div>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="avis-diag-search" placeholder="Rechercher un avis diagnostic (patient, IPP, imagerie...)" oninput="renderAvisTab()" />
+      </div>
+      <div class="chips-row">
+        <button class="chip active" id="flt-avis-diag-all" onclick="setAvisDiagFilter('all')">Tous</button>
+        <button class="chip" id="flt-avis-diag-non" onclick="setAvisDiagFilter('Non répondu')">Non répondu</button>
+        <button class="chip" id="flt-avis-diag-oui" onclick="setAvisDiagFilter('Répondu')">Répondu</button>
+        <button class="chip" id="btn-avis-diag-sort" onclick="toggleAvisSortOrder()" style="margin-left:auto;" title="Changer le sens de tri chronologique">🔽 Plus récents</button>
+      </div>
+      <div id="avis-diag-list-container"></div>
     </section>
 
     <!-- TAB 4 : QUESTIONS & MAILS PERSO (LIVE.FR, AP-HP, WHATSAPP & IMESSAGE) -->
@@ -2234,9 +2254,13 @@
         <div class="kpi-val" style="color:var(--cs)" id="kpi-cs">-</div>
         <div class="kpi-lbl">Consult.</div>
       </div>
-      <div class="kpi-box" id="kpi-box-avis" onclick="switchTab('avis')">
-        <div class="kpi-val" style="color:var(--img)" id="kpi-avis">-</div>
-        <div class="kpi-lbl">Avis</div>
+      <div class="kpi-box" id="kpi-box-avis-interv" onclick="switchTab('avis-interv')">
+        <div class="kpi-val" style="color:var(--acte)" id="kpi-avis-interv">-</div>
+        <div class="kpi-lbl">Avis RI</div>
+      </div>
+      <div class="kpi-box" id="kpi-box-avis-diag" onclick="switchTab('avis-diag')">
+        <div class="kpi-val" style="color:var(--img)" id="kpi-avis-diag">-</div>
+        <div class="kpi-lbl">Avis Diag</div>
       </div>
       <div class="kpi-box" id="kpi-box-perso" onclick="openPersoView('Non répondu')">
         <div class="kpi-val" style="color:var(--perso-msg)" id="kpi-perso">-</div>
@@ -2549,9 +2573,24 @@
             pRdvs = getBig('cochin_personal_rdvs_v1');
             pQs = getBig('cochin_questions_perso_v1');
           } catch (err2) {}
+          var avInterv = readTab('Avis Interventionnel', 8).map(function(x) {
+            x["Catégorie d'avis"] = 'Avis Interventionnel';
+            x._sheet = 'Avis Interventionnel';
+            return x;
+          });
+          var avDiag = readTab('Avis Diagnostic', 8).map(function(x, idx) {
+            x["Catégorie d'avis"] = 'Avis Diagnostic';
+            x._sheet = 'Avis Diagnostic';
+            x._sheetRow = x._row;
+            x._row = 1000 + Number(x._row || idx);
+            return x;
+          });
+          var avAll = (avInterv.length || avDiag.length) ? avInterv.concat(avDiag) : readTab("Demandes d'avis", 8);
           return {
             Data: readTab('Data', 7),
-            Demandes_avis: readTab("Demandes d'avis", 8),
+            Avis_Interventionnel: avInterv,
+            Avis_Diagnostic: avDiag,
+            Demandes_avis: avAll,
             Consultations: readTab('Consultations', 8),
             Imagerie_Anesthesie: readTab('Imagerie & Anesthésie', 8),
             Biopsies: readTab('Biopsies', 8),
@@ -2621,53 +2660,29 @@
         const safeRep = JSON.stringify(params.repondant || "");
         const safePatNorm = JSON.stringify(params.pat_norm || "");
         return { [k]: `
-          var sh = ss.getSheetByName("Demandes d'avis");
-          if (!sh) return { error: 'Sheet not found' };
-          var targetRow = ${rowNum};
-          var lastRow = sh.getLastRow();
-          if (lastRow >= 9) {
-            var pNorm = ${safePatNorm};
-            if (pNorm) {
-              var patCheck = String(sh.getRange(targetRow, 4).getDisplayValue() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-              if (patCheck.indexOf(pNorm) === -1 && pNorm.indexOf(patCheck) === -1) {
-                var allPats = sh.getRange(9, 4, lastRow - 8, 1).getDisplayValues();
-                for (var i = 0; i < allPats.length; i++) {
-                  var rP = String(allPats[i][0] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-                  if (rP && (rP.indexOf(pNorm) !== -1 || pNorm.indexOf(rP) !== -1)) { targetRow = 9 + i; break; }
-                }
-              }
-            }
-          }
-          if (targetRow >= 9 && targetRow <= lastRow) {
-            sh.getRange(targetRow, 7).setValue('${safeStatus}');
-            var curRep = sh.getRange(targetRow, 8).getDisplayValue();
-            if (!curRep || curRep.indexOf('En attente') !== -1 || curRep === 'Non spécifié' || curRep === '-') {
-              sh.getRange(targetRow, 8).setValue(${safeRep});
-            }
-          }
           var pNormSync = ${safePatNorm};
-          if (pNormSync) {
-            var subTabs = ["Avis Interventionnel", "Avis Diagnostic"];
-            for (var stIdx = 0; stIdx < subTabs.length; stIdx++) {
-              var subSh = ss.getSheetByName(subTabs[stIdx]);
-              if (subSh && subSh.getLastRow() >= 9) {
-                var subPats = subSh.getRange(9, 4, subSh.getLastRow() - 8, 1).getDisplayValues();
-                for (var sRow = 0; sRow < subPats.length; sRow++) {
-                  var sp = String(subPats[sRow][0] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-                  if (sp && (sp.indexOf(pNormSync) !== -1 || pNormSync.indexOf(sp) !== -1)) {
-                    var rNum = 9 + sRow;
-                    subSh.getRange(rNum, 7).setValue('${safeStatus}');
-                    var cRep = subSh.getRange(rNum, 8).getDisplayValue();
-                    if (!cRep || cRep.indexOf('En attente') !== -1 || cRep === 'Non spécifié' || cRep === '-') {
-                      subSh.getRange(rNum, 8).setValue(${safeRep});
-                    }
-                    break;
+          var updated = [];
+          var subTabs = ["Avis Interventionnel", "Avis Diagnostic", "Demandes d'avis"];
+          for (var stIdx = 0; stIdx < subTabs.length; stIdx++) {
+            var subSh = ss.getSheetByName(subTabs[stIdx]);
+            if (subSh && subSh.getLastRow() >= 9) {
+              var subPats = subSh.getRange(9, 4, subSh.getLastRow() - 8, 1).getDisplayValues();
+              for (var sRow = 0; sRow < subPats.length; sRow++) {
+                var sp = String(subPats[sRow][0] || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (pNormSync && sp && (sp.indexOf(pNormSync) !== -1 || pNormSync.indexOf(sp) !== -1)) {
+                  var rNum = 9 + sRow;
+                  subSh.getRange(rNum, 7).setValue('${safeStatus}');
+                  var cRep = subSh.getRange(rNum, 8).getDisplayValue();
+                  if (!cRep || cRep.indexOf('En attente') !== -1 || cRep === 'Non spécifié' || cRep === '-') {
+                    subSh.getRange(rNum, 8).setValue(${safeRep});
                   }
+                  updated.push(subTabs[stIdx] + ':' + rNum);
+                  break;
                 }
               }
             }
           }
-          return { updatedRow: targetRow, newStatus: '${safeStatus}' };
+          return { updated: updated, newStatus: '${safeStatus}' };
         ` };
       }
       if (action === "set_perso_status" && params && params.patch) {
@@ -3322,13 +3337,14 @@
         document.getElementById("kpi-cs").textContent = appData.Consultations.length;
       }
 
-      const nonRepAvis = appData.Demandes_avis.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
-      document.getElementById("kpi-avis").textContent = nonRepAvis > 0 ? `${nonRepAvis} à rép.` : appData.Demandes_avis.length;
-      const bAvis = document.getElementById("badge-avis-non");
-      if (bAvis) {
-        bAvis.style.display = nonRepAvis > 0 ? "inline-block" : "none";
-        bAvis.textContent = nonRepAvis;
-      }
+      const intervAvis = (appData.Demandes_avis || []).filter(a => getAvisCategory(a) === "interventionnel");
+      const diagAvis = (appData.Demandes_avis || []).filter(a => getAvisCategory(a) === "diagnostic");
+      const nonRepInterv = intervAvis.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const nonRepDiag = diagAvis.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const elKpiInterv = document.getElementById("kpi-avis-interv");
+      if (elKpiInterv) elKpiInterv.textContent = nonRepInterv > 0 ? `${nonRepInterv} à rép.` : intervAvis.length;
+      const elKpiDiag = document.getElementById("kpi-avis-diag");
+      if (elKpiDiag) elKpiDiag.textContent = nonRepDiag > 0 ? `${nonRepDiag} à rép.` : diagAvis.length;
 
       const nonRepPerso = appData.Questions_perso.filter(q => String(q["Statut"] || "").toLowerCase().includes("non")).length;
       document.getElementById("kpi-perso").textContent = nonRepPerso > 0 ? `${nonRepPerso} à rép.` : appData.Questions_perso.length;
@@ -7475,45 +7491,52 @@
       `).join("");
     }
 
-    // DEMANDES D'AVIS (SERVICE)
+    // DEMANDES D'AVIS : 2 PAGES SÉPARÉES (AVIS INTERVENTIONNEL & AVIS DIAGNOSTIC)
+    let avisIntervFilter = "all";
+    let avisDiagFilter = "all";
+
     function syncAvisSortButton() {
-      const btn = document.getElementById("btn-avis-sort");
-      if (!btn) return;
-      btn.textContent = avisSortOrder === "asc" ? "🔼 Plus anciens" : "🔽 Plus récents";
-      btn.title = avisSortOrder === "asc"
-        ? "Ordre chronologique : du plus ancien au plus récent (cliquer pour inverser)"
-        : "Ordre chronologique : du plus récent au plus ancien (cliquer pour inverser)";
+      for (const id of ["btn-avis-interv-sort", "btn-avis-diag-sort"]) {
+        const btn = document.getElementById(id);
+        if (!btn) continue;
+        btn.textContent = avisSortOrder === "asc" ? "🔼 Plus anciens" : "🔽 Plus récents";
+        btn.title = avisSortOrder === "asc"
+          ? "Ordre chronologique : du plus ancien au plus récent (cliquer pour inverser)"
+          : "Ordre chronologique : du plus récent au plus ancien (cliquer pour inverser)";
+      }
     }
 
     function syncAvisCategoryButtons() {
       const allList = appData.Demandes_avis || [];
-      let nInterv = 0;
-      let nDiag = 0;
-      for (const a of allList) {
-        if (getAvisCategory(a) === "interventionnel") nInterv++;
-        else nDiag++;
-      }
-      const bAll = document.getElementById("cat-avis-all");
-      const bInt = document.getElementById("cat-avis-interventionnel");
-      const bDia = document.getElementById("cat-avis-diagnostic");
-      if (bAll) {
-        bAll.classList.toggle("active", avisCategoryFilter === "all");
-        bAll.textContent = allList.length ? `Tous (${allList.length})` : "Tous";
-      }
-      if (bInt) {
-        bInt.classList.toggle("active", avisCategoryFilter === "interventionnel");
-        bInt.textContent = allList.length ? `🔪 Avis Interventionnel (${nInterv})` : "🔪 Avis Interventionnel";
-      }
-      if (bDia) {
-        bDia.classList.toggle("active", avisCategoryFilter === "diagnostic");
-        bDia.textContent = allList.length ? `🩻 Avis Diagnostic (${nDiag})` : "🩻 Avis Diagnostic";
-      }
-    }
+      const intervList = allList.filter(a => getAvisCategory(a) === "interventionnel");
+      const diagList = allList.filter(a => getAvisCategory(a) === "diagnostic");
 
-    function setAvisCategoryFilter(cat) {
-      avisCategoryFilter = cat;
-      syncAvisCategoryButtons();
-      renderAvisTab();
+      const bInt1 = document.getElementById("page-btn-interv-1");
+      const bDia1 = document.getElementById("page-btn-diag-1");
+      const bInt2 = document.getElementById("page-btn-interv-2");
+      const bDia2 = document.getElementById("page-btn-diag-2");
+      if (bInt1) bInt1.textContent = `🔪 Avis Interventionnel (${intervList.length})`;
+      if (bDia1) bDia1.textContent = `🩻 Avis Diagnostic (${diagList.length}) →`;
+      if (bInt2) bInt2.textContent = `← 🔪 Avis Interventionnel (${intervList.length})`;
+      if (bDia2) bDia2.textContent = `🩻 Avis Diagnostic (${diagList.length})`;
+
+      const intNon = intervList.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const intOui = intervList.length - intNon;
+      const fIntAll = document.getElementById("flt-avis-interv-all");
+      const fIntNon = document.getElementById("flt-avis-interv-non");
+      const fIntOui = document.getElementById("flt-avis-interv-oui");
+      if (fIntAll) fIntAll.textContent = `Tous (${intervList.length})`;
+      if (fIntNon) fIntNon.textContent = `Non répondu (${intNon})`;
+      if (fIntOui) fIntOui.textContent = `Répondu (${intOui})`;
+
+      const diaNon = diagList.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const diaOui = diagList.length - diaNon;
+      const fDiaAll = document.getElementById("flt-avis-diag-all");
+      const fDiaNon = document.getElementById("flt-avis-diag-non");
+      const fDiaOui = document.getElementById("flt-avis-diag-oui");
+      if (fDiaAll) fDiaAll.textContent = `Tous (${diagList.length})`;
+      if (fDiaNon) fDiaNon.textContent = `Non répondu (${diaNon})`;
+      if (fDiaOui) fDiaOui.textContent = `Répondu (${diaOui})`;
     }
 
     function toggleAvisSortOrder() {
@@ -7526,11 +7549,25 @@
       renderAvisTab();
     }
 
-    function setAvisFilter(flt) {
-      avisFilter = flt;
-      document.getElementById("flt-avis-all").classList.toggle("active", flt === "all");
-      document.getElementById("flt-avis-non").classList.toggle("active", flt === "Non répondu");
-      document.getElementById("flt-avis-oui").classList.toggle("active", flt === "Répondu");
+    function setAvisIntervFilter(flt) {
+      avisIntervFilter = flt;
+      const fAll = document.getElementById("flt-avis-interv-all");
+      const fNon = document.getElementById("flt-avis-interv-non");
+      const fOui = document.getElementById("flt-avis-interv-oui");
+      if (fAll) fAll.classList.toggle("active", flt === "all");
+      if (fNon) fNon.classList.toggle("active", flt === "Non répondu");
+      if (fOui) fOui.classList.toggle("active", flt === "Répondu");
+      renderAvisTab();
+    }
+
+    function setAvisDiagFilter(flt) {
+      avisDiagFilter = flt;
+      const fAll = document.getElementById("flt-avis-diag-all");
+      const fNon = document.getElementById("flt-avis-diag-non");
+      const fOui = document.getElementById("flt-avis-diag-oui");
+      if (fAll) fAll.classList.toggle("active", flt === "all");
+      if (fNon) fNon.classList.toggle("active", flt === "Non répondu");
+      if (fOui) fOui.classList.toggle("active", flt === "Répondu");
       renderAvisTab();
     }
 
@@ -7574,6 +7611,7 @@
         }
       } catch (e) {}
 
+      updateKpis();
       renderAvisTab();
     }
 
@@ -7627,26 +7665,22 @@
       `;
     }
 
-    function renderAvisTab() {
-      syncAvisSortButton();
-      syncAvisCategoryButtons();
-      const container = document.getElementById("avis-list-container");
+    function renderSingleAvisPage(catKey, containerId, searchId, statusFilter) {
+      const container = document.getElementById(containerId);
       if (!container) return;
-      const q = ((document.getElementById("avis-search") || {}).value || "").toLowerCase().trim();
-      let list = sortAvisChronologically(appData.Demandes_avis || [], avisSortOrder);
-      if (avisCategoryFilter !== "all") {
-        list = list.filter(a => getAvisCategory(a) === avisCategoryFilter);
-      }
-      if (avisFilter === "Répondu") {
+      const q = ((document.getElementById(searchId) || {}).value || "").toLowerCase().trim();
+      let list = sortAvisChronologically(appData.Demandes_avis || [], avisSortOrder)
+        .filter(a => getAvisCategory(a) === catKey);
+      if (statusFilter === "Répondu") {
         list = list.filter(a => isAvisAnswered(a["Statut Réponse"]));
-      } else if (avisFilter === "Non répondu") {
+      } else if (statusFilter === "Non répondu") {
         list = list.filter(a => !isAvisAnswered(a["Statut Réponse"]));
       }
       if (q) {
         list = list.filter(a => JSON.stringify(a).toLowerCase().includes(q));
       }
       if (list.length === 0) {
-        container.innerHTML = `<div class="empty-state">Aucune demande d'avis dans ce filtre.</div>`;
+        container.innerHTML = `<div class="empty-state">Aucune demande d'avis ${catKey === "interventionnel" ? "interventionnel" : "diagnostic"} dans ce filtre.</div>`;
         return;
       }
 
@@ -7671,6 +7705,13 @@
         </div>
         ${g.items.map(a => renderAvisCardHtml(a)).join("")}
       `).join("");
+    }
+
+    function renderAvisTab() {
+      syncAvisSortButton();
+      syncAvisCategoryButtons();
+      renderSingleAvisPage("interventionnel", "avis-interv-list-container", "avis-interv-search", avisIntervFilter);
+      renderSingleAvisPage("diagnostic", "avis-diag-list-container", "avis-diag-search", avisDiagFilter);
     }
 
     async function toggleAvisStatus(row, newStatus) {
@@ -8176,12 +8217,14 @@
       const kActes = document.getElementById("kpi-box-actes");
       const kBio = document.getElementById("kpi-box-biopsies");
       const kCs = document.getElementById("kpi-box-cs");
-      const kAvis = document.getElementById("kpi-box-avis");
+      const kAvisInterv = document.getElementById("kpi-box-avis-interv");
+      const kAvisDiag = document.getElementById("kpi-box-avis-diag");
       const kPerso = document.getElementById("kpi-box-perso");
       if (kActes) kActes.classList.toggle("active", currentTab === "activite" && activiteMode === "acte");
       if (kBio) kBio.classList.toggle("active", currentTab === "activite" && activiteMode === "biopsie");
       if (kCs) kCs.classList.toggle("active", currentTab === "activite" && activiteMode === "cs");
-      if (kAvis) kAvis.classList.toggle("active", currentTab === "avis");
+      if (kAvisInterv) kAvisInterv.classList.toggle("active", currentTab === "avis-interv");
+      if (kAvisDiag) kAvisDiag.classList.toggle("active", currentTab === "avis-diag");
       if (kPerso) kPerso.classList.toggle("active", currentTab === "perso");
     }
 
@@ -8536,8 +8579,9 @@
     }
 
     function switchTab(tab) {
+      if (tab === "avis") tab = "avis-interv";
       currentTab = tab;
-      ["agenda", "activite", "avis", "perso", "suivi", "patients", "annuaire"].forEach(t => {
+      ["agenda", "activite", "avis-interv", "avis-diag", "perso", "suivi", "patients", "annuaire"].forEach(t => {
         const sec = document.getElementById("tab-" + t);
         const nav = document.getElementById("nav-" + t);
         if (sec) sec.style.display = t === tab ? "block" : "none";
@@ -8552,7 +8596,7 @@
       updateBottomKpiActiveState();
       if (currentTab === "agenda") renderCalendar();
       else if (currentTab === "activite") renderActiviteTab();
-      else if (currentTab === "avis") renderAvisTab();
+      else if (currentTab === "avis-interv" || currentTab === "avis-diag") renderAvisTab();
       else if (currentTab === "perso") renderPersoTab();
       else if (currentTab === "suivi") renderSuiviTab();
       else if (currentTab === "patients") renderPatientsTab();
