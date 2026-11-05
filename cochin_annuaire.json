@@ -498,6 +498,16 @@
     "building": "Pavillon Copernic"
   },
   {
+    "id": "tel-onco-dig",
+    "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
+    "name": "Oncologie Digestive & Hépato-Gastro-Entérologie (Dr Anna PELLAT)",
+    "role": "Oncologie Digestive Cochin — DECT Dr A. Pellat : 15046",
+    "poste": "DECT 15046",
+    "phone": "01 58 41 50 46",
+    "fax": "",
+    "building": "Hôpital Cochin"
+  },
+  {
     "id": "tel-hemostase",
     "category": "Laboratoires, Pharmacie & Administration (DAM)",
     "name": "Consultation & Laboratoire d'Hémostase / Hématologie Biologique",
