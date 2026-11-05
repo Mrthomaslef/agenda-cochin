@@ -37,6 +37,7 @@ BASELINE_ENTRIES = [
         "poste": "12163 / DECT 12404",
         "phone": "01 58 41 21 63",
         "fax": "",
+        "email": "secretariat.radiob.cch@aphp.fr",
         "building": "Bâtiment Ollier / Achard",
         "pinnedDefault": True,
     },
@@ -48,6 +49,7 @@ BASELINE_ENTRIES = [
         "poste": "14612 / 12476",
         "phone": "01 58 41 46 12",
         "fax": "01 58 41 24 55",
+        "email": "secretariat.radiob.cch@aphp.fr",
         "building": "Bâtiment Ollier",
         "pinnedDefault": True,
     },
@@ -59,6 +61,7 @@ BASELINE_ENTRIES = [
         "poste": "12483 / 13788",
         "phone": "01 58 41 24 83",
         "fax": "01 58 41 24 55",
+        "email": "anne-marie.fortin@aphp.fr",
         "building": "Albarran / Ollier",
         "pinnedDefault": True,
     },
@@ -70,6 +73,7 @@ BASELINE_ENTRIES = [
         "poste": "12360 / 12350 / 19135",
         "phone": "01 58 41 23 60",
         "fax": "01 58 41 24 49",
+        "email": "rdv.radiob.cch@aphp.fr / secretariat.radiob.cch@aphp.fr",
         "building": "Bâtiment Ollier (1er sous-sol)",
         "pinnedDefault": True,
     },
@@ -81,6 +85,7 @@ BASELINE_ENTRIES = [
         "poste": "12684",
         "phone": "01 58 41 26 84",
         "fax": "01 58 41 24 55",
+        "email": "gysleve.mouyoungui@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -91,6 +96,7 @@ BASELINE_ENTRIES = [
         "poste": "11788",
         "phone": "01 58 41 17 88",
         "fax": "01 58 41 24 55",
+        "email": "mariana.gameirojorge@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -101,6 +107,7 @@ BASELINE_ENTRIES = [
         "poste": "12502",
         "phone": "01 58 41 25 02",
         "fax": "01 58 41 21 51",
+        "email": "ania.dworak@aphp.fr / secretariat.drape.cch@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -111,6 +118,7 @@ BASELINE_ENTRIES = [
         "poste": "12481 / 12507",
         "phone": "01 58 41 24 81",
         "fax": "01 58 41 21 51",
+        "email": "sandrine.camblong@aphp.fr / christelle.pouget@aphp.fr",
         "building": "Bâtiment Ollier / Albarran",
     },
     {
@@ -121,6 +129,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12484",
         "phone": "01 58 41 24 84",
         "fax": "",
+        "email": "isabelle.menage-marache@aphp.fr",
         "building": "Bâtiment Ollier (1er sous-sol)",
     },
     {
@@ -131,6 +140,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 13424 / 12284 / 14752",
         "phone": "01 58 41 34 24",
         "fax": "",
+        "email": "catherine.fischer@aphp.fr / veronique.nitsche@aphp.fr / karine.pretzner@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -141,6 +151,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12197",
         "phone": "01 58 41 21 97",
         "fax": "",
+        "email": "laila.sellami@aphp.fr",
         "building": "Imagerie Cochin",
         "pinnedDefault": True,
     },
@@ -152,6 +163,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12183 / 12984",
         "phone": "01 58 41 21 83",
         "fax": "",
+        "email": "olivier.peaudecerf@aphp.fr / david.vannifterik@aphp.fr",
         "building": "Radiologie B",
     },
     {
@@ -223,6 +235,7 @@ BASELINE_ENTRIES = [
         "poste": "14254 / 12463 / 19146",
         "phone": "01 58 41 42 54",
         "fax": "01 58 41 28 74",
+        "email": "rdv.radioa.cch@aphp.fr / radio.vasculaire.cch@aphp.fr",
         "building": "Radiologie A",
     },
     # --- RADIOLOGIE B : ÉQUIPE MÉDICALE (CHEFS & SENIORS) ---
@@ -245,6 +258,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12487 / Secr. 12483 & 12481",
         "phone": "01 58 41 24 83",
         "fax": "01 58 41 24 55",
+        "email": "antoine.feydy@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -255,6 +269,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12494 / Secr. 12502 & 12480",
         "phone": "01 58 41 25 02",
         "fax": "01 58 41 21 51",
+        "email": "jean-luc.drape@aphp.fr / secretariat.drape.cch@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -265,6 +280,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12489 / Salle RI 12163",
         "phone": "01 58 41 24 89",
         "fax": "",
+        "email": "thomas-jean.lefevre@aphp.fr",
         "building": "Albarran / Ollier / Achard",
         "pinnedDefault": True,
     },
@@ -276,6 +292,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12489",
         "phone": "01 58 41 24 89",
         "fax": "",
+        "email": "marie.talabard@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -286,6 +303,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12504 / 12404",
         "phone": "01 58 41 25 04",
         "fax": "",
+        "email": "macil.hamadouche@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -296,6 +314,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12503 / 12404 / 12488",
         "phone": "01 58 41 25 03",
         "fax": "",
+        "email": "hippolyte.monnier@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -306,6 +325,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12488",
         "phone": "01 58 41 24 88",
         "fax": "",
+        "email": "stefano.lusi@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -316,6 +336,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12404 / 12488",
         "phone": "01 58 41 24 04",
         "fax": "",
+        "email": "yazid.allel@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -326,6 +347,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 11399 / Secr. 12483",
         "phone": "01 58 41 13 99",
         "fax": "",
+        "email": "amandine.laporte@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -336,6 +358,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12480 / Secr. 12483",
         "phone": "01 58 41 24 80",
         "fax": "",
+        "email": "fadila.mihoubibouvier@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -346,6 +369,7 @@ BASELINE_ENTRIES = [
         "poste": "12483",
         "phone": "01 58 41 24 83",
         "fax": "",
+        "email": "secretariat.radiob.cch@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -356,6 +380,7 @@ BASELINE_ENTRIES = [
         "poste": "12483",
         "phone": "01 58 41 24 83",
         "fax": "",
+        "email": "secretariat.radiob.cch@aphp.fr",
         "building": "Albarran / Ollier",
     },
     {
@@ -366,6 +391,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 18987 / 11339",
         "phone": "01 58 41 89 87",
         "fax": "",
+        "email": "henri.guerini@aphp.fr / fabrice.thevenin@aphp.fr",
         "building": "Bâtiment Ollier / Albarran",
     },
     {
@@ -376,6 +402,7 @@ BASELINE_ENTRIES = [
         "poste": "12488 / 13101",
         "phone": "01 58 41 24 88",
         "fax": "",
+        "email": "robert.burns@aphp.fr / louis.idier@aphp.fr",
         "building": "Hôpital Cochin",
     },
     {
@@ -386,6 +413,7 @@ BASELINE_ENTRIES = [
         "poste": "12490 / 14612",
         "phone": "01 58 41 24 90",
         "fax": "",
+        "email": "anthony.dohan@aphp.fr / maxime.barat@aphp.fr / marie.masson@aphp.fr",
         "building": "Hôpital Cochin",
     },
     # --- SERVICES PARTENAIRES (ORTHO, RHUMATO, ANESTH, ANAPATH, URGENCES) ---
@@ -397,6 +425,7 @@ BASELINE_ENTRIES = [
         "poste": "13037 / 18764 / DECT 14052",
         "phone": "01 58 41 30 37",
         "fax": "01 58 41 30 60",
+        "email": "secretariat.biau.cch@aphp.fr / david.biau@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -407,6 +436,7 @@ BASELINE_ENTRIES = [
         "poste": "13130 / 13082 / 13107",
         "phone": "01 58 41 31 30",
         "fax": "01 58 41 30 60",
+        "email": "khaoula.rahmani@aphp.fr / adjopatricia.bitty@aphp.fr / laurence.guedj@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -417,6 +447,7 @@ BASELINE_ENTRIES = [
         "poste": "13077 / 13041 / 13104",
         "phone": "01 58 41 30 77",
         "fax": "",
+        "email": "peter.maalouf@aphp.fr / alexandra.villard2@aphp.fr",
         "building": "Bâtiment Ollier",
     },
     {
@@ -427,6 +458,7 @@ BASELINE_ENTRIES = [
         "poste": "12606 / 12619",
         "phone": "01 58 41 26 06",
         "fax": "01 58 41 40 97",
+        "email": "yannick.allanore@aphp.fr",
         "building": "Bâtiment Achard / Hardy",
     },
     {
@@ -447,6 +479,7 @@ BASELINE_ENTRIES = [
         "poste": "14022 / 13691",
         "phone": "01 58 41 40 22",
         "fax": "",
+        "email": "sandra.azzopardi@aphp.fr",
         "building": "Bâtiment Port-Royal",
     },
     {
@@ -457,6 +490,7 @@ BASELINE_ENTRIES = [
         "poste": "12412",
         "phone": "01 58 41 24 12",
         "fax": "",
+        "email": "elisabeth.vaugenot@aphp.fr",
         "building": "Bâtiment Achard",
     },
     {
@@ -467,6 +501,7 @@ BASELINE_ENTRIES = [
         "poste": "13542 / 14719",
         "phone": "01 58 41 35 42",
         "fax": "",
+        "email": "leslie.chanat@aphp.fr / frederique.larousserie@aphp.fr",
         "building": "Hôpital Cochin",
     },
     {
@@ -477,6 +512,7 @@ BASELINE_ENTRIES = [
         "poste": "13040 / 12704",
         "phone": "01 58 41 30 40",
         "fax": "",
+        "email": "corinne.taliercio@aphp.fr / serge.perrot@aphp.fr",
         "building": "Hôpital Cochin",
     },
     {
@@ -487,6 +523,7 @@ BASELINE_ENTRIES = [
         "poste": "14091",
         "phone": "01 58 41 40 91",
         "fax": "",
+        "email": "francois.lecomte@aphp.fr",
         "building": "Urgences / HUCD Cochin",
     },
     {
@@ -537,6 +574,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 15046",
         "phone": "01 58 41 50 46",
         "fax": "",
+        "email": "anna.pellat@aphp.fr",
         "building": "Hôpital Cochin",
     },
     {
@@ -547,6 +585,7 @@ BASELINE_ENTRIES = [
         "poste": "12945",
         "phone": "01 58 41 29 45",
         "fax": "01 58 41 25 38",
+        "email": "reeducation.hardyb1.cch@aphp.fr / christelle.nguyen2@aphp.fr",
         "building": "Bâtiment Hardy (B1 / 1er sous-sol)",
     },
     # --- RCP & STAFFS MULTIDISCIPLINAIRES COCHIN ---
@@ -558,6 +597,7 @@ BASELINE_ENTRIES = [
         "poste": "13037 / DECT 12489",
         "phone": "01 58 41 30 37",
         "fax": "01 58 41 30 60",
+        "email": "secretariat.biau.cch@aphp.fr / thomas-jean.lefevre@aphp.fr / jacques.medioni@aphp.fr",
         "building": "Visio Teams / Bureau Radio B (Albarran -1)",
         "pinnedDefault": True,
     },
@@ -569,6 +609,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 12503 / 13037",
         "phone": "01 58 41 25 03",
         "fax": "01 58 41 30 60",
+        "email": "secretariat.biau.cch@aphp.fr / hippolyte.monnier@aphp.fr / david.biau@aphp.fr",
         "building": "Bâtiment Ollier / Albarran",
         "pinnedDefault": True,
     },
@@ -580,6 +621,7 @@ BASELINE_ENTRIES = [
         "poste": "13037 / 11454 / DECT 11399",
         "phone": "01 58 41 30 37",
         "fax": "01 58 41 30 60",
+        "email": "violaine.solovieff@aphp.fr / secretariat.biau.cch@aphp.fr / amandine.laporte@aphp.fr",
         "building": "Salle de Staff Ollier (3e étage)",
         "pinnedDefault": True,
     },
@@ -591,6 +633,7 @@ BASELINE_ENTRIES = [
         "poste": "12945 / 12606 / 12483",
         "phone": "01 58 41 29 45",
         "fax": "01 58 41 25 38",
+        "email": "reeducation.hardyb1.cch@aphp.fr / christelle.nguyen2@aphp.fr / anne-marie.fortin@aphp.fr",
         "building": "Salle de Staff MPR — Bâtiment Hardy (1er sous-sol)",
     },
     {
@@ -601,6 +644,7 @@ BASELINE_ENTRIES = [
         "poste": "12606 / 12619 / 12483",
         "phone": "01 58 41 26 06",
         "fax": "01 58 41 40 97",
+        "email": "yannick.allanore@aphp.fr / antoine.feydy@aphp.fr",
         "building": "Salle de Staff — Bâtiment Hardy A (RDC)",
     },
     {
@@ -611,6 +655,7 @@ BASELINE_ENTRIES = [
         "poste": "DECT 18987 / 12945",
         "phone": "01 58 41 89 87",
         "fax": "",
+        "email": "henri.guerini@aphp.fr / reeducation.hardyb1.cch@aphp.fr",
         "building": "Salle de Staff MPR — Bâtiment Hardy (1er sous-sol)",
     },
     {
@@ -621,6 +666,7 @@ BASELINE_ENTRIES = [
         "poste": "12508 / DECT 12480 / 12483",
         "phone": "01 58 41 25 08",
         "fax": "01 58 41 24 55",
+        "email": "fadila.mihoubibouvier@aphp.fr / anne-marie.fortin@aphp.fr",
         "building": "Salle de Staff Radio B — Pavillon Albarran (1er sous-sol)",
     },
     {
@@ -631,6 +677,7 @@ BASELINE_ENTRIES = [
         "poste": "12508 / 12481 / 13542",
         "phone": "01 58 41 24 81",
         "fax": "01 58 41 21 51",
+        "email": "enseignement.radiob.cch@aphp.fr / sandrine.camblong@aphp.fr / frederique.larousserie@aphp.fr",
         "building": "Salle de Staff Albarran -1 / Amphithéâtre Luton",
     },
     # --- LABORATOIRES, PHARMACIE & ADMINISTRATION (DAM) ---
@@ -662,6 +709,7 @@ BASELINE_ENTRIES = [
         "poste": "14275 / 12314 / 12982",
         "phone": "01 58 41 42 75",
         "fax": "01 58 41 18 84",
+        "email": "marie-laure.brandely-piat@aphp.fr / hugo.palisson@aphp.fr",
         "building": "Service Pharmacie Cochin",
     },
     {
@@ -672,6 +720,7 @@ BASELINE_ENTRIES = [
         "poste": "12632",
         "phone": "01 58 41 26 32",
         "fax": "",
+        "email": "lea.meyer@aphp.fr",
         "building": "Hôpital Cochin",
     },
     {
@@ -692,6 +741,7 @@ BASELINE_ENTRIES = [
         "poste": "12295 / 11014 / 11071",
         "phone": "01 58 41 22 95",
         "fax": "",
+        "email": "aminata.ndiaye3@aphp.fr / magalie.lambert@aphp.fr / isabelle.parrain@aphp.fr / cindy.besacier@aphp.fr",
         "building": "Port-Royal — Pavillon de Chasse",
     },
     {
@@ -722,6 +772,7 @@ BASELINE_ENTRIES = [
         "poste": "3233 / Dossier 7485615",
         "phone": "3233",
         "fax": "",
+        "email": "contact@macsf.fr / societaire@macsf.fr",
         "building": "275 rue du Faubourg Saint-Antoine, 75012 Paris",
     },
 ]
@@ -880,6 +931,7 @@ def sync_annuaire(fetch_cloud: bool = False) -> tuple[list, list]:
             if m5:
                 phone_val = poste_to_cochin_phone(m5.group(1))
 
+        email_val = str(item.get("email") or "").strip()
         normalized = {
             "id": iid,
             "category": sanitize_public_str(item.get("category") or "Radiologie B — Secrétariats & Consoles"),
@@ -888,6 +940,7 @@ def sync_annuaire(fetch_cloud: bool = False) -> tuple[list, list]:
             "poste": poste_val,
             "phone": phone_val,
             "fax": sanitize_public_str(item.get("fax") or ""),
+            "email": email_val,
             "building": sanitize_public_str(item.get("building") or "Hôpital Cochin"),
         }
         if item.get("pinnedDefault"):
@@ -903,8 +956,7 @@ def sync_annuaire(fetch_cloud: bool = False) -> tuple[list, list]:
         elif overwrite_existing:
             prev = entries_by_id[iid]
             updated_fields = []
-            prev.pop("email", None)
-            for k in ("category", "name", "role", "poste", "phone", "fax", "building"):
+            for k in ("category", "name", "role", "poste", "phone", "fax", "email", "building"):
                 new_v = normalized.get(k, "")
                 old_v = prev.get(k, "")
                 if new_v and new_v != old_v:

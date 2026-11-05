@@ -14,6 +14,8 @@ def _clean_annuaire_entry(item):
     out = {}
     for k, v in item.items():
         if k == "email":
+            if isinstance(v, str) and v.strip():
+                out["email"] = v.strip().replace("@", "[at]")
             continue
         if isinstance(v, str):
             v = re.sub(r"\s*\([A-Za-z0-9._%+-]+@[A-Za-z0-9-]+[.][A-Za-z.]{2,}\)", "", v)
@@ -8373,6 +8375,7 @@ html_template = """<!DOCTYPE html>
           phone: derived.phone || (byId.get(id) && byId.get(id).phone) || "",
           poste: derived.poste || (byId.get(id) && (byId.get(id).poste || byId.get(id).short)) || "",
           short: derived.poste || (byId.get(id) && (byId.get(id).poste || byId.get(id).short)) || "",
+          email: String(raw.email !== undefined ? raw.email : ((byId.get(id) && byId.get(id).email) || "")).replace(/\[at\]/g, String.fromCharCode(64)),
           building: raw.building || (byId.get(id) && byId.get(id).building) || "",
           fax: raw.fax || (byId.get(id) && byId.get(id).fax) || ""
         });
@@ -8424,6 +8427,40 @@ html_template = """<!DOCTYPE html>
       renderAnnuaireTab();
     }
 
+    function copyAnnuaireEmail(btn, emailStr) {
+      if (!emailStr) return;
+      const done = () => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = `✅ Copié : ${esc(emailStr)}`;
+        btn.style.borderColor = "#10B981";
+        btn.style.color = "#10B981";
+        setTimeout(() => {
+          btn.innerHTML = orig;
+          btn.style.borderColor = "";
+          btn.style.color = "";
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(emailStr).then(done).catch(() => {
+          const ta = document.createElement("textarea");
+          ta.value = emailStr;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          done();
+        });
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = emailStr;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        done();
+      }
+    }
+
     function renderAnnuaireTab() {
       const container = document.getElementById("annuaire-list-container");
       const chipsContainer = document.getElementById("annuaire-cat-chips");
@@ -8452,7 +8489,7 @@ html_template = """<!DOCTYPE html>
         if (annuaireCatFilter !== "all" && e.category !== annuaireCatFilter) return false;
         if (!q) return true;
         const posteStr = e.poste || e.short || "";
-        const hay = `${e.name || ""} ${e.role || ""} ${e.phone || ""} ${posteStr} ${e.building || ""} ${e.fax || ""} ${e.category || ""}`.toLowerCase();
+        const hay = `${e.name || ""} ${e.role || ""} ${e.phone || ""} ${posteStr} ${e.email || ""} ${e.building || ""} ${e.fax || ""} ${e.category || ""}`.toLowerCase();
         const hayDigits = hay.replace(/\\s+/g, "");
         return hay.includes(q) || (qDigits.length >= 3 && hayDigits.includes(qDigits));
       });
@@ -8480,6 +8517,7 @@ html_template = """<!DOCTYPE html>
           const rawTel = String(item.phone || "").replace(/[^0-9+]/g, "");
           const canCall = rawTel.length >= 10;
           const safeId = esc(item.id || "");
+          const emailList = String(item.email || "").split(/[\/,;]+/).map(s => s.trim()).filter(Boolean);
           html += `
             <div class="ann-card">
               <div style="min-width:0; flex:1;">
@@ -8492,6 +8530,15 @@ html_template = """<!DOCTYPE html>
                   <div style="font-size:10px; color:var(--text-muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; opacity:0.85;">
                     ${item.building ? `<span>📍 ${esc(item.building)}</span>` : ``}
                     ${item.fax ? `<span>📠 Fax : ${esc(item.fax)}</span>` : ``}
+                  </div>
+                ` : ``}
+                ${emailList.length ? `
+                  <div style="display:flex; gap:5px; flex-wrap:wrap; margin-top:5px;">
+                    ${emailList.map(em => `
+                      <button type="button" onclick="copyAnnuaireEmail(this, '${esc(em)}')" title="Cliquer pour copier l'email" style="background:var(--bg-elevated); border:1px solid var(--border); border-radius:6px; color:var(--primary); font-size:10.5px; font-weight:600; padding:2px 7px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                        ✉️ <span style="user-select:all;">${esc(em)}</span> 📋
+                      </button>
+                    `).join("")}
                   </div>
                 ` : ``}
               </div>
@@ -8550,6 +8597,10 @@ html_template = """<!DOCTYPE html>
             <input id="new-ann-phone" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.phone || "") : "")}" placeholder="Ex: 01 58 41 25 03 (auto si poste 1XXXX renseigné)" />
           </div>
           <div>
+            <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Email(s) AP-HP (séparés par / si plusieurs)</label>
+            <input id="new-ann-email" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.email || "") : "")}" placeholder="Ex: prenom.nom (aphp.fr)" />
+          </div>
+          <div>
             <label style="font-size:11px; color:var(--text-muted); display:block; margin-bottom:4px;">Fonction / Détails</label>
             <input id="new-ann-role" type="text" class="search-input" style="padding-left:12px;" value="${esc(editEntry ? (editEntry.role || "") : "")}" placeholder="Ex: CCA Radio B / Sous-sol Pavillon Ollier" />
           </div>
@@ -8577,12 +8628,13 @@ html_template = """<!DOCTYPE html>
       const category = document.getElementById("new-ann-cat")?.value || "Radiologie B — Secrétariats & Consoles";
       const rawPhone = (document.getElementById("new-ann-phone")?.value || "").trim();
       const rawShort = (document.getElementById("new-ann-short")?.value || "").trim();
+      const email = (document.getElementById("new-ann-email")?.value || "").trim();
       const role = (document.getElementById("new-ann-role")?.value || "").trim();
       const building = (document.getElementById("new-ann-building")?.value || "").trim();
 
       const derived = deriveCochinPhoneAndPoste(rawPhone, rawShort);
-      if (!name || (!derived.phone && !derived.poste)) {
-        alert("Veuillez renseigner le nom ainsi qu'un numéro ou un poste/DECT.");
+      if (!name || (!derived.phone && !derived.poste && !email)) {
+        alert("Veuillez renseigner le nom ainsi qu'un numéro, poste/DECT ou email.");
         return;
       }
 
@@ -8605,6 +8657,7 @@ html_template = """<!DOCTYPE html>
         phone: derived.phone,
         poste: derived.poste,
         short: derived.poste,
+        email,
         building: building || "Hôpital Cochin",
         custom: true,
         updated_at: new Date().toISOString()
