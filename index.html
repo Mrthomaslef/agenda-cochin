@@ -3268,6 +3268,11 @@
         const dt = String(r["Date"] || "").trim();
         if (!pat || dt.includes("SEMAINE")) return false;
         return true;
+      }).map(r => {
+        if (!r["Type d'acte / Consultation"] && r["Intervention"]) {
+          return { ...r, "Type d'acte / Consultation": r["Intervention"] };
+        }
+        return r;
       });
     }
 
