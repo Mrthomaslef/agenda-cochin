@@ -3938,7 +3938,7 @@
 
     function detectAnticoagAlert(text) {
       const t = String(text || "");
-      if (/eliquis|apixaban|plavix|clopidogrel|kard[eé]gic|aspirine|r[eé]situne|brilique|ticagrelor|efient|prasugrel|duoplavin|xarelto|rivaroxaban|lixiana|edoxaban|pradaxa|dabigatran|coumadine|warfarine|pr[eé]viscan|fluindione|sintrom|ac[eé]nocoumarol|lovenox|innohep|hbpm|calciparine|h[eé]parine|anticoag|h[eé]mostase|avk|aod|aap/i.test(t)) {
+      if (/eliquis|apixaban|plavix|clopidogrel|kard[eé]gic|aspirine|r[eé]situne|brilique|ticagrelor|efient|prasugrel|duoplavin|xarelto|rivaroxaban|lixiana|edoxaban|pradaxa|dabigatran|coumadine|warfarine|pr[eé]viscan|fluindione|sintrom|ac[eé]nocoumarol|lovenox|innohep|hbpm|calciparine|h[eé]parine|anticoag|h[eé]mostase|\bavk\b|\baod\b|\baap\b/i.test(t)) {
         return t;
       }
       return null;
@@ -3987,9 +3987,9 @@
       if (/sacroplastie/i.test(ctx)) return "sacroplastie";
       if (/vissage|ost[eé]osynth/i.test(ctx)) return "vissage_bassin";
       if (/cimento|vert[eé]broplastie|kyphoplastie/i.test(ctx)) return "cimentoplastie_vertebrale";
-      if (/ect|[eé]lectrochimio|scl[eé]roth/i.test(ctx)) return "ect_sclerotherapie";
+      if (/\bect\b|[eé]lectrochimio|scl[eé]roth/i.test(ctx)) return "ect_sclerotherapie";
       if (/morton|g[eé]nicul|rfna|nerf\s+superficiel|f[eé]moro-cutan/i.test(ctx)) return "rf_cryo_nerfs";
-      if (/cryo|radiofr[eé]quence|thermoablation|rf|ost[eé]ome\s+ost[eé]o|chondroblastome|desmo[iï]de|nodule|schwannome/i.test(ctx)) return "rf_cryo_profonde";
+      if (/cryo|radiofr[eé]quence|thermoablation|\brf\b|ost[eé]ome\s+ost[eé]o|chondroblastome|desmo[iï]de|nodule|schwannome/i.test(ctx)) return "rf_cryo_profonde";
       if (/biopsie\s+synoviale/i.test(ctx)) return "biopsie_synoviale";
       if (/biopsie\s+(osseuse|vert[eé]brale|disco|sacrum|bassin|f[eé]mur|tibia|hum[eé]rus|rachis|c[oô]te|sternum)/i.test(ctx)) return "biopsie_osseuse";
       if (/biopsie|ponction-biopsie/i.test(ctx) || ev?.category === "biopsie") {
@@ -4016,7 +4016,7 @@
     function inferAnticoagMedsFromText(text) {
       const t = String(text || "");
       const found = [];
-      if (/eliquis|apixaban|xarelto|rivaroxaban|lixiana|edoxaban|aod/i.test(t)) found.push("aod_xaban");
+      if (/eliquis|apixaban|xarelto|rivaroxaban|lixiana|edoxaban|\baod\b/i.test(t)) found.push("aod_xaban");
       if (/pradaxa|dabigatran/i.test(t)) found.push("dabigatran");
       if (/plavix|clopidogrel|brilique|ticagrelor/i.test(t)) found.push("clopidogrel");
       if (/efient|prasugrel/i.test(t)) found.push("prasugrel");
@@ -4026,7 +4026,7 @@
       if (/pr[eé]viscan|fluindione/i.test(t)) found.push("fluindione");
       if (/sintrom|ac[eé]nocoumarol/i.test(t)) found.push("acenocoumarol");
       if (/lovenox|innohep|hbpm|[eé]noxaparine|tinzaparine/i.test(t)) found.push("hbpm");
-      if (/calciparine|h[eé]parine|hnf/i.test(t)) found.push("hnf");
+      if (/calciparine|h[eé]parine|\bhnf\b/i.test(t)) found.push("hnf");
       return found.length ? found : ["aod_xaban"];
     }
 
@@ -4127,8 +4127,7 @@
       });
 
       lines.push("En cas de question ou d'événement intercurrent (stent récent, phlébite/embolie récente), merci de contacter l'équipe de Radiologie B avant toute modification.");
-      return lines.join("
-");
+      return lines.join("\n");
     }
 
     function copyPatientAnticoag(encodedEvMeta, btnEl, clickEv, medOverride = null, procOverride = null) {
