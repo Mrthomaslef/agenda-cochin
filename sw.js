@@ -1,4 +1,4 @@
-const CACHE_NAME = "cochin-ri-pwa-v71";
+const CACHE_NAME = "cochin-ri-pwa-v72";
 const ASSETS = [
   "./",
   "./index.html",
