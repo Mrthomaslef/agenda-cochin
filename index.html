@@ -8398,17 +8398,14 @@
       document.getElementById("modal-body").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;">
           <div>
-            <h2 style="margin:0; font-size:18px;">${name}</h2>
+            <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
+              <h2 style="margin:0; font-size:18px;">${name}</h2>
+              ${anticoag ? `<span class="alert-anticoag" onclick="const b=document.getElementById('modal-anticoag-block'); if(b) b.style.display=(b.style.display==='none'?'block':'none');" style="margin:0; padding:2px 8px; font-size:10.5px; display:inline-flex; align-items:center; gap:4px; border-radius:999px; cursor:pointer;" title="Vigilance Anticoagulant / Hémostase${detectedMedsLabel ? ' (' + escHtmlAttr(detectedMedsLabel) + ')' : ''} — cliquer pour afficher les consignes">🩸 Hémostase${detectedMedsLabel ? ` · ${escHtmlAttr(detectedMedsLabel)}` : ""}</span>` : ""}
+            </div>
             <div style="font-size:12px; color:var(--primary); font-family:monospace; margin-top:2px;">IPP : ${ipp}</div>
           </div>
           <button class="btn-icon" onclick="closeModal()">✕</button>
         </div>
-
-        ${anticoag ? `
-          <div class="alert-anticoag" style="margin-bottom:10px; font-size:12px; padding:8px 10px;">
-            🚨 <strong>ANTICOAGULANT / HÉMOSTASE :</strong><br>${coord}<br>${remarques}
-          </div>
-        ` : ""}
 
         <div class="quick-actions">
           ${ipp && ipp !== "Non spécifié" ? `<button class="action-btn primary" onclick="copyText(${escHtmlAttr(JSON.stringify(String(ipp)))}, this)">📋 Copier IPP</button>` : ""}
