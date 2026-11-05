@@ -2200,6 +2200,13 @@ html_template = """<!DOCTYPE html>
 
     <!-- TAB 3 : DEMANDES D'AVIS (SERVICE) -->
     <section id="tab-avis" style="display:none;">
+      <div class="agenda-controls">
+        <div class="segmented">
+          <button class="seg-btn active" id="cat-avis-all" onclick="setAvisCategoryFilter('all')">Tous</button>
+          <button class="seg-btn" id="cat-avis-interventionnel" onclick="setAvisCategoryFilter('interventionnel')">🔪 Avis Interventionnel</button>
+          <button class="seg-btn" id="cat-avis-diagnostic" onclick="setAvisCategoryFilter('diagnostic')">🩻 Avis Diagnostic</button>
+        </div>
+      </div>
       <div class="search-box">
         <span class="search-icon">⌕</span>
         <input type="text" class="search-input" id="avis-search" placeholder="Rechercher patient, IPP, demandeur, motif..." oninput="renderAvisTab()" />
@@ -2416,6 +2423,7 @@ html_template = """<!DOCTYPE html>
 
     let actesFilter = "all";
     let avisFilter = "all";
+    let avisCategoryFilter = "all"; // 'all' | 'interventionnel' | 'diagnostic'
     const STORAGE_AVIS_SORT_KEY = "cochin_ri_avis_sort_v1";
     let avisSortOrder = (() => {
       try {
@@ -3200,6 +3208,23 @@ html_template = """<!DOCTYPE html>
       return s.startsWith("répondu") || s.startsWith("repondu");
     }
 
+    const AVIS_INTERV_REGEX = /biopsie|microbiopsie|cryo|radiofr[ée]quence|\brf\b|cimento|vert[ée]broplastie|alcoolisation|scl[ée]roth[ée]rapie|vissage|embolisation|[ée]lectrochimioth[ée]rapie|\bect\b|infiltration|ponction|test\s+anesth|neurolyse|prp|acide\s+hyaluronique|ablation|percutan[ée]|traitement\s+local|radiologue\s+interventionnel|avis\s+ri\b|hdj\s+radio|achard\s*-1|cs\s+anesth|consultation\s+d'anesth/i;
+
+    function getAvisCategory(a) {
+      if (!a) return "diagnostic";
+      const explicit = String(a["Catégorie Avis"] || a["Catégorie"] || a._category || "").trim().toLowerCase();
+      if (explicit.includes("interv")) return "interventionnel";
+      if (explicit.includes("diag")) return "diagnostic";
+      const mot = String(a["Motif de l'avis / Question clinique"] || "");
+      const dec = String(a["Décision & Suite donnée"] || "");
+      const txt = `${mot} ${dec}`;
+      const low = txt.toLowerCase();
+      if (low.includes("complément tdm à visée diagnostique") || low.includes("biopsié en cs ce")) {
+        return "diagnostic";
+      }
+      return AVIS_INTERV_REGEX.test(txt) ? "interventionnel" : "diagnostic";
+    }
+
     function getAvisSortMeta(a) {
       const dd = String((a && a["Date Demande"]) || "").trim();
       const dr = String((a && a["Date Réponse"]) || "").trim();
@@ -3256,12 +3281,13 @@ html_template = """<!DOCTYPE html>
       const mapped = (avisRows || []).map(a => {
         const key = String(a._row || "");
         const patKey = normName(a["Identité Patient"]);
-        const override = localAvis[key] || (patKey ? localAvis[patKey] : null);
-        if (override && override.status) {
+        const override = (patKey ? localAvis[patKey] : null) || localAvis[key];
+        if (override && (override.status || override.category)) {
           return {
             ...a,
-            "Statut Réponse": override.status,
-            "Médecin Répondant (Radio B)": override.repondant || a["Médecin Répondant (Radio B)"]
+            "Statut Réponse": override.status || a["Statut Réponse"],
+            "Médecin Répondant (Radio B)": override.repondant || a["Médecin Répondant (Radio B)"],
+            "Catégorie Avis": override.category || a["Catégorie Avis"] || ""
           };
         }
         return a;
@@ -7507,6 +7533,37 @@ html_template = """<!DOCTYPE html>
         : "Ordre chronologique : du plus récent au plus ancien (cliquer pour inverser)";
     }
 
+    function syncAvisCategoryButtons() {
+      const allList = appData.Demandes_avis || [];
+      let nInterv = 0;
+      let nDiag = 0;
+      for (const a of allList) {
+        if (getAvisCategory(a) === "interventionnel") nInterv++;
+        else nDiag++;
+      }
+      const bAll = document.getElementById("cat-avis-all");
+      const bInt = document.getElementById("cat-avis-interventionnel");
+      const bDia = document.getElementById("cat-avis-diagnostic");
+      if (bAll) {
+        bAll.classList.toggle("active", avisCategoryFilter === "all");
+        bAll.textContent = allList.length ? `Tous (${allList.length})` : "Tous";
+      }
+      if (bInt) {
+        bInt.classList.toggle("active", avisCategoryFilter === "interventionnel");
+        bInt.textContent = allList.length ? `🔪 Avis Interventionnel (${nInterv})` : "🔪 Avis Interventionnel";
+      }
+      if (bDia) {
+        bDia.classList.toggle("active", avisCategoryFilter === "diagnostic");
+        bDia.textContent = allList.length ? `🩻 Avis Diagnostic (${nDiag})` : "🩻 Avis Diagnostic";
+      }
+    }
+
+    function setAvisCategoryFilter(cat) {
+      avisCategoryFilter = cat;
+      syncAvisCategoryButtons();
+      renderAvisTab();
+    }
+
     function toggleAvisSortOrder() {
       avisSortOrder = avisSortOrder === "asc" ? "desc" : "asc";
       try {
@@ -7525,9 +7582,55 @@ html_template = """<!DOCTYPE html>
       renderAvisTab();
     }
 
+    function toggleAvisCategory(row, event) {
+      if (event) event.stopPropagation();
+      const rowNum = Number(row);
+      let patNorm = "";
+      let nextCat = "interventionnel";
+
+      for (const a of (appData.Demandes_avis || [])) {
+        if (Number(a._row) === rowNum) {
+          const curCat = getAvisCategory(a);
+          nextCat = curCat === "interventionnel" ? "diagnostic" : "interventionnel";
+          a["Catégorie Avis"] = nextCat === "interventionnel" ? "Avis interventionnel" : "Avis diagnostic";
+          patNorm = normName(a["Identité Patient"]);
+        }
+      }
+
+      const catLabel = nextCat === "interventionnel" ? "Avis interventionnel" : "Avis diagnostic";
+      try {
+        const localAvis = JSON.parse(localStorage.getItem(STORAGE_AVIS_KEY) || "{}");
+        const prev = (patNorm && localAvis[patNorm]) || localAvis[String(rowNum)] || {};
+        const entry = { ...prev, category: catLabel, updated_at: new Date().toISOString() };
+        localAvis[String(rowNum)] = entry;
+        if (patNorm) localAvis[patNorm] = entry;
+        localStorage.setItem(STORAGE_AVIS_KEY, JSON.stringify(localAvis));
+      } catch (e) {}
+
+      try {
+        const cachedRaw = localStorage.getItem(STORAGE_CACHE_KEY);
+        if (cachedRaw) {
+          const cachedObj = JSON.parse(cachedRaw);
+          if (cachedObj && cachedObj.data && Array.isArray(cachedObj.data.Demandes_avis)) {
+            for (const ca of cachedObj.data.Demandes_avis) {
+              if (Number(ca._row) === rowNum || (patNorm && normName(ca["Identité Patient"]) === patNorm)) {
+                ca["Catégorie Avis"] = catLabel;
+              }
+            }
+            localStorage.setItem(STORAGE_CACHE_KEY, JSON.stringify(cachedObj));
+          }
+        }
+      } catch (e) {}
+
+      renderAvisTab();
+    }
+
     function renderAvisCardHtml(a) {
       const st = String(a["Statut Réponse"] || "Non répondu");
       const isRep = isAvisAnswered(st);
+      const avisCat = getAvisCategory(a);
+      const isInterv = avisCat === "interventionnel";
+      const catBadgeHtml = `<span class="pill ${isInterv ? "pill-acte" : "pill-img"}" style="cursor:pointer;" onclick="toggleAvisCategory(${a._row}, event)" title="Cliquer pour basculer entre Avis Interventionnel et Avis Diagnostic">${isInterv ? "🔪 Avis Interventionnel" : "🩻 Avis Diagnostic"}</span>`;
       const safePatientAttr = encodeURIComponent(JSON.stringify({ name: a["Identité Patient"], ipp: a["N° Dossier / IPP"] }));
       const nextStatus = isRep ? "Non répondu" : "Répondu";
       const meta = getAvisSortMeta(a);
@@ -7543,7 +7646,10 @@ html_template = """<!DOCTYPE html>
       return `
         <div class="event-card" style="border-left-color:${isRep ? "var(--success)" : "var(--danger)"};">
           <div class="event-top" onclick="openPatientModal('${safePatientAttr}')">
-            <span class="event-time-badge">📅 ${a["Date Demande"] || "-"}</span>
+            <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+              <span class="event-time-badge">📅 ${a["Date Demande"] || "-"}</span>
+              ${catBadgeHtml}
+            </div>
             <span class="pill ${isRep ? "pill-success" : "pill-danger"}">${st}</span>
           </div>
           <div class="event-patient" onclick="openPatientModal('${safePatientAttr}')">
@@ -7557,7 +7663,7 @@ html_template = """<!DOCTYPE html>
             ${a["Motif de l'avis / Question clinique"] || ""}
           </div>
           <div class="ev-rep-txt" style="font-size:11.5px; margin-top:4px; font-weight:600;" onclick="openPatientModal('${safePatientAttr}')">
-            <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"}${dateReponse ? ` (${dateReponse})` : ""} :</strong> ${a["Décision & Suite donnée"] || "-"}
+            <strong>${formatShortDoc(a["Médecin Répondant (Radio B)"]) || "-"}${dateReponse && !dateReponse.toLowerCase().startsWith("répondu") ? ` (${dateReponse})` : ""} :</strong> ${a["Décision & Suite donnée"] || "-"}
           </div>
           <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <button class="btn-icon" onclick="toggleAvisStatus(${a._row}, '${nextStatus}')">
@@ -7571,10 +7677,14 @@ html_template = """<!DOCTYPE html>
 
     function renderAvisTab() {
       syncAvisSortButton();
+      syncAvisCategoryButtons();
       const container = document.getElementById("avis-list-container");
       if (!container) return;
       const q = ((document.getElementById("avis-search") || {}).value || "").toLowerCase().trim();
       let list = sortAvisChronologically(appData.Demandes_avis || [], avisSortOrder);
+      if (avisCategoryFilter !== "all") {
+        list = list.filter(a => getAvisCategory(a) === avisCategoryFilter);
+      }
       if (avisFilter === "Répondu") {
         list = list.filter(a => isAvisAnswered(a["Statut Réponse"]));
       } else if (avisFilter === "Non répondu") {
@@ -7630,7 +7740,8 @@ html_template = """<!DOCTYPE html>
 
       try {
         const localAvis = JSON.parse(localStorage.getItem(STORAGE_AVIS_KEY) || "{}");
-        const entry = { status: newStatus, repondant, updated_at: new Date().toISOString() };
+        const prev = (patNorm && localAvis[patNorm]) || localAvis[String(rowNum)] || {};
+        const entry = { ...prev, status: newStatus, repondant, updated_at: new Date().toISOString() };
         localAvis[String(rowNum)] = entry;
         if (patNorm) localAvis[patNorm] = entry;
         localStorage.setItem(STORAGE_AVIS_KEY, JSON.stringify(localAvis));
