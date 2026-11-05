@@ -8440,6 +8440,7 @@ html_template = """<!DOCTYPE html>
           const shortCat = cat === "all"
             ? `Tous (${count})`
             : `${cat.replace("Radiologie B — ", "Radio B : ").replace("Services Partenaires ", "Partenaires ")
+                .replace("RCP & Staffs Multidisciplinaires Cochin", "RCP & Staffs")
                 .replace("Laboratoires, Pharmacie & Administration (DAM)", "Labos / Pharmacie / DAM")} (${count})`;
           return `<button class="chip ${annuaireCatFilter === cat ? 'active' : ''}" onclick="setAnnuaireCategoryIdx(${idx})">${esc(shortCat)}</button>`;
         }).join("");
@@ -8521,6 +8522,7 @@ html_template = """<!DOCTYPE html>
         "Radiologie B — Secrétariats & Consoles",
         "Radiologie B — Équipe Médicale (Chefs & Seniors)",
         "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
+        "RCP & Staffs Multidisciplinaires Cochin",
         "Laboratoires, Pharmacie & Administration (DAM)"
       ];
       body.innerHTML = `
