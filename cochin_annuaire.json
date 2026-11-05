@@ -439,12 +439,12 @@
   {
     "id": "tel-rhumato-allanore",
     "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
-    "name": "Service de Rhumatologie (Pr Y. ALLANORE — Mme Canvel)",
-    "role": "Secrétariat Rhumatologie A/B & Demandes Cimentoplastie",
-    "poste": "12606 / 12619",
+    "name": "Service de Rhumatologie (Pr Y. ALLANORE — Mme Canvel / Dr H. Hajji / Dr J. Pariselle)",
+    "role": "Secrétariat Rhumatologie A/B (12606 / 12619) • HDS Rhumato / Secr. Dr H. Hajji : 13173",
+    "poste": "12606 / 12619 / 13173",
     "phone": "01 58 41 26 06",
     "fax": "01 58 41 40 97",
-    "email": "yannick.allanore@aphp.fr",
+    "email": "yannick.allanore@aphp.fr / haifa.hajji@aphp.fr / juliette.pariselle@aphp.fr",
     "building": "Bâtiment Achard / Hardy"
   },
   {
@@ -572,11 +572,11 @@
     "id": "tel-mpr-nguyen",
     "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
     "name": "Service MPR — Rééducation & Pathologies du Rachis (Pr Christelle NGUYEN)",
-    "role": "Secrétariat MPR Hardy B1 (Laëtitia) • Dr Alexandre Luc • Staffs Rachis & MPR",
-    "poste": "12945",
+    "role": "Secrétariat MPR Hardy B1 (Laëtitia : 12945) • HDS MPR (Mme Alisa Nikolić : 13177) • Dr Alexandre Luc / Dr Quentin Lejeune",
+    "poste": "12945 / 13177",
     "phone": "01 58 41 29 45",
     "fax": "01 58 41 25 38",
-    "email": "reeducation.hardyb1.cch@aphp.fr / christelle.nguyen2@aphp.fr",
+    "email": "reeducation.hardyb1.cch@aphp.fr / alisa.nikolic@aphp.fr / christelle.nguyen2@aphp.fr / quentin.lejeune@aphp.fr",
     "building": "Bâtiment Hardy (B1 / 1er sous-sol)"
   },
   {

@@ -4011,10 +4011,184 @@ html_template = """<!DOCTYPE html>
 
     function detectAnticoagAlert(text) {
       const t = String(text || "");
-      if (/eliquis|apixaban|plavix|clopidogrel|kard[eé]gic|xarelto|pradaxa|anticoag|h[eé]mostase/i.test(t)) {
+      if (/eliquis|apixaban|plavix|clopidogrel|kard[eé]gic|aspirine|r[eé]situne|brilique|ticagrelor|efient|prasugrel|duoplavin|xarelto|rivaroxaban|lixiana|edoxaban|pradaxa|dabigatran|coumadine|warfarine|pr[eé]viscan|fluindione|sintrom|ac[eé]nocoumarol|lovenox|innohep|hbpm|calciparine|h[eé]parine|anticoag|h[eé]mostase|\\bavk\\b|\\baod\\b|\\baap\\b/i.test(t)) {
         return t;
       }
       return null;
+    }
+
+    const ANTICOAG_PROCEDURES = {
+      hanche: { label: "Infiltration / Ponction de la hanche", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      genou: { label: "Infiltration / Ponction / Viscosupplémentation du genou", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" }, note: "Si lavage articulaire : adaptation AOD (pas de prise la veille au soir ni le matin du geste)." },
+      cheville_pied: { label: "Infiltration cheville / pied", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      epaule: { label: "Infiltration / Arthro-infiltration de l'épaule", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" }, note: "Si capsulodistension : adaptation AOD (pas de prise la veille au soir ni le matin du geste)." },
+      coude: { label: "Infiltration du coude", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      poignet_main: { label: "Infiltration poignet / main", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      iap_lombaire: { label: "Infiltration articulaire postérieure (IAP) lombaire", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      epidurale_lombaire_basse: { label: "Infiltration épidurale / foraminale lombaire basse (L3-S1)", risk: "intermediaire", rules: { aspirine: "poursuite", autre_aap: "adaptation", bitherapie_aap: "adaptation", avk: "arret", aod: "adaptation", hbpm: "adaptation", hnf: "adaptation" } },
+      epidurale_lombaire_haute: { label: "Infiltration épidurale lombaire haute (L1-L3) ou sur rachis opéré", risk: "eleve", rules: { aspirine: "poursuite", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      iap_cervicale: { label: "Infiltration cervicale (IAP cervicale) ou thoracique", risk: "eleve", rules: { aspirine: "poursuite", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      sacro_iliaque: { label: "Infiltration sacro-iliaque ou piriforme profond", risk: "eleve", rules: { aspirine: "poursuite", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      cimentoplastie_vertebrale: { label: "Cimentoplastie / Vertébroplastie / Kyphoplastie", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      sacroplastie: { label: "Sacroplastie / Cimentoplastie du bassin", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      vissage_bassin: { label: "Vissage percutané / Ostéosynthèse cimentée", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      biopsie_pm_superficielle: { label: "Biopsie des parties molles superficielles (sous-cutanée)", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      biopsie_pm_profonde: { label: "Biopsie des parties molles profondes (musculaire / rétro-péritonéale)", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      biopsie_synoviale: { label: "Biopsie synoviale percutanée", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      biopsie_osseuse: { label: "Biopsie osseuse ou disco-vertébrale (sous scanner)", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      rf_cryo_nerfs: { label: "Radiofréquence / Cryoneurolyse de nerfs superficiels (géniculés, Morton)", risk: "faible", rules: { aspirine: "poursuite", autre_aap: "poursuite", bitherapie_aap: "poursuite", avk: "poursuite", aod: "poursuite", hbpm: "adaptation", hnf: "adaptation" } },
+      rf_cryo_profonde: { label: "Thermoablation (Radiofréquence / Cryothérapie) de tumeur profonde (osseuse ou PM)", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } },
+      ect_sclerotherapie: { label: "Électrochimiothérapie (ECT) / Sclérothérapie percutanée", risk: "majeur", rules: { aspirine: "arret", autre_aap: "arret", bitherapie_aap: "arret", avk: "arret", aod: "arret", hbpm: "adaptation", hnf: "adaptation" } }
+    };
+
+    const ANTICOAG_MEDS = {
+      eliquis: { label: "Eliquis® (Apixaban)", shortName: "Eliquis®", ruleKey: "aod", stopOffset: -3, adaptOffset: -1, resumeStopOffset: 2, resumeStopNote: "48h après le geste (préventif possible dès le lendemain)", resumeAdaptOffset: 0, resumeAdaptNote: "6h après le geste" },
+      xarelto: { label: "Xarelto® (Rivaroxaban)", shortName: "Xarelto®", ruleKey: "aod", stopOffset: -3, adaptOffset: -1, resumeStopOffset: 2, resumeStopNote: "48h après le geste (préventif possible dès le lendemain)", resumeAdaptOffset: 0, resumeAdaptNote: "6h après le geste" },
+      lixiana: { label: "Lixiana® (Edoxaban)", shortName: "Lixiana®", ruleKey: "aod", stopOffset: -3, adaptOffset: -1, resumeStopOffset: 2, resumeStopNote: "48h après le geste", resumeAdaptOffset: 0, resumeAdaptNote: "6h après le geste" },
+      pradaxa: { label: "Pradaxa® (Dabigatran)", shortName: "Pradaxa®", ruleKey: "aod", stopOffset: -3, adaptOffset: -1, resumeStopOffset: 2, resumeStopNote: "48h après le geste (arrêt à J-5 si DFG < 50)", resumeAdaptOffset: 0, resumeAdaptNote: "6h après le geste" },
+      aspirine: { label: "Kardégic® / Aspirine", shortName: "Kardégic® / Aspirine", ruleKey: "aspirine", stopOffset: -3, adaptOffset: 0, resumeStopOffset: 0, resumeStopNote: "6h après le geste", resumeAdaptOffset: 0, resumeAdaptNote: "sans interruption" },
+      plavix: { label: "Plavix® (Clopidogrel)", shortName: "Plavix®", ruleKey: "autre_aap", stopOffset: -5, adaptOffset: -5, resumeStopOffset: 1, resumeStopNote: "le lendemain du geste", resumeAdaptOffset: 1, resumeAdaptNote: "le lendemain du geste (relais Aspirine possible pendant l'arrêt)" },
+      brilique: { label: "Brilique® (Ticagrélor)", shortName: "Brilique®", ruleKey: "autre_aap", stopOffset: -5, adaptOffset: -5, resumeStopOffset: 1, resumeStopNote: "le lendemain du geste", resumeAdaptOffset: 1, resumeAdaptNote: "le lendemain du geste" },
+      efient: { label: "Efient® (Prasugrel)", shortName: "Efient®", ruleKey: "autre_aap", stopOffset: -7, adaptOffset: -7, resumeStopOffset: 1, resumeStopNote: "le lendemain du geste", resumeAdaptOffset: 1, resumeAdaptNote: "le lendemain du geste" },
+      coumadine: { label: "Coumadine® (Warfarine)", shortName: "Coumadine®", ruleKey: "avk", stopOffset: -6, adaptOffset: 0, resumeStopOffset: 1, resumeStopNote: "le lendemain du geste", bioNote: "Contrôle INR la veille ou le matin du geste (objectif ≤ 1,5)." },
+      previscan: { label: "Préviscan® (Fluindione)", shortName: "Préviscan®", ruleKey: "avk", stopOffset: -5, adaptOffset: 0, resumeStopOffset: 1, resumeStopNote: "le lendemain du geste", bioNote: "Contrôle INR la veille ou le matin du geste (objectif ≤ 1,5)." },
+      sintrom: { label: "Sintrom® (Acénocoumarol)", shortName: "Sintrom®", ruleKey: "avk", stopOffset: -4, adaptOffset: 0, resumeStopOffset: 1, resumeStopNote: "le lendemain du geste", bioNote: "Contrôle INR la veille ou le matin du geste (objectif ≤ 1,5)." },
+      lovenox: { label: "Lovenox® / Innohep® (HBPM)", shortName: "Lovenox®", ruleKey: "hbpm", stopOffset: -1, adaptOffset: -1, resumeStopOffset: 0, resumeStopNote: "6h après le geste (dose préventive, curative à 48h)", resumeAdaptOffset: 0, resumeAdaptNote: "6h après le geste" }
+    };
+
+    function inferAnticoagProcId(ev, extraContext = "") {
+      const ctx = `${ev?.title || ""} ${ev?.remarques || ""} ${ev?.catActe || ""} ${extraContext}`.toLowerCase();
+      if (/sacroplastie/i.test(ctx)) return "sacroplastie";
+      if (/vissage|ost[eé]osynth/i.test(ctx)) return "vissage_bassin";
+      if (/cimento|vert[eé]broplastie|kyphoplastie/i.test(ctx)) return "cimentoplastie_vertebrale";
+      if (/\\bect\\b|[eé]lectrochimio|scl[eé]roth/i.test(ctx)) return "ect_sclerotherapie";
+      if (/morton|g[eé]nicul|rfna|nerf\\s+superficiel|f[eé]moro-cutan/i.test(ctx)) return "rf_cryo_nerfs";
+      if (/cryo|radiofr[eé]quence|thermoablation|\\brf\\b|ost[eé]ome\\s+ost[eé]o|chondroblastome|desmo[iï]de|nodule|schwannome/i.test(ctx)) return "rf_cryo_profonde";
+      if (/biopsie\\s+synoviale/i.test(ctx)) return "biopsie_synoviale";
+      if (/biopsie\\s+(osseuse|vert[eé]brale|disco|sacrum|bassin|f[eé]mur|tibia|hum[eé]rus|rachis|c[oô]te|sternum)/i.test(ctx)) return "biopsie_osseuse";
+      if (/biopsie|ponction-biopsie/i.test(ctx) || ev?.category === "biopsie") {
+        if (/superficiel|sous-cutan/i.test(ctx)) return "biopsie_pm_superficielle";
+        if (/os|genou|hanche\\s+os|vert[eé]br|sacr|iliaque|f[eé]mur|tibia|p[eé]ron[eé]|clavicule|scapula/i.test(ctx) && !/parties\\s+molles|masse|[eé]cho/i.test(ctx)) return "biopsie_osseuse";
+        return "biopsie_pm_profonde";
+      }
+      if (/sacro-iliaque|piriforme/i.test(ctx)) return "sacro_iliaque";
+      if (/cervical|thoracique/i.test(ctx) && /infiltration|iap|foraminal/i.test(ctx)) return "iap_cervicale";
+      if (/[eé]pidural|foraminal|hiatus/i.test(ctx)) {
+        if (/l1|l2|op[eé]r[eé]/i.test(ctx)) return "epidurale_lombaire_haute";
+        return "epidurale_lombaire_basse";
+      }
+      if (/iap|articulaire\\s+post[eé]rieure/i.test(ctx)) return "iap_lombaire";
+      if (/épaule|epaule|acromio|gl[eé]no|capsulodistension/i.test(ctx)) return "epaule";
+      if (/hanche|coxo|psoas/i.test(ctx)) return "hanche";
+      if (/genou|f[eé]moro-patellaire|ménisc|baker/i.test(ctx)) return "genou";
+      if (/cheville|pied|talo|tarse|apon[eé]vros/i.test(ctx)) return "cheville_pied";
+      if (/coude|[eé]picondyl/i.test(ctx)) return "coude";
+      if (/poignet|main|canal\\s+carpien|de\\s+quervain|doigt/i.test(ctx)) return "poignet_main";
+      return "biopsie_osseuse";
+    }
+
+    function inferAnticoagMedsFromText(text) {
+      const t = String(text || "");
+      const found = [];
+      if (/plavix|clopidogrel/i.test(t)) found.push("plavix");
+      if (/brilique|ticagrelor/i.test(t)) found.push("brilique");
+      if (/efient|prasugrel/i.test(t)) found.push("efient");
+      if (/kard[eé]gic|aspirine|r[eé]situne|aspegic/i.test(t)) found.push("aspirine");
+      if (/eliquis|apixaban/i.test(t)) found.push("eliquis");
+      if (/xarelto|rivaroxaban/i.test(t)) found.push("xarelto");
+      if (/lixiana|edoxaban/i.test(t)) found.push("lixiana");
+      if (/pradaxa|dabigatran/i.test(t)) found.push("pradaxa");
+      if (/coumadine|warfarine/i.test(t)) found.push("coumadine");
+      if (/pr[eé]viscan|fluindione/i.test(t)) found.push("previscan");
+      if (/sintrom|ac[eé]nocoumarol/i.test(t)) found.push("sintrom");
+      if (/lovenox|innohep|hbpm|[eé]noxaparine|tinzaparine|calciparine|h[eé]parine/i.test(t)) found.push("lovenox");
+      return found.length ? found : ["eliquis"];
+    }
+
+    function addDaysIso(isoDate, deltaDays) {
+      if (!isoDate || !/^\\d{4}-\\d{2}-\\d{2}$/.test(isoDate)) return null;
+      const [y, m, d] = isoDate.split("-").map(Number);
+      return new Date(y, m - 1, d + deltaDays);
+    }
+
+    function formatAnticoagShortDate(dt) {
+      if (!dt) return "";
+      return dt.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+    }
+
+    function buildAnticoagProtocolTextForEvent(ev, medOverride = null) {
+      const master = findPatientMasterRecord(ev?.patient, ev?.ipp) || {};
+      const allEvs = getAllTimedEvents().filter(e => {
+        if (e.category === "mail-rdv") return false;
+        const mIpp = String(ev?.ipp || "").replace(/[^0-9]/g, "");
+        const eIpp = String(e.ipp || "").replace(/[^0-9]/g, "");
+        if (mIpp && mIpp.length >= 7 && mIpp === eIpp) return true;
+        return normName(e.patient) === normName(ev?.patient);
+      });
+      const gestureEv = (ev && (ev.category === "acte" || ev.category === "biopsie") && ev.isoDate)
+        ? ev
+        : (allEvs.find(e => (e.category === "acte" || e.category === "biopsie") && e.isoDate) || ev || {});
+
+      const combinedNotes = `${ev?.remarques || ""} ${gestureEv?.remarques || ""} ${master["Coordonnées / DDN"] || ""} ${master["Instructions & Remarques Cliniques"] || ""} ${master["Type d'Intervention / Suivi"] || ""}`;
+      const procId = inferAnticoagProcId(gestureEv, combinedNotes);
+      const proc = ANTICOAG_PROCEDURES[procId] || ANTICOAG_PROCEDURES.biopsie_osseuse;
+      const meds = medOverride ? [medOverride] : inferAnticoagMedsFromText(combinedNotes);
+      const isoJ0 = gestureEv?.isoDate || ev?.isoDate || "";
+      const dtJ0 = addDaysIso(isoJ0, 0);
+      const j0Str = dtJ0 ? formatAnticoagShortDate(dtJ0) : (gestureEv?.dateStr || ev?.dateStr || "date du geste");
+      const gesteTitle = gestureEv?.title || master["Type d'Intervention / Suivi"] || proc.label;
+      const medNames = meds.map(m => (ANTICOAG_MEDS[m] || ANTICOAG_MEDS.eliquis).shortName).join(" + ");
+
+      const lines = [
+        `Consignes ${medNames} — ${gesteTitle} (${j0Str}) :`
+      ];
+
+      meds.forEach(mId => {
+        const med = ANTICOAG_MEDS[mId] || ANTICOAG_MEDS.eliquis;
+        const action = proc.rules[med.ruleKey] || "arret";
+        const prefix = meds.length > 1 ? `[${med.shortName}] ` : "";
+
+        if (action === "poursuite") {
+          lines.push(`• ${prefix}Pas d'arrêt : poursuivre ${med.shortName} normalement (y compris le jour du geste).`);
+        } else if (action === "adaptation") {
+          const dtLast = addDaysIso(isoJ0, med.adaptOffset);
+          const lastStr = dtLast ? formatAnticoagShortDate(dtLast) : `J${med.adaptOffset}`;
+          const dtRes = addDaysIso(isoJ0, med.resumeAdaptOffset);
+          const resStr = dtRes ? formatAnticoagShortDate(dtRes) : "après le geste";
+          if (med.ruleKey === "hbpm") {
+            lines.push(`• ${prefix}Arrêt 24h avant : dernière injection le ${lastStr} au matin (pas d'injection la veille au soir ni le matin du geste).`);
+          } else {
+            lines.push(`• ${prefix}Suspension : dernière prise le ${lastStr} (pas de prise la veille au soir ni le matin du geste).`);
+          }
+          lines.push(`• ${prefix}Reprise : le ${resStr} (${med.resumeAdaptNote}).`);
+        } else {
+          const dtLast = addDaysIso(isoJ0, med.stopOffset);
+          const lastStr = dtLast ? formatAnticoagShortDate(dtLast) : `J${med.stopOffset}`;
+          const dtNoStart = addDaysIso(isoJ0, med.stopOffset + 1);
+          const noStartStr = dtNoStart ? formatAnticoagShortDate(dtNoStart) : `J${med.stopOffset + 1}`;
+          const dtRes = addDaysIso(isoJ0, med.resumeStopOffset);
+          const resStr = dtRes ? formatAnticoagShortDate(dtRes) : `J+${med.resumeStopOffset}`;
+          const sansRelais = med.ruleKey === "aod" ? ", sans relais HBPM" : "";
+          lines.push(`• ${prefix}Arrêt : dernière prise le ${lastStr} (aucune prise du ${noStartStr} au ${j0Str} inclus${sansRelais}).`);
+          lines.push(`• ${prefix}Reprise : le ${resStr} (${med.resumeStopNote}).`);
+          if (med.bioNote) lines.push(`• ${prefix}${med.bioNote}`);
+        }
+      });
+
+      return lines.join("\\n");
+    }
+
+    function copyPatientAnticoag(encodedEvMeta, btnEl, clickEv, medOverride = null) {
+      if (clickEv) clickEv.stopPropagation();
+      let ev = {};
+      try { ev = JSON.parse(decodeURIComponent(encodedEvMeta)); } catch (_) {}
+      const text = buildAnticoagProtocolTextForEvent(ev, medOverride);
+      copyToClipboardText(text);
+      if (btnEl) {
+        const orig = btnEl.innerHTML;
+        btnEl.innerHTML = "✅ Copié !";
+        setTimeout(() => { btnEl.innerHTML = orig; }, 1500);
+      }
     }
 
     function formatShortDoc(medStr) {
@@ -6267,6 +6441,11 @@ html_template = """<!DOCTYPE html>
           "",
           `Les modalités, bénéfices et risques de cette prise en charge ont été expliqués ${auPatient}, qui a bien compris l'ensemble de ces éléments et a donné son accord pour l'intervention.`
         ];
+        const masterForPreop = findPatientMasterRecord(ev.patient, ev.ipp);
+        const hasAnticoagForPreop = detectAnticoagAlert(`${ev.remarques || ""} ${masterForPreop ? (masterForPreop["Coordonnées / DDN"] || "") + " " + (masterForPreop["Instructions & Remarques Cliniques"] || "") : ""}`);
+        if (hasAnticoagForPreop) {
+          linesPreop.push("", buildAnticoagProtocolTextForEvent(ev, null));
+        }
         if (ann.recommandations.length > 0) {
           linesPreop.push("");
           linesPreop.push(`En vue de cette prise en charge, il est recommandé : ${ann.recommandations.join(" ; ")}.`);
@@ -6571,6 +6750,8 @@ html_template = """<!DOCTYPE html>
         `<button type="button" class="mat-chip" onclick="appendMaterialChoice('${matInputId}', '${escHtmlAttr(c)}', '${sKey}', '${safeEvMeta}', '${prefix}', event)">+ ${escHtmlAttr(c)}</button>`
       ).join("");
       const datalistHtml = `<datalist id="${matListId}">${matChoices.map(c => `<option value="${escHtmlAttr(c)}"></option>`).join("")}</datalist>`;
+      const masterRec = findPatientMasterRecord(ev.patient, ev.ipp);
+      const hasAnticoagAlert = Boolean(detectAnticoagAlert(`${ev.remarques || ""} ${masterRec ? (masterRec["Coordonnées / DDN"] || "") + " " + (masterRec["Instructions & Remarques Cliniques"] || "") : ""}`));
       return `
         <div class="bloc-toggle-row" onclick="event.stopPropagation()">
           <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
@@ -6590,6 +6771,7 @@ html_template = """<!DOCTYPE html>
           <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "crh" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'crh', this, event, '${prefix}')" title="Copier le Compte Rendu d'Hospitalisation (CRH)">
             <span>📋 CRH</span>
           </button>
+          ${hasAnticoagAlert ? `<button type="button" class="bloc-toggle-btn cr-btn" style="background:#FEF2F2; color:#B91C1C; border-color:#FCA5A5; font-weight:800;" onclick="copyPatientAnticoag('${safeEvMeta}', this, event)" title="Copier les consignes d'arrêt des anticoagulants"><span>🩸 Anticoag</span></button>` : ""}
         </div>
         <div class="bloc-notes-box ${isOpen ? "open" : ""}" id="${boxDomId}" onclick="event.stopPropagation()">
           <div class="mat-chips-row">${chipsHtml}</div>
@@ -8280,6 +8462,11 @@ html_template = """<!DOCTYPE html>
         title: interv
       };
       const modalBlocHtml = renderBlocNotesHtml(primaryModalEv, "modal-");
+      const safeModalEvMeta = encodeURIComponent(JSON.stringify(primaryModalEv));
+      const initialAnticoagText = buildAnticoagProtocolTextForEvent(primaryModalEv, null);
+      const detectedMedsLabel = inferAnticoagMedsFromText(`${coord} ${remarques}`).map(k => ANTICOAG_MEDS[k]?.shortName || k).join(" + ");
+      const medOptionsHtml = `<option value="">Auto (${escHtmlAttr(detectedMedsLabel)})</option>` +
+        Object.entries(ANTICOAG_MEDS).map(([k, v]) => `<option value="${k}">${escHtmlAttr(v.shortName)}</option>`).join("");
 
       document.getElementById("modal-body").innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;">
@@ -8300,9 +8487,21 @@ html_template = """<!DOCTYPE html>
           ${ipp && ipp !== "Non spécifié" ? `<button class="action-btn primary" onclick="copyText(${escHtmlAttr(JSON.stringify(String(ipp)))}, this)">📋 Copier IPP</button>` : ""}
           ${phoneMatch ? `<a class="action-btn" href="tel:${phoneMatch[0].replace(/[^0-9+]/g, '')}">📞 Appeler</a>` : ""}
           ${emailMatch ? `<a class="action-btn" href="mailto:${emailMatch[0]}">✉️ Email</a>` : ""}
+          ${!anticoag ? `<button class="action-btn" onclick="document.getElementById('modal-anticoag-block').style.display='block'; this.style.display='none';">🩸 Anticoag</button>` : ""}
         </div>
 
         ${modalBlocHtml ? `<div style="margin-bottom:10px;">${modalBlocHtml}</div>` : ""}
+
+        <div id="modal-anticoag-block" class="detail-block" style="display:${anticoag ? "block" : "none"}; border-color:#FCA5A5; background:#FFFBFB; padding:9px 11px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">
+            <span style="font-size:11.5px; color:#B91C1C; font-weight:800;">🩸 Consignes Anticoagulant</span>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <select id="modal-anticoag-med" class="bloc-input" style="margin:0; padding:3px 6px; font-size:11px; width:auto;" onchange="refreshModalAnticoagPreview('${safeModalEvMeta}')">${medOptionsHtml}</select>
+              <button type="button" class="bloc-save-btn" style="background:#DC2626; padding:4px 9px; font-size:11px;" onclick="copyModalAnticoagText('${safeModalEvMeta}', this)">📋 Copier</button>
+            </div>
+          </div>
+          <div id="modal-anticoag-preview" style="font-size:11.5px; line-height:1.45; color:var(--text); white-space:pre-wrap; background:var(--bg-elevated); padding:7px 9px; border-radius:7px;">${escHtmlAttr(initialAnticoagText)}</div>
+        </div>
 
         <div class="detail-block">
           <div class="detail-label">Indication & Geste</div>
@@ -8326,6 +8525,30 @@ html_template = """<!DOCTYPE html>
         </div>
       `;
       document.getElementById("patient-modal").classList.add("open");
+    }
+
+    function refreshModalAnticoagPreview(encodedEvMeta) {
+      let ev = {};
+      try { ev = JSON.parse(decodeURIComponent(encodedEvMeta)); } catch (_) {}
+      const medSel = document.getElementById("modal-anticoag-med")?.value || null;
+      const box = document.getElementById("modal-anticoag-preview");
+      if (box) {
+        box.textContent = buildAnticoagProtocolTextForEvent(ev, medSel || null);
+      }
+    }
+
+    function copyModalAnticoagText(encodedEvMeta, btnEl) {
+      const box = document.getElementById("modal-anticoag-preview");
+      if (box && box.textContent) {
+        copyToClipboardText(box.textContent);
+        if (btnEl) {
+          const orig = btnEl.innerHTML;
+          btnEl.innerHTML = "✅ Copié !";
+          setTimeout(() => { btnEl.innerHTML = orig; }, 1500);
+        }
+        return;
+      }
+      copyPatientAnticoag(encodedEvMeta, btnEl, null);
     }
 
     function closeModal() {
@@ -8830,6 +9053,15 @@ html_out = (
 )
 
 assert_no_sensitive_data(html_out)
+
+import subprocess, tempfile
+for _idx, _scr in enumerate(re.findall(r"<script[^>]*>(.*?)</script>", html_out, re.S)):
+    with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as _tf:
+        _tf.write(_scr)
+        _tpath = _tf.name
+    _chk = subprocess.run(["node", "--check", _tpath], capture_output=True, text=True)
+    if _chk.returncode != 0:
+        raise RuntimeError(f"JS syntax error in script block {_idx}:\n{_chk.stderr}")
 
 with open("/Users/thomaslefevre/Documents/Agendainterventionnel/index.html", "w") as f:
     f.write(html_out)
