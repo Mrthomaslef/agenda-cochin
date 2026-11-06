@@ -549,12 +549,12 @@
   {
     "id": "tel-endocrino",
     "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
-    "name": "Service d'Endocrinologie & Programmation Hospitalisations (Copernic)",
-    "role": "Secrétariat 11878 / Programmation Hospit 11888 & 13940",
-    "poste": "11878 / 11888 / 13940",
-    "phone": "01 58 41 18 88",
-    "fax": "01 58 41 18 10",
-    "email": "",
+    "name": "Service d'Endocrinologie (Pr J. BERTHERAT) & Programmation Hospit (Copernic)",
+    "role": "Pr J. Bertherat : 11895 • Secr. 11878 • Programmation Hospit 11888 & 13940",
+    "poste": "11895 / 11878 / 11888 / 13940",
+    "phone": "01 58 41 18 95",
+    "fax": "01 58 41 18 10 / 01 46 33 80 60",
+    "email": "jerome.bertherat@aphp.fr",
     "building": "Pavillon Copernic"
   },
   {
@@ -582,13 +582,13 @@
   {
     "id": "tel-dermato-kramkimel",
     "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
-    "name": "Service de Dermatologie & Oncologie Cutanée (Dr Nora KRAMKIMEL)",
-    "role": "IDE Parcours HDJ : 11868 • RDV CS : 11919 • Secr. CS : Mme Valérie Bruandet",
-    "poste": "11868 / 11919",
-    "phone": "01 58 41 18 68",
+    "name": "Service de Dermatologie & Oncologie Cutanée (Pr N. DUPIN / Dr N. KRAMKIMEL / Dr C. LHEURE / Dr J. ARCHIMBAUD)",
+    "role": "Dr J. Archimbaud : DECT 14668 (Secr. 11838) • IDE Parcours HDJ : 11868 • RDV CS : 11919 • Secr. CS : Mme V. Bruandet",
+    "poste": "DECT 14668 / 11838 / 11868 / 11919",
+    "phone": "01 58 41 18 38",
     "fax": "",
-    "email": "nora.kramkimel@aphp.fr / ideparcours.dermato.cch@aphp.fr / valerie.bruandet@aphp.fr",
-    "building": "Site Port-Royal — Bâtiment Copernic"
+    "email": "nora.kramkimel@aphp.fr / juliette.archimbaud@aphp.fr / coralie.lheure@aphp.fr / ideparcours.dermato.cch@aphp.fr / valerie.bruandet@aphp.fr",
+    "building": "Site Port-Royal — Bâtiment Copernic / Tarnier"
   },
   {
     "id": "tel-onco-hegp",
