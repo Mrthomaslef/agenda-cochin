@@ -2416,7 +2416,7 @@ html_template = """<!DOCTYPE html>
       "2026-11-16": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["Gestes (C)", "TDM Ollier 4 (SAU)"], note: "", offCochin: false },
       "2026-11-17": { am: ["TDM Achard 1 (AG dès 11h)"], pm: ["TDM Achard 1"], note: "Vacation AG à 11h • Marie garde", offCochin: false },
       "2026-11-18": { am: ["Gestes (C)"], pm: ["Consultation", "TDM Ollier 4 (SAU)", "UCSA"], note: "", offCochin: false },
-      "2026-11-19": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "Jeudi libre en journée • Garde de nuit Cochin", offCochin: true },
+      "2026-11-19": { am: ["Journée libre Cochin"], pm: ["Journée libre Cochin"], note: "09h30 RDV Visio MACSF (Tony TAHIRI) • Jeudi libre en journée • Garde de nuit Cochin", offCochin: true },
       "2026-11-20": { am: ["Écho (9h-12h / Yang)"], pm: ["IRM"], note: "", offCochin: false },
       "2026-11-23": { am: ["Consultation", "UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)", "TDM Ollier 3"], note: "", offCochin: false },
       "2026-11-24": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "", offCochin: false },
@@ -3975,6 +3975,7 @@ html_template = """<!DOCTYPE html>
           medecin: rdv.medecin,
           title: rdv.title,
           lieu: rdv.lieu,
+          url: rdv.url || "",
           remarques: rdv.remarques,
           isMine: true
         });
@@ -6819,11 +6820,15 @@ html_template = """<!DOCTYPE html>
       }
       if (ev.category === "mail-rdv") {
         const shortDocRdv = formatShortDoc(ev.medecin);
+        const safeUrl = ev.url && /^https?:\/\//i.test(String(ev.url).trim()) ? escHtmlAttr(String(ev.url).trim()) : "";
         return `
           <div class="event-card type-mail-rdv">
             <div class="event-top">
               <span class="event-time-badge">${showDate ? `${ev.dateStr} · ` : ""}${ev.horaire}</span>
-              <span class="pill pill-mail-rdv">${ev.badgeLabel}</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                ${safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="pill" style="background:#0284C7; color:#FFF; text-decoration:none; font-weight:800;">🎥 Rejoindre Visio ↗</a>` : ""}
+                <span class="pill pill-mail-rdv">${ev.badgeLabel}</span>
+              </div>
             </div>
             <div class="event-patient"><span>${ev.title}</span></div>
             <div class="event-title">${ev.patient}</div>
