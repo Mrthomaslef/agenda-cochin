@@ -799,6 +799,19 @@ html_template = """<!DOCTYPE html>
       font-size: 10.5px;
       font-weight: 700;
     }
+    .anticoag-fold { border-color:#FCA5A5 !important; background:#FFFBFB !important; padding:0 !important; overflow:hidden; }
+    .anticoag-fold > summary { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; font-size:13px; font-weight:800; color:#B91C1C; touch-action:manipulation; }
+    .anticoag-fold > summary::-webkit-details-marker { display:none; }
+    .anticoag-fold > summary .af-chev { transition:transform .15s; font-size:12px; }
+    .anticoag-fold[open] > summary .af-chev { transform:rotate(90deg); }
+    .anticoag-fold .af-body { padding:0 12px 12px; }
+    .anticoag-fold .af-tools { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .anticoag-preview { font-size:14px; line-height:1.55; color:var(--text); background:var(--bg-elevated); padding:10px 12px; border-radius:9px; border-left:3px solid #DC2626; }
+    .anticoag-preview .ap-title { font-weight:800; margin-bottom:6px; }
+    .anticoag-preview .ap-line { margin-top:5px; }
+    .anticoag-preview .ap-line b { color:#B91C1C; }
+    html[data-theme="dark"] .anticoag-fold { background:rgba(220,38,38,0.08) !important; border-color:rgba(239,68,68,0.4) !important; }
+    html[data-theme="dark"] .anticoag-fold > summary, html[data-theme="dark"] .anticoag-preview .ap-line b { color:#FCA5A5; }
 
     /* WEEK VIEW */
     .week-day-card {
@@ -6876,7 +6889,6 @@ html_template = """<!DOCTYPE html>
           </div>
           ${mainLine ? `<div class="event-title">${mainLine}</div>` : ""}
           ${subLine ? `<div style="font-size:11px; color:var(--text-muted); margin-top:3px;">${subLine}</div>` : ""}
-          ${anticoag ? `<div class="alert-anticoag">Anticoagulant / Hémostase (voir fiche)</div>` : ""}
           ${renderBlocNotesHtml(ev, cardPrefix)}
         </div>
       `;
@@ -8394,7 +8406,6 @@ html_template = """<!DOCTYPE html>
           <div style="font-size:11.5px; color:var(--primary); font-weight:600; margin-top:3px;">
             📅 ${p["Échéance / Rendez-vous"] || "-"}
           </div>
-          ${anticoag ? `<div class="alert-anticoag">⚠️ Vigilance Anticoagulant / Antiagrégant</div>` : ""}
           ${renderBlocNotesHtml(patEv, patPrefix)}
         </div>
       `;
@@ -8473,7 +8484,7 @@ html_template = """<!DOCTYPE html>
           <div>
             <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
               <h2 style="margin:0; font-size:18px;">${name}</h2>
-              ${anticoag ? `<span class="alert-anticoag" onclick="const b=document.getElementById('modal-anticoag-block'); if(b) b.style.display=(b.style.display==='none'?'block':'none');" style="margin:0; padding:2px 8px; font-size:10.5px; display:inline-flex; align-items:center; gap:4px; border-radius:999px; cursor:pointer;" title="Vigilance Anticoagulant / Hémostase${detectedMedsLabel ? ' (' + escHtmlAttr(detectedMedsLabel) + ')' : ''} — cliquer pour afficher les consignes">🩸 Hémostase${detectedMedsLabel ? ` · ${escHtmlAttr(detectedMedsLabel)}` : ""}</span>` : ""}
+              ${anticoag ? `<span class="alert-anticoag" onclick="const b=document.getElementById('modal-anticoag-block'); if(b){ b.open=!b.open; if(b.open) b.scrollIntoView({behavior:'smooth', block:'nearest'}); }" style="margin:0; padding:2px 8px; font-size:10.5px; display:inline-flex; align-items:center; gap:4px; border-radius:999px; cursor:pointer;" title="Vigilance Anticoagulant / Hémostase${detectedMedsLabel ? ' (' + escHtmlAttr(detectedMedsLabel) + ')' : ''} — cliquer pour afficher les consignes">🩸 Hémostase${detectedMedsLabel ? ` · ${escHtmlAttr(detectedMedsLabel)}` : ""}</span>` : ""}
             </div>
             <div style="font-size:12px; color:var(--primary); font-family:monospace; margin-top:2px;">IPP : ${ipp}</div>
           </div>
@@ -8484,21 +8495,21 @@ html_template = """<!DOCTYPE html>
           ${ipp && ipp !== "Non spécifié" ? `<button class="action-btn primary" onclick="copyText(${escHtmlAttr(JSON.stringify(String(ipp)))}, this)">📋 Copier IPP</button>` : ""}
           ${phoneMatch ? `<a class="action-btn" href="tel:${phoneMatch[0].replace(/[^0-9+]/g, '')}">📞 Appeler</a>` : ""}
           ${emailMatch ? `<a class="action-btn" href="mailto:${emailMatch[0]}">✉️ Email</a>` : ""}
-          ${!anticoag ? `<button class="action-btn" onclick="document.getElementById('modal-anticoag-block').style.display='block'; this.style.display='none';">🩸 Anticoag</button>` : ""}
+          ${!anticoag ? `<button class="action-btn" onclick="const b=document.getElementById('modal-anticoag-block'); b.style.display='block'; b.open=true; this.style.display='none';">🩸 Anticoag</button>` : ""}
         </div>
 
         ${modalBlocHtml ? `<div style="margin-bottom:10px;">${modalBlocHtml}</div>` : ""}
 
-        <div id="modal-anticoag-block" class="detail-block" style="display:${anticoag ? "block" : "none"}; border-color:#FCA5A5; background:#FFFBFB; padding:9px 11px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:6px;">
-            <span style="font-size:11.5px; color:#B91C1C; font-weight:800;">🩸 Consignes Anticoagulant</span>
-            <div style="display:flex; align-items:center; gap:5px;">
-              <select id="modal-anticoag-med" class="bloc-input" style="margin:0; padding:3px 6px; font-size:11px; width:auto;" onchange="refreshModalAnticoagPreview('${safeModalEvMeta}')">${medOptionsHtml}</select>
-              <button type="button" class="bloc-save-btn" style="background:#DC2626; padding:4px 9px; font-size:11px;" onclick="copyModalAnticoagText('${safeModalEvMeta}', this)">📋 Copier</button>
+        <details id="modal-anticoag-block" class="detail-block anticoag-fold" style="display:${anticoag ? "block" : "none"};">
+          <summary><span>🩸 Gestion anticoagulant${detectedMedsLabel ? ` · ${escHtmlAttr(detectedMedsLabel)}` : ""}</span><span class="af-chev">▸</span></summary>
+          <div class="af-body">
+            <div class="af-tools">
+              <select id="modal-anticoag-med" class="bloc-input" style="margin:0; padding:5px 8px; font-size:13px; width:auto; flex:1; min-width:0;" onchange="refreshModalAnticoagPreview('${safeModalEvMeta}')">${medOptionsHtml}</select>
+              <button type="button" class="bloc-save-btn" style="background:#DC2626; padding:6px 12px; font-size:13px;" onclick="copyModalAnticoagText('${safeModalEvMeta}', this)">📋 Copier</button>
             </div>
+            <div id="modal-anticoag-preview" class="anticoag-preview" data-raw="${escHtmlAttr(initialAnticoagText)}">${formatAnticoagPreviewHtml(initialAnticoagText)}</div>
           </div>
-          <div id="modal-anticoag-preview" style="font-size:11.5px; line-height:1.45; color:var(--text); white-space:pre-wrap; background:var(--bg-elevated); padding:7px 9px; border-radius:7px;">${escHtmlAttr(initialAnticoagText)}</div>
-        </div>
+        </details>
 
         <div class="detail-block">
           <div class="detail-label">Indication & Geste</div>
@@ -8524,20 +8535,33 @@ html_template = """<!DOCTYPE html>
       document.getElementById("patient-modal").classList.add("open");
     }
 
+    function formatAnticoagPreviewHtml(text) {
+      return String(text || "").split("\\n").filter(l => l.trim()).map((l, i) => {
+        const safe = escHtmlAttr(l.trim());
+        if (/^•/.test(l.trim())) {
+          return `<div class="ap-line">${safe.replace(/^(•\\s*)([^:]+:)/, "$1<b>$2</b>")}</div>`;
+        }
+        return i === 0 ? `<div class="ap-title">${safe}</div>` : `<div class="ap-line">${safe}</div>`;
+      }).join("");
+    }
+
     function refreshModalAnticoagPreview(encodedEvMeta) {
       let ev = {};
       try { ev = JSON.parse(decodeURIComponent(encodedEvMeta)); } catch (_) {}
       const medSel = document.getElementById("modal-anticoag-med")?.value || null;
       const box = document.getElementById("modal-anticoag-preview");
       if (box) {
-        box.textContent = buildAnticoagProtocolTextForEvent(ev, medSel || null);
+        const txt = buildAnticoagProtocolTextForEvent(ev, medSel || null);
+        box.dataset.raw = txt;
+        box.innerHTML = formatAnticoagPreviewHtml(txt);
       }
     }
 
     function copyModalAnticoagText(encodedEvMeta, btnEl) {
       const box = document.getElementById("modal-anticoag-preview");
-      if (box && box.textContent) {
-        copyToClipboardText(box.textContent);
+      const rawTxt = box ? (box.dataset.raw || box.textContent) : "";
+      if (rawTxt) {
+        copyToClipboardText(rawTxt);
         if (btnEl) {
           const orig = btnEl.innerHTML;
           btnEl.innerHTML = "✅ Copié !";
