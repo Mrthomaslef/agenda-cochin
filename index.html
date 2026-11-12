@@ -2165,8 +2165,8 @@
         <input type="text" class="search-input" id="avis-interv-search" placeholder="Rechercher un avis interventionnel (patient, IPP, geste...)" oninput="renderAvisTab()" />
       </div>
       <div class="chips-row">
-        <button class="chip active" id="flt-avis-interv-all" onclick="setAvisIntervFilter('all')">Tous</button>
-        <button class="chip" id="flt-avis-interv-non" onclick="setAvisIntervFilter('Non répondu')">Non répondu</button>
+        <button class="chip active" id="flt-avis-interv-non" onclick="setAvisIntervFilter('Non répondu')">Non répondu</button>
+        <button class="chip" id="flt-avis-interv-all" onclick="setAvisIntervFilter('all')">Tous</button>
         <button class="chip" id="flt-avis-interv-oui" onclick="setAvisIntervFilter('Répondu')">Répondu</button>
         <button class="chip" id="btn-avis-interv-sort" onclick="toggleAvisSortOrder()" style="margin-left:auto;" title="Changer le sens de tri chronologique">🔽 Plus récents</button>
       </div>
@@ -2186,8 +2186,8 @@
         <input type="text" class="search-input" id="avis-diag-search" placeholder="Rechercher un avis diagnostic (patient, IPP, imagerie...)" oninput="renderAvisTab()" />
       </div>
       <div class="chips-row">
-        <button class="chip active" id="flt-avis-diag-all" onclick="setAvisDiagFilter('all')">Tous</button>
-        <button class="chip" id="flt-avis-diag-non" onclick="setAvisDiagFilter('Non répondu')">Non répondu</button>
+        <button class="chip active" id="flt-avis-diag-non" onclick="setAvisDiagFilter('Non répondu')">Non répondu</button>
+        <button class="chip" id="flt-avis-diag-all" onclick="setAvisDiagFilter('all')">Tous</button>
         <button class="chip" id="flt-avis-diag-oui" onclick="setAvisDiagFilter('Répondu')">Répondu</button>
         <button class="chip" id="btn-avis-diag-sort" onclick="toggleAvisSortOrder()" style="margin-left:auto;" title="Changer le sens de tri chronologique">🔽 Plus récents</button>
       </div>
@@ -3257,9 +3257,22 @@
       });
     }
 
-    function isAvisAnswered(st) {
-      const s = String(st || "").trim().toLowerCase();
-      return s.startsWith("répondu") || s.startsWith("repondu");
+    // Règle Thomas : un avis traité par un collègue / le secrétariat (programmé, annulé, récusé,
+    // à programmer…) SANS solliciter @TL personnellement est considéré comme Répondu.
+    // Accepte une ligne d'avis (objet) ou directement le texte du statut.
+    function isAvisAnswered(aOrSt) {
+      const isObj = aOrSt && typeof aOrSt === "object";
+      const st = String(isObj ? (aOrSt["Statut Réponse"] || "") : (aOrSt || "")).trim();
+      const s = st.toLowerCase();
+      if (s.startsWith("répondu") || s.startsWith("repondu")) return true;
+      if (!s || s.startsWith("non") || s.startsWith("à traiter") || s.startsWith("a traiter")) return false;
+      const dec = isObj ? String(aOrSt["Décision & Suite donnée"] || "") : "";
+      const meRe = /@tl([^a-z]|$)|(^|[^a-z@])tl([^a-z]|$)|thomas|lef[eè]vre/i;
+      const askRe = /attente|en cours|à confirmer|a confirmer|question|[?]/i;
+      if (meRe.test(s) && askRe.test(s)) return false;
+      if (/attente (avis|de réponse|réponse|retour)|en attente( *\(|$| de r)|en cours|à revoir|a revoir/i.test(s)) return false;
+      if (isObj && meRe.test(dec) && /demande à @?tl|attente @?tl|@tl *\?|à confirmer \(@?tl/i.test(dec)) return false;
+      return true;
     }
 
     const AVIS_INTERV_REGEX = /biopsie|microbiopsie|cryo|radiofr[ée]quence|rf|cimento|vert[ée]broplastie|alcoolisation|scl[ée]roth[ée]rapie|vissage|embolisation|[ée]lectrochimioth[ée]rapie|ect|infiltration|ponction|test\s+anesth|neurolyse|prp|acide\s+hyaluronique|ablation|percutan[ée]|traitement\s+local|radiologue\s+interventionnel|avis\s+ri|hdj\s+radio|achard\s*-1|cs\s+anesth|consultation\s+d'anesth/i;
@@ -3432,8 +3445,8 @@
 
       const intervAvis = (appData.Demandes_avis || []).filter(a => getAvisCategory(a) === "interventionnel");
       const diagAvis = (appData.Demandes_avis || []).filter(a => getAvisCategory(a) === "diagnostic");
-      const nonRepInterv = intervAvis.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
-      const nonRepDiag = diagAvis.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const nonRepInterv = intervAvis.filter(a => !isAvisAnswered(a)).length;
+      const nonRepDiag = diagAvis.filter(a => !isAvisAnswered(a)).length;
       const elKpiInterv = document.getElementById("kpi-avis-interv");
       if (elKpiInterv) elKpiInterv.textContent = nonRepInterv > 0 ? `${nonRepInterv} à rép.` : intervAvis.length;
       const elKpiDiag = document.getElementById("kpi-avis-diag");
@@ -7309,8 +7322,8 @@
     }
 
     // DEMANDES D'AVIS : 2 PAGES SÉPARÉES (AVIS INTERVENTIONNEL & AVIS DIAGNOSTIC)
-    let avisIntervFilter = "all";
-    let avisDiagFilter = "all";
+    let avisIntervFilter = "Non répondu";
+    let avisDiagFilter = "Non répondu";
 
     function syncAvisSortButton() {
       for (const id of ["btn-avis-interv-sort", "btn-avis-diag-sort"]) {
@@ -7337,7 +7350,7 @@
       if (bInt2) bInt2.textContent = `← 🔪 Avis Interventionnel (${intervList.length})`;
       if (bDia2) bDia2.textContent = `🩻 Avis Diagnostic (${diagList.length})`;
 
-      const intNon = intervList.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const intNon = intervList.filter(a => !isAvisAnswered(a)).length;
       const intOui = intervList.length - intNon;
       const fIntAll = document.getElementById("flt-avis-interv-all");
       const fIntNon = document.getElementById("flt-avis-interv-non");
@@ -7346,7 +7359,7 @@
       if (fIntNon) fIntNon.textContent = `Non répondu (${intNon})`;
       if (fIntOui) fIntOui.textContent = `Répondu (${intOui})`;
 
-      const diaNon = diagList.filter(a => !isAvisAnswered(a["Statut Réponse"])).length;
+      const diaNon = diagList.filter(a => !isAvisAnswered(a)).length;
       const diaOui = diagList.length - diaNon;
       const fDiaAll = document.getElementById("flt-avis-diag-all");
       const fDiaNon = document.getElementById("flt-avis-diag-non");
@@ -7434,7 +7447,7 @@
 
     function renderAvisCardHtml(a) {
       const st = String(a["Statut Réponse"] || "Non répondu");
-      const isRep = isAvisAnswered(st);
+      const isRep = isAvisAnswered(a);
       const avisCat = getAvisCategory(a);
       const isInterv = avisCat === "interventionnel";
       const catBadgeHtml = `<span class="pill ${isInterv ? "pill-acte" : "pill-img"}" style="cursor:pointer;" onclick="toggleAvisCategory(${a._row}, event)" title="Cliquer pour basculer entre Avis Interventionnel et Avis Diagnostic">${isInterv ? "🔪 Avis Interventionnel" : "🩻 Avis Diagnostic"}</span>`;
@@ -7489,9 +7502,9 @@
       let list = sortAvisChronologically(appData.Demandes_avis || [], avisSortOrder)
         .filter(a => getAvisCategory(a) === catKey);
       if (statusFilter === "Répondu") {
-        list = list.filter(a => isAvisAnswered(a["Statut Réponse"]));
+        list = list.filter(a => isAvisAnswered(a));
       } else if (statusFilter === "Non répondu") {
-        list = list.filter(a => !isAvisAnswered(a["Statut Réponse"]));
+        list = list.filter(a => !isAvisAnswered(a));
       }
       if (q) {
         list = list.filter(a => JSON.stringify(a).toLowerCase().includes(q));
