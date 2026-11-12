@@ -2398,6 +2398,20 @@
 
     const _initNow = new Date();
     let selectedDate = new Date(_initNow.getFullYear(), _initNow.getMonth(), _initNow.getDate(), 12, 0, 0);
+    // Jour réel lors du dernier affichage : si l'app (PWA iOS) reste ouverte en arrière-plan
+    // et qu'on la rouvre un autre jour, on revient automatiquement sur aujourd'hui.
+    let _lastSeenTodayIso = dateToIso(_initNow);
+    function rollSelectedDateIfNewDay() {
+      const now = new Date();
+      const todayIso = dateToIso(now);
+      if (todayIso === _lastSeenTodayIso) return false;
+      _lastSeenTodayIso = todayIso;
+      selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+      try { renderCalendar({ scrollStrip: true, alignMonday: true }); } catch (_) {}
+      try { updateKpis(); } catch (_) {}
+      return true;
+    }
+    setInterval(() => { if (document.visibilityState === "visible") rollSelectedDateIfNewDay(); }, 60000);
 
     let actesFilter = "all";
     let avisFilter = "all";
@@ -2786,6 +2800,7 @@
 
     let isSyncingNow = false;
     async function syncFromCloud(showIndicator) {
+      rollSelectedDateIfNewDay();
       const savedPin = localStorage.getItem(STORAGE_PIN_KEY);
       if (!savedPin || isSyncingNow) return;
       isSyncingNow = true;
@@ -3177,6 +3192,23 @@
       return `${dt}__${subj}`;
     }
 
+    // Règle Thomas : un mail traité par quelqu'un d'autre (collègue, secrétariat) SANS le solliciter
+    // personnellement (@TL / Thomas / Lefèvre + question ou attente) est considéré comme Répondu.
+    const PERSO_ME_RE = /@tl([^a-z]|$)|(^|[^a-z@])tl([^a-z]|$)|thomas|lef[eè]vre/i;
+    const PERSO_ASK_RE = /attente|en cours|à confirmer|a confirmer|question|[?]|avis/i;
+    const PERSO_REPLY_RE = /répondu|repondu|routé|route vers|programmé|reprogramm|confirmé|validé|valide par|traité|pris en charge|prise en charge|maintenue|calé|noté|dans l'agenda|demandé à|demandé par|récusé|annulé|fait |@(mh|mp|hm|ya|sl|al|ml)([^a-z]|$)/i;
+    function derivePersoStatus(item) {
+      const st = String(item["Statut"] || "").trim();
+      const note = String(item["Date Réponse / Note"] || "").trim();
+      const stl = st.toLowerCase();
+      const isNon = !st || stl.startsWith("non") || stl.startsWith("à répondre") || stl.startsWith("a repondre");
+      const txt = st + " " + note;
+      if (PERSO_ME_RE.test(txt) && (isNon || PERSO_ASK_RE.test(txt))) return "Non répondu";
+      if (!isNon) return "Répondu";
+      if (PERSO_REPLY_RE.test(note)) return "Répondu";
+      return "Non répondu";
+    }
+
     function loadPersoWithLocalStatus(cloudPersoMap) {
       let savedMap = {};
       try {
@@ -3215,9 +3247,10 @@
         const entry = sKey ? savedMap[sKey] : undefined;
         const resolvedStatus = (entry && typeof entry === "object" && entry.status)
           ? entry.status
-          : (typeof entry === "string" ? entry : item["Statut"]);
+          : (typeof entry === "string" ? entry : derivePersoStatus(item));
         return {
           ...item,
+          _statutDetail: item["Statut"] || "",
           _row: Number(item._row) > 0 ? Number(item._row) : (idx + 1),
           "Statut": resolvedStatus
         };
@@ -7624,6 +7657,7 @@
               ${q["Question / Action demandée"] || ""}
             </div>
             ${q["Date Réponse / Note"] ? `<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">📌 ${q["Date Réponse / Note"]}</div>` : ""}
+            ${q._statutDetail && q._statutDetail !== "Répondu" && q._statutDetail !== "Non répondu" ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">🏷️ ${q._statutDetail}</div>` : ""}
             <div style="margin-top:8px; display:flex; justify-content:flex-end; gap:6px;">
               ${emailAddr ? `<a class="btn-icon" style="text-decoration:none;" href="mailto:${escHtmlAttr(encodeURIComponent(emailAddr).replace(/%40/g, "@"))}?subject=${subj}">✉️ Répondre</a>` : ""}
               <button class="btn-icon" onclick="togglePersoStatus('${sKeyAttr}', '${nextStatus}')">
@@ -8540,6 +8574,7 @@
       syncLiveAnnuaireJson();
       document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
+          rollSelectedDateIfNewDay();
           syncLiveAnnuaireJson();
           if (localStorage.getItem(STORAGE_PIN_KEY)) {
             syncFromCloud(false);
