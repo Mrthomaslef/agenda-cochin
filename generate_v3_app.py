@@ -10,6 +10,22 @@ planning_path = "/Users/thomaslefevre/Documents/Agendainterventionnel/cochin_pla
 with open(planning_path) as f:
     general_planning = json.load(f)
 
+# Congés de Thomas + fermetures de postes (prioritaires sur toute vacation habituelle)
+_conges_path = "/Users/thomaslefevre/Documents/Agendainterventionnel/conges_thomas.json"
+try:
+    with open(_conges_path) as f:
+        conges_data = json.load(f)
+except FileNotFoundError:
+    conges_data = {"conges": [], "fermetures": []}
+
+# Vacations de Thomas extraites automatiquement du dernier planning d'Anne-Marie (sync_planning.py)
+_my_auto_path = "/Users/thomaslefevre/Documents/Agendainterventionnel/my_planning_auto.json"
+try:
+    with open(_my_auto_path) as f:
+        my_planning_auto = json.load(f)
+except FileNotFoundError:
+    my_planning_auto = {}
+
 def _clean_annuaire_entry(item):
     out = {}
     for k, v in item.items():
@@ -2398,6 +2414,14 @@ html_template = """<!DOCTYPE html>
 
     const DEFAULT_GARDES_HIVER = __GARDES_JSON__;
     const GENERAL_PLANNING_NOV = __GENERAL_PLANNING_JSON__;
+    // Congés de Thomas (conges_thomas.json) : priment sur toute vacation habituelle
+    const CONGES_THOMAS = __CONGES_JSON__;
+    const FERMETURES_POSTES = __FERMETURES_JSON__;
+    // Postes « TL » du dernier planning d'Anne-Marie (sync_planning.py → my_planning_auto.json)
+    const MY_PLANNING_AUTO = __MY_PLANNING_AUTO_JSON__;
+    function getCongeForIso(iso) {
+      return (CONGES_THOMAS || []).find(c => iso >= c.start && iso <= c.end) || null;
+    }
     const COCHIN_ANNUAIRE = __ANNUAIRE_JSON__;
 
     // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
@@ -3581,7 +3605,24 @@ html_template = """<!DOCTYPE html>
     }
 
     function getMyVacationForIso(isoDate) {
-      if (MY_VACATIONS[isoDate]) return MY_VACATIONS[isoDate];
+      const manual = MY_VACATIONS[isoDate];
+      // 1. Congés / vacances : jamais de vacation habituelle (seuls les jours fériés gardent leur libellé)
+      const conge = getCongeForIso(isoDate);
+      if (conge) {
+        if (manual && /férié/i.test(manual.am[0] || "")) return Object.assign({}, manual, { isConge: true });
+        return { am: [conge.label], pm: [conge.label], note: conge.note || conge.label, offCochin: true, isConge: true };
+      }
+      // 2. Journée hors Cochin saisie à la main (formation, libéral, férié…) ou forçage manuel
+      if (manual && (manual.offCochin || manual.manual)) return manual;
+      // 3. Dernier planning d'Anne-Marie (prend en compte ses modifications V2, V3, V4…)
+      const auto = MY_PLANNING_AUTO[isoDate];
+      if (auto) {
+        const am = auto.am.length ? auto.am : (manual ? manual.am : ["Pas de vacation programmée"]);
+        const pm = auto.pm.length ? auto.pm : (manual ? manual.pm : ["Pas de vacation programmée"]);
+        const isOff = l => /libre|férié|pas de vacation/i.test(l || "");
+        return { am, pm, note: manual ? manual.note : "", offCochin: am.every(isOff) && pm.every(isOff) };
+      }
+      if (manual) return manual;
       const [y, m, d] = isoDate.split("-").map(Number);
       const dt = new Date(y, m - 1, d, 12, 0, 0);
       const dow = dt.getDay();
@@ -3757,7 +3798,7 @@ html_template = """<!DOCTYPE html>
       return expanded.join(" / ");
     }
 
-    function getGeneralPlanningForIso(isoDate) {
+    function getGeneralPlanningBaseForIso(isoDate) {
       if (GENERAL_PLANNING_NOV[isoDate]) return GENERAL_PLANNING_NOV[isoDate];
       if (!isoDate) return { am: [], pm: [] };
       const [y, m, d] = isoDate.split("-").map(Number);
@@ -3765,6 +3806,27 @@ html_template = """<!DOCTYPE html>
       const dow = dt.getDay();
       if (GENERAL_MAQUETTE_DOW[dow]) return GENERAL_MAQUETTE_DOW[dow];
       return { am: [], pm: [] };
+    }
+
+    function getGeneralPlanningForIso(isoDate) {
+      const base = getGeneralPlanningBaseForIso(isoDate);
+      if (!isoDate) return base;
+      const conge = getCongeForIso(isoDate);
+      const closures = (FERMETURES_POSTES || []).filter(f => isoDate >= f.start && isoDate <= f.end);
+      if (!conge && !closures.length) return base;
+      const tlRe = /(^|[^A-Z])TL([^A-Z]|$)/;
+      const adjust = items => (items || []).map(it => {
+        if (closures.some(f => String(f.poste).toUpperCase() === String(it.poste).toUpperCase())) {
+          return { poste: it.poste, doc: "FERMÉ", closed: true };
+        }
+        if (conge && !it.closed && tlRe.test(String(it.doc || "").toUpperCase())) {
+          const rest = String(it.doc).replace(/\\(.*?\\)/g, "").split(/[\\/,]/).map(x => x.trim()).filter(x => x && !/^TL\\b/i.test(x));
+          if (it.demiOff || /staff/i.test(it.poste)) return rest.length ? { ...it, doc: rest.join("/") } : null;
+          return { ...it, doc: rest.length ? rest.join("/") : "À pourvoir (TL en congés)" };
+        }
+        return it;
+      }).filter(Boolean);
+      return { am: adjust(base.am), pm: adjust(base.pm) };
     }
 
     function formatVacationPosteLabel(posteStr, periodKey) {
@@ -6509,6 +6571,8 @@ html_template = """<!DOCTYPE html>
       if (firstPost.includes("libéral") || firstPost.includes("jdp")) return { lbl: "JDP/GSH", cls: "post-liberal" };
       if (firstPost.includes("masterclass") || firstPost.includes("formation") || firstPost.includes("j.a.e")) return { lbl: "Master.", cls: "post-staff" };
       if (firstPost.includes("libre")) return { lbl: "Libre", cls: "post-libre" };
+      if (myV.isConge || /cong[ée]|vacances/.test(firstPost)) return { lbl: "Congés", cls: "post-libre" };
+      if (myV.offCochin) return { lbl: "Hors Cochin", cls: "post-libre" };
       const def = MAQUETTE_DEFAULT_DOW[dow] || { short: "Cochin", color: "post-cs" };
       return { lbl: def.short, cls: def.color };
     }
@@ -6979,6 +7043,10 @@ html_template = """<!DOCTYPE html>
               tagHtml = `<div class="month-vac-tag post-liberal">JDP/GSH</div>`;
             } else if (firstPost.includes("masterclass")) {
               tagHtml = `<div class="month-vac-tag post-staff">OsteoCool</div>`;
+            } else if (myV.isConge || /cong[ée]|vacances/.test(firstPost)) {
+              tagHtml = `<div class="month-vac-tag post-libre">Congés</div>`;
+            } else if (myV.offCochin) {
+              tagHtml = `<div class="month-vac-tag post-libre">${firstPost.includes("libre") ? "Libre" : "Hors Cochin"}</div>`;
             } else {
               const def = MAQUETTE_DEFAULT_DOW[dow];
               tagHtml = `<div class="month-vac-tag ${def.color}">${def.short}</div>`;
@@ -8694,6 +8762,9 @@ html_out = (
     html_template
     .replace("__GARDES_JSON__", js_json(gardes_dict))
     .replace("__GENERAL_PLANNING_JSON__", js_json(general_planning))
+    .replace("__CONGES_JSON__", js_json(conges_data.get("conges", [])))
+    .replace("__FERMETURES_JSON__", js_json(conges_data.get("fermetures", [])))
+    .replace("__MY_PLANNING_AUTO_JSON__", js_json(my_planning_auto))
     .replace("__ANNUAIRE_JSON__", js_json(cochin_phone_directory))
     .replace("__INITIAL_SHEET_DATA_JSON__", "{}")
 )
