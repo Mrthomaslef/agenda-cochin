@@ -2941,7 +2941,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v79"; /*__APP_BUILD_ID:v79__*/
+        const CURRENT_BUILD_ID = "v80"; /*__APP_BUILD_ID:v80__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -5856,6 +5856,11 @@ html_template = """<!DOCTYPE html>
       const sEntry = getSuiviEntry(ev);
       // Consultation dictée (Écoute intelligente) : le CR dicté, déjà rédigé selon la trame habituelle, prime
       // sur la trame générique (sauf lettre personnalisée du Dr Lefevre pour ce mode).
+      // Consultation : la lettre validée (pré-op ou suivi) est rendue quel que soit le mode affiché.
+      if ((mode === "preop" || mode === "suivi") && ev.category === "cs") {
+        const lettre = mode === "suivi" ? (prof.customSuiviBody || prof.customPreopBody) : (prof.customPreopBody || prof.customSuiviBody);
+        if (lettre) return String(lettre).replace("__DDN_CLAUSE__", "").replace(/Dr Thomas Lef[eè]vre/g, "Dr Thomas Lefevre");
+      }
       const hasCustomForMode = (mode === "preop" && prof.customPreopBody) || (mode === "suivi" && prof.customSuiviBody);
       if ((mode === "preop" || mode === "suivi") && ev.category === "cs" && !hasCustomForMode) {
         const dictes = String((sEntry && sEntry.suivi_cs) || "").split(/—\\s*CR de consultation dicté[^\\n]*—/).slice(1);
