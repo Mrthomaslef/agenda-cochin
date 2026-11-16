@@ -129,8 +129,13 @@ function readTabRows_(sheet, headerRow, startCol, numCols) {
 // elle est lue dans les Propriétés du script (Paramètres du projet > Propriétés du script > APP_CODE_SHA256).
 var APP_CODE_SHA256 = PropertiesService.getScriptProperties().getProperty("APP_CODE_SHA256") || "__non_configure__";
 var ADMIN_TOKEN_SHA256 = "e09ae48cb07c575df6ee27400c66fdbe072e7491d960a924af330997e01624e0";
-var AUTH_MAX_FAILURES = 8;           // échecs tolérés...
+// Plusieurs codes possibles : APP_CODE_SHA256 peut contenir une liste d'empreintes séparées par des virgules.
+var APP_CODE_HASHES = APP_CODE_SHA256.split(",").map(function (h) { return h.trim().toLowerCase(); })
+  .filter(function (h) { return /^[0-9a-f]{64}$/.test(h); });
+var AUTH_MAX_FAILURES = 8;           // échecs tolérés PAR code essayé...
 var AUTH_WINDOW_SECONDS = 15 * 60;   // ...par fenêtre de 15 minutes
+var AUTH_MAX_GLOBAL_FAILURES = 500;  // garde-fou global (anti force brute) très large : un appareil
+                                     // avec un code périmé ne doit plus bloquer tous les autres.
 
 var PROP_PERSO_STATUS = "cochin_perso_status_v4";
 var PROP_SUIVI_BLOC = "cochin_suivi_bloc_v1";
@@ -170,14 +175,18 @@ function authenticate_(payload) {
       constantTimeEquals_(sha256Hex_(adminTok), ADMIN_TOKEN_SHA256)) {
     return "admin";
   }
-  var failures = Number(cache.get("auth_failures") || 0);
-  if (failures >= AUTH_MAX_FAILURES) return null;
   var code = normalizeAccessCode_(payload.token);
-  if (code && APP_CODE_SHA256.indexOf("__") !== 0 &&
-      constantTimeEquals_(sha256Hex_(code), APP_CODE_SHA256)) {
-    return "app";
+  if (!code) return null;
+  var codeHash = sha256Hex_(code);
+  var tokKey = "auth_fail_" + codeHash.substr(0, 24);
+  var tokFailures = Number(cache.get(tokKey) || 0);
+  var globalFailures = Number(cache.get("auth_failures_global") || 0);
+  if (tokFailures >= AUTH_MAX_FAILURES || globalFailures >= AUTH_MAX_GLOBAL_FAILURES) return null;
+  for (var i = 0; i < APP_CODE_HASHES.length; i++) {
+    if (constantTimeEquals_(codeHash, APP_CODE_HASHES[i])) return "app";
   }
-  cache.put("auth_failures", String(failures + 1), AUTH_WINDOW_SECONDS);
+  cache.put(tokKey, String(tokFailures + 1), AUTH_WINDOW_SECONDS);
+  cache.put("auth_failures_global", String(globalFailures + 1), AUTH_WINDOW_SECONDS);
   return null;
 }
 
