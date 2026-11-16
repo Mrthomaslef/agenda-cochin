@@ -476,6 +476,8 @@ function saveSuivi_(ss, raw) {
   try {
     var props = PropertiesService.getScriptProperties();
     var cur = getJsonProperty_(PROP_SUIVI_BLOC, {});
+    // Le marqueur « CR validé » (posé par sync_cr_valides.py) survit aux modifications faites dans l'app.
+    if (cur[entry.suivi_key] && cur[entry.suivi_key].cr_valide) entry.cr_valide = cur[entry.suivi_key].cr_valide;
     cur[entry.suivi_key] = entry;
     props.setProperty(PROP_SUIVI_BLOC, JSON.stringify(cur));
   } catch (e2) {}

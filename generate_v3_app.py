@@ -1437,6 +1437,7 @@ html_template = """<!DOCTYPE html>
     }
 
     /* BLOC / SUIVI OPÉRATOIRE (MATÉRIEL UTILISÉ & REMARQUES - LIGHT THEME) */
+    .cr-valide-badge { display:inline-flex; align-items:center; gap:3px; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:700; background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; white-space:nowrap; }
     .bloc-toggle-row {
       margin-top: 7px;
       display: flex;
@@ -2941,7 +2942,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v80"; /*__APP_BUILD_ID:v80__*/
+        const CURRENT_BUILD_ID = "v81"; /*__APP_BUILD_ID:v81__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3186,6 +3187,7 @@ html_template = """<!DOCTYPE html>
         remarques: stored.remarques !== undefined && stored.remarques !== "" ? stored.remarques : patRem,
         anapath: stored.anapath !== undefined && stored.anapath !== "" ? stored.anapath : patAna,
         suivi_cs: stored.suivi_cs !== undefined && stored.suivi_cs !== "" ? stored.suivi_cs : patSuiviCs,
+        cr_valide: stored.cr_valide || "",
         updated_at: stored.updated_at || ""
       };
     }
@@ -6339,6 +6341,7 @@ html_template = """<!DOCTYPE html>
       const hasAnticoagAlert = Boolean(detectAnticoagAlert(`${ev.remarques || ""} ${masterRec ? (masterRec["Coordonnées / DDN"] || "") + " " + (masterRec["Instructions & Remarques Cliniques"] || "") : ""}`));
       return `
         <div class="bloc-toggle-row" onclick="event.stopPropagation()">
+          ${sEntry.cr_valide ? `<span class="cr-valide-badge" title="CR validé collé dans « CR consultation » (Drive) — ${escHtmlAttr(sEntry.cr_valide)}">✅ CR validé</span>` : ""}
           <button type="button" class="bloc-toggle-btn ${hasSaved ? "has-saved" : ""}" id="btn-${boxDomId}" onclick="toggleBlocNotes('${boxDomId}', event)">
             <span>Notes</span>
             <span id="${prefix}btnbadge-${sKey}" style="font-size:10px;">${hasSaved ? "✓" : ""}</span>
