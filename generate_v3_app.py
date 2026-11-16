@@ -2941,7 +2941,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v78"; /*__APP_BUILD_ID:v78__*/
+        const CURRENT_BUILD_ID = "v79"; /*__APP_BUILD_ID:v79__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -7253,7 +7253,8 @@ html_template = """<!DOCTYPE html>
         if (s.includes(" -> ")) return s.replace(" -> ", ` (IPP ${ippClean}) -> `);
         return `${s} (IPP ${ippClean})`;
       };
-      const customNote = [sEntry.suivi_cs, sEntry.remarques]
+      // Les CR dictés (Écoute intelligente) ne sont pas des consignes secrétariat : seules les notes saisies à la main comptent.
+      const customNote = [String(sEntry.suivi_cs || "").split(/—\\s*CR de consultation dicté/)[0], sEntry.remarques]
         .map(x => String(x || "").trim())
         .filter(Boolean)
         .join(" • ");
@@ -7322,7 +7323,8 @@ html_template = """<!DOCTYPE html>
         const ippClean = resolvePatientIpp(ev.patient, ev.ipp, master, prof);
         const ippBit = ippClean.length >= 7 ? ` — IPP ${ippClean}` : " — IPP [à compléter]";
         const horBit = ev.horaire ? `[${ev.horaire}] ` : "";
-        const actionStr = inferSecretaryActionForCs(ev);
+        // L'IPP figure déjà sur la ligne du patient : pas de doublon dans l'action.
+        const actionStr = String(inferSecretaryActionForCs(ev) || "").replace(/\\s*\\(IPP\\s*\\d+\\)/g, "").trim();
         lines.push(`• ${horBit}${civNom}${ddnBit}${ippBit} :`);
         lines.push(`  -> ${actionStr}`);
         lines.push("");
