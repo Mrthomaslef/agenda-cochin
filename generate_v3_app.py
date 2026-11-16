@@ -2942,7 +2942,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v81"; /*__APP_BUILD_ID:v81__*/
+        const CURRENT_BUILD_ID = "v82"; /*__APP_BUILD_ID:v82__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -3125,6 +3125,10 @@ html_template = """<!DOCTYPE html>
           if (cloudSuivi[k] && (!localMap[k] || (cloudSuivi[k].updated_at && (!localMap[k].updated_at || cloudSuivi[k].updated_at >= localMap[k].updated_at)))) {
             suiviBlocMap[k] = cloudSuivi[k];
           }
+          // Le marqueur « CR validé » vient toujours du serveur, même si la copie locale est plus récente.
+          if (cloudSuivi[k] && cloudSuivi[k].cr_valide && suiviBlocMap[k] && !suiviBlocMap[k].cr_valide) {
+            suiviBlocMap[k] = Object.assign({}, suiviBlocMap[k], { cr_valide: cloudSuivi[k].cr_valide });
+          }
         }
         try {
           localStorage.setItem(STORAGE_SUIVI_KEY, JSON.stringify(suiviBlocMap));
@@ -3228,6 +3232,7 @@ html_template = """<!DOCTYPE html>
         remarques,
         anapath,
         suivi_cs,
+        cr_valide: (suiviBlocMap[suiviKey] && suiviBlocMap[suiviKey].cr_valide) || "",
         updated_at: new Date().toISOString()
       };
       const patNorm = normName(meta.patient);
