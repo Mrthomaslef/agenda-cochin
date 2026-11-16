@@ -2838,7 +2838,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v70"; /*__APP_BUILD_ID:v70__*/
+        const CURRENT_BUILD_ID = "v71"; /*__APP_BUILD_ID:v71__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -4572,7 +4572,10 @@
         const isDesmoide = /desmo[ïi]de/i.test(fullCtx);
         const hasBiopsie = /biopsie/i.test(fullCtx);
         let desmoLoc = "[<localisation à préciser>]";
-        if (/flanc\s+gauche/i.test(fullCtx)) desmoLoc = "du flanc gauche";
+        if (/paroi\s+thoracique\s+ant[ée]rieure\s+gauche/i.test(fullCtx)) desmoLoc = "de la paroi thoracique antérieure gauche";
+        else if (/paroi\s+thoracique\s+ant[ée]rieure\s+droite/i.test(fullCtx)) desmoLoc = "de la paroi thoracique antérieure droite";
+        else if (/paroi\s+thoracique/i.test(fullCtx)) desmoLoc = `de la paroi thoracique${sideStr ? ` ${sideStr}` : ""}`;
+        else if (/flanc\s+gauche/i.test(fullCtx)) desmoLoc = "du flanc gauche";
         else if (/sus[\s\-]*claviculaire/i.test(fullCtx)) desmoLoc = "du creux sus-claviculaire";
         else if (/paravertebral|paravertébral/i.test(fullCtx)) desmoLoc = `du nodule paravertébral ${sideStr || "[<côté>]"}`;
         else if (/hanche/i.test(fullCtx)) desmoLoc = `de la hanche ${sideStr ? sideStr : "[<droite / gauche>]"}`;
