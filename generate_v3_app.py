@@ -2154,7 +2154,7 @@ html_template = """<!DOCTYPE html>
     <div class="lock-card">
       <div class="lock-logo"><img src="icon.svg?v=3" alt="Cochin RI" /></div>
       <h2 class="lock-title">Cochin Radiologie B</h2>
-      <p class="lock-sub">Dr Thomas Lefèvre</p>
+      <p class="lock-sub">Dr Thomas Lefevre</p>
       <form class="pin-form" onsubmit="submitPinForm(event)">
         <input
           type="password"
@@ -2448,7 +2448,7 @@ html_template = """<!DOCTYPE html>
     }
     const COCHIN_ANNUAIRE = __ANNUAIRE_JSON__;
 
-    // Vacations personnelles Dr Thomas Lefèvre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
+    // Vacations personnelles Dr Thomas Lefevre (Planning Anne-Marie V3 + Vacations Clinique du Sport / JDP / GSH avec Catherine Deforge)
     const MY_VACATIONS = {
       "2026-11-02": { am: ["UCSA", "Staff RCP Méta OS"], pm: ["TDM Ollier 4 (SAU)"], note: "Prise de poste Cochin • RCP Méta-Os (DUBOIS O. & QUENTIN V.) • 15h IGEA • Marie 23h", offCochin: false },
       "2026-11-03": { am: ["TDM Achard 1"], pm: ["TDM Achard 1"], note: "4 gestes prévus (MARANDET 08h, DENIS 10h30, 3e à conf., CANTIN en fin de planning)", offCochin: false },
@@ -2941,7 +2941,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v76"; /*__APP_BUILD_ID:v76__*/
+        const CURRENT_BUILD_ID = "v77"; /*__APP_BUILD_ID:v77__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -5747,7 +5747,9 @@ html_template = """<!DOCTYPE html>
       // 2. Analyse combinée des annotations saisies dans Remarques et Suivi CS (le champ Matériel est volontairement ignoré)
       const rawBlocks = [];
       if (sEntry.remarques && sEntry.remarques.trim()) rawBlocks.push(sEntry.remarques.trim());
-      if (sEntry.suivi_cs && sEntry.suivi_cs.trim()) rawBlocks.push(sEntry.suivi_cs.trim());
+      // Les CR dictés (Écoute intelligente) ne sont jamais découpés en annotations : ils sont repris tels quels.
+      const suiviSansDictes = String(sEntry.suivi_cs || "").split(/—\\s*CR de consultation dicté/)[0].trim();
+      if (suiviSansDictes) rawBlocks.push(suiviSansDictes);
 
       const seenClauses = new Set();
       for (const block of rawBlocks) {
@@ -5852,6 +5854,19 @@ html_template = """<!DOCTYPE html>
       }
       const prof = inferPatientCrProfile(ev);
       const sEntry = getSuiviEntry(ev);
+      // Consultation dictée (Écoute intelligente) : le CR dicté, déjà rédigé selon la trame habituelle, prime
+      // sur la trame générique (sauf lettre personnalisée du Dr Lefevre pour ce mode).
+      const hasCustomForMode = (mode === "preop" && prof.customPreopBody) || (mode === "suivi" && prof.customSuiviBody);
+      if ((mode === "preop" || mode === "suivi") && ev.category === "cs" && !hasCustomForMode) {
+        const dictes = String((sEntry && sEntry.suivi_cs) || "").split(/—\\s*CR de consultation dicté[^\\n]*—/).slice(1);
+        const dernier = dictes.length ? dictes[dictes.length - 1].trim() : "";
+        if (dernier) {
+          return dernier
+            .replace(/\\n\\s*Radiologie B\\s*[—-]\\s*Hôpital Cochin\\s*$/i, "")
+            .replace(/Dr Thomas Lef[eè]vre/g, "Dr Thomas Lefevre")
+            .trim();
+        }
+      }
       const ageAccord = prof.fem ? "âgée" : "âgé";
       const suiviAccord = prof.fem ? "suivie" : "suivi";
       const hospitAccord = prof.fem ? "hospitalisée" : "hospitalisé";
@@ -5899,10 +5914,7 @@ html_template = """<!DOCTYPE html>
           const neeLabelCustom = prof.fem ? "née" : "né";
           const ddnStrCustom = prof.ddn || "[<JJ/MM/AAAA>]";
           let customOut = prof.customPreopBody.replace("__DDN_CLAUSE__", `${neeLabelCustom} le ${ddnStrCustom}, `);
-          if (ann.recommandations.length > 0) {
-            customOut = customOut.replace(/\\nBien confraternellement,/, `\\nEn vue de cette prise en charge, il est recommandé : ${ann.recommandations.join(" ; ")}.\\n\\nBien confraternellement,`);
-          }
-          return customOut;
+          return customOut; // lettre rédigée = version finale, rien n'y est ajouté
         }
         const masterForPreop = findPatientMasterRecord(ev.patient, ev.ipp);
         const combinedPreop = `${ev.title || ""} ${ev.remarques || ""} ${prof.motif || ""} ${prof.gesteRetenu || ""} ${masterForPreop ? (masterForPreop["Type d'Intervention / Suivi"] || "") + " " + (masterForPreop["Instructions & Remarques Cliniques"] || "") : ""}`;
@@ -5948,7 +5960,7 @@ html_template = """<!DOCTYPE html>
             "",
             "Bien confraternellement,",
             "",
-            "Dr Thomas Lefèvre"
+            "Dr Thomas Lefevre"
           );
           return linesMortonPreop.join("\\n");
         }
@@ -6001,7 +6013,7 @@ html_template = """<!DOCTYPE html>
           "",
           "Bien confraternellement,",
           "",
-          "Dr Thomas Lefèvre"
+          "Dr Thomas Lefevre"
         );
         return linesPreop.join("\\n");
       }
@@ -6171,7 +6183,7 @@ html_template = """<!DOCTYPE html>
         "",
         "Bien confraternellement,",
         "",
-        "Dr Thomas Lefèvre"
+        "Dr Thomas Lefevre"
       );
       return linesSuivi.join("\\n");
     }
@@ -7290,8 +7302,8 @@ html_template = """<!DOCTYPE html>
         : isoDate;
       const lines = [
         isTue
-          ? `Objet : Suites de la vacation du mardi (${dateStr}) — Fin de journée — Dr Thomas Lefèvre`
-          : `Objet : Suites des consultations du matin (${dateStr}) — Dr Thomas Lefèvre`,
+          ? `Objet : Suites de la vacation du mardi (${dateStr}) — Fin de journée — Dr Thomas Lefevre`
+          : `Objet : Suites des consultations du matin (${dateStr}) — Dr Thomas Lefevre`,
         "",
         "Bonjour Mariana, bonjour Gyslève,",
         "",
