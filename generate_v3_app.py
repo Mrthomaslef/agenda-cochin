@@ -26,6 +26,20 @@ try:
 except FileNotFoundError:
     my_planning_auto = {}
 
+# Internes par poste (lecture seule du planning des internes, jamais modifié ici)
+_internes_path = "/Users/thomaslefevre/Documents/planning-interne/internes_data.json"
+internes_by_day = {}
+try:
+    with open(_internes_path) as f:
+        _int_sched = json.load(f).get("schedule", {})
+    for _iso, _day in _int_sched.items():
+        _out = {}
+        for _per in ("am", "pm"):
+            _out[_per] = [[_e.get("poste", ""), _e.get("interne", "")] for _e in (_day.get(_per) or []) if _e.get("interne")]
+        internes_by_day[_iso] = _out
+except Exception as _int_err:
+    print("Warning: internes_data.json non lu:", _int_err)
+
 def _clean_annuaire_entry(item):
     out = {}
     for k, v in item.items():
@@ -579,8 +593,16 @@ html_template = """<!DOCTYPE html>
       flex-wrap: wrap;
       gap: 4px;
     }
+    .post-pill-interne {
+      font-size: 9.5px;
+      font-weight: 600;
+      opacity: 0.8;
+      margin-left: 2px;
+      white-space: nowrap;
+    }
     .post-pill {
       display: inline-flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 4px;
       padding: 3px 7px;
@@ -2419,6 +2441,8 @@ html_template = """<!DOCTYPE html>
     const FERMETURES_POSTES = __FERMETURES_JSON__;
     // Postes « TL » du dernier planning d'Anne-Marie (sync_planning.py → my_planning_auto.json)
     const MY_PLANNING_AUTO = __MY_PLANNING_AUTO_JSON__;
+    // Internes affectés à chaque poste (planning des internes, lecture seule)
+    const INTERNES_BY_DAY = __INTERNES_BY_DAY_JSON__;
     function getCongeForIso(iso) {
       return (CONGES_THOMAS || []).find(c => iso >= c.start && iso <= c.end) || null;
     }
@@ -3843,10 +3867,33 @@ html_template = """<!DOCTYPE html>
       return s;
     }
 
-    function renderPostPills(items, isGeneral, periodKey = "am", showHours = true) {
+    function internePosteKey(label) {
+      const l = String(label || "").toLowerCase();
+      if (/achard/.test(l)) return "achard";
+      if (/sau|ollier\s*4/.test(l)) return "sau";
+      if (/ollier\s*3|ollier diag/.test(l)) return "ollier3";
+      if (/allura/.test(l)) return "allura";
+      if (/gestes|poste\s*c\b/.test(l)) return "gestes";
+      if (/[ée]cho/.test(l)) return "echo";
+      if (/irm/.test(l)) return "irm";
+      return "";
+    }
+    function getInternesForPoste(iso, periodKey, label) {
+      const key = internePosteKey(label);
+      const day = iso && INTERNES_BY_DAY[iso];
+      if (!key || !day) return [];
+      const names = (day[periodKey] || []).filter(([p]) => internePosteKey(p) === key).map(([, n]) => n);
+      return [...new Set(names)];
+    }
+
+    function renderPostPills(items, isGeneral, periodKey = "am", showHours = true, iso = "") {
       if (!items || items.length === 0) return `<span class="post-pill post-libre">-</span>`;
       if (!isGeneral) {
-        return items.map(txt => `<span class="post-pill ${postColorClass(txt)}">${showHours ? formatVacationPosteLabel(txt, periodKey) : txt}</span>`).join("");
+        return items.map(txt => {
+          const ints = getInternesForPoste(iso, periodKey, txt);
+          const intHtml = ints.length ? `<span class="post-pill-interne">👩‍⚕️ ${ints.join(" / ")}</span>` : "";
+          return `<span class="post-pill ${postColorClass(txt)}">${showHours ? formatVacationPosteLabel(txt, periodKey) : txt}${intHtml}</span>`;
+        }).join("");
       }
       return items.map(it => {
         const isClosed = Boolean(it.closed || /ferm[eé]|maintenance/i.test(String(it.doc || "")));
@@ -4038,9 +4085,22 @@ html_template = """<!DOCTYPE html>
           isMine: res.isMine
         });
       }
+      // Un même patient ne doit apparaître qu'une fois par jour : une ligne « Biopsies » déjà présente dans « actes » (même patient/IPP, même date) est ignorée
+      const gestureKeys = new Set();
+      const gestureKeyOf = (row, iso) => {
+        const ippDigits = String(row["N° Dossier / IPP"] || "").replace(/\D/g, "");
+        return [`${iso || row["Date"] || ""}|n:${normName(row["Identité Patient"])}`, /^80\d{8}$/.test(ippDigits) ? `${iso || row["Date"] || ""}|i:${ippDigits}` : ""].filter(Boolean);
+      };
+      for (const a of (appData.actes || [])) {
+        if (!String(a["Identité Patient"] || "").trim() || String(a["Date"] || "").includes("SEMAINE")) continue;
+        gestureKeyOf(a, parseFrDateToIso(a["Date"])).forEach(k => gestureKeys.add(k));
+      }
       for (const b of (appData.Biopsies || [])) {
         if (!String(b["Identité Patient"] || "").trim() || String(b["Date"] || "").includes("SEMAINE")) continue;
         const iso = parseFrDateToIso(b["Date"]);
+        const bKeys = gestureKeyOf(b, iso);
+        if (bKeys.some(k => gestureKeys.has(k))) continue;
+        bKeys.forEach(k => gestureKeys.add(k));
         const res = resolveEventWithPlanning(b["Médecin en charge"], b["Type d'acte / Consultation"], b["Lieu / Modalité"], iso, b["Horaire"], "biopsie", b["Instructions & Remarques"], b["Identité Patient"]);
         events.push({
           row: b._row || 0,
@@ -6856,11 +6916,11 @@ html_template = """<!DOCTYPE html>
             <div class="vac-grid">
               <div class="vac-card">
                 <div class="vac-period">${isGeneral ? "Matin (Chefs Radio B)" : "Matin (TL)"}</div>
-                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am")}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am", true, iso)}</div>
               </div>
               <div class="vac-card">
                 <div class="vac-period">${isGeneral ? "Après-midi (Chefs Radio B)" : "Après-midi (TL)"}</div>
-                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm")}</div>
+                <div class="post-pills">${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm", true, iso)}</div>
               </div>
             </div>
           ` : weekendCardHtml}
@@ -6983,8 +7043,8 @@ html_template = """<!DOCTYPE html>
                 <div style="display:flex;gap:4px;align-items:center;">${gardeBadge}</div>
               </div>
               <div style="display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px; margin-bottom:6px;">
-                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am", false)}</div>
-                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm", false)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Matin</div>${renderPostPills(isGeneral ? genVac.am : myVac.am, isGeneral, "am", false, iso)}</div>
+                <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px;">Après-midi</div>${renderPostPills(isGeneral ? genVac.pm : myVac.pm, isGeneral, "pm", false, iso)}</div>
               </div>
               ${dayEvs.map(ev => renderEventCard(ev, false)).join("")}
               ${renderMorningSecMailCardHtml(iso, dayEvs)}
@@ -7117,8 +7177,8 @@ html_template = """<!DOCTYPE html>
           </div>
           ${renderGardeBannerHtml(selectedIso)}
           <div class="vac-grid">
-            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral, "am")}</div></div>
-            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral, "pm")}</div></div>
+            <div class="vac-card"><div class="vac-period">Matin</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.am : selMyVac.am, isGeneral, "am", true, selectedIso)}</div></div>
+            <div class="vac-card"><div class="vac-period">Après-midi</div><div class="post-pills">${renderPostPills(isGeneral ? selGenVac.pm : selMyVac.pm, isGeneral, "pm", true, selectedIso)}</div></div>
           </div>
           ${selEvs.map(ev => renderEventCard(ev, false)).join("")}
           ${renderMorningSecMailCardHtml(selectedIso, selEvs)}
@@ -8765,6 +8825,7 @@ html_out = (
     .replace("__CONGES_JSON__", js_json(conges_data.get("conges", [])))
     .replace("__FERMETURES_JSON__", js_json(conges_data.get("fermetures", [])))
     .replace("__MY_PLANNING_AUTO_JSON__", js_json(my_planning_auto))
+    .replace("__INTERNES_BY_DAY_JSON__", js_json(internes_by_day))
     .replace("__ANNUAIRE_JSON__", js_json(cochin_phone_directory))
     .replace("__INITIAL_SHEET_DATA_JSON__", "{}")
 )
