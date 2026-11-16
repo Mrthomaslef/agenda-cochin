@@ -199,7 +199,8 @@ function jsonOut_(obj) {
 /* --- Script Properties découpées (limite 9 Ko par propriété) --- */
 function setBigProperty_(key, value) {
   var props = PropertiesService.getScriptProperties();
-  var str = JSON.stringify(value);
+  // Stockage compressé (« gz: » + base64 gzip) : quota Script Properties limité à 500 Ko
+  var str = "gz:" + Utilities.base64Encode(Utilities.gzip(Utilities.newBlob(JSON.stringify(value), "application/json")).getBytes());
   var CHUNK = 8000;
   var oldCount = Number(props.getProperty(key + "__chunks") || 0);
   var n = Math.ceil(str.length / CHUNK) || 1;
@@ -216,7 +217,12 @@ function getBigProperty_(key, fallback) {
   if (!n) return fallback;
   var str = "";
   for (var i = 0; i < n; i++) str += props.getProperty(key + "__" + i) || "";
-  try { return JSON.parse(str); } catch (e) { return fallback; }
+  try {
+    if (str.indexOf("gz:") === 0) {
+      str = Utilities.ungzip(Utilities.newBlob(Utilities.base64Decode(str.substr(3)), "application/x-gzip")).getDataAsString("UTF-8");
+    }
+    return JSON.parse(str);
+  } catch (e) { return fallback; }
 }
 
 function getJsonProperty_(key, fallback) {
@@ -253,6 +259,11 @@ function doPost(e) {
     payload = JSON.parse((e && e.postData && e.postData.contents) || "{}");
   } catch (parseErr) {
     return jsonOut_({ status: "error", message: "Requête invalide" });
+  }
+
+  // Planning des internes : actions publiques limitées à son propre état (sans code d'accès)
+  if (payload.action === "internes_read" || payload.action === "internes_push") {
+    return handleInternesAction_(payload);
   }
 
   var role = authenticate_(payload);
@@ -319,6 +330,286 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/* ==========================================================================
+ * PLANNING DES INTERNES (agenda-internes) — actions publiques CIRCONSCRITES
+ * L'app des internes n'a pas de code d'accès : elle ne peut QUE lire/écrire
+ * son propre état (propriété cochin_internes_state_v1) et l'onglet « Planning Absence »
+ * du Sheet des internes. Aucun accès au Sheet RI ni exécution de code arbitraire.
+ * ========================================================================== */
+var INTERNES_PROP_KEY = "cochin_internes_state_v1";
+var INTERNES_SHEET_ID = "10sPMOg9GPXqsSItnUfuYn2Ke0im34p5EEyKk5A0hEF8";
+var INTERNES_MAX_BYTES = 300000;
+
+/* État stocké compressé (« gz: » + base64 gzip) pour ménager le quota de 500 Ko des Script Properties.
+ * Lit aussi l'ancien format JSON brut. Utilisé aussi par build_internes_data.py (eval admin). */
+function internesGetState_() {
+  var raw = PropertiesService.getScriptProperties().getProperty(INTERNES_PROP_KEY);
+  if (!raw) return null;
+  if (raw.indexOf("gz:") === 0) {
+    var blob = Utilities.newBlob(Utilities.base64Decode(raw.substr(3)), "application/x-gzip");
+    raw = Utilities.ungzip(blob).getDataAsString("UTF-8");
+  }
+  return JSON.parse(raw);
+}
+
+function internesSetState_(obj) {
+  var json = JSON.stringify(obj);
+  var gz = Utilities.gzip(Utilities.newBlob(json, "application/json"));
+  PropertiesService.getScriptProperties().setProperty(INTERNES_PROP_KEY, "gz:" + Utilities.base64Encode(gz.getBytes()));
+}
+
+function internesRead_() {
+        var props = PropertiesService.getScriptProperties();
+        var cloudState = internesGetState_();
+        var sheetAbs = [];
+        try {
+          var ssInt = SpreadsheetApp.openById(INTERNES_SHEET_ID);
+          var shAbs = ssInt.getSheetByName('Planning Absence');
+          if (shAbs) {
+            var rows = shAbs.getDataRange().getDisplayValues();
+            for (var r = 1; r < rows.length; r++) {
+              var dStr = String(rows[r][0] || '').trim();
+              if (!dStr) continue;
+              var cols = [
+                { idx: 1, type: 'Repos de garde' },
+                { idx: 2, type: 'CA 1' },
+                { idx: 3, type: 'CA 2' },
+                { idx: 4, type: 'CF' },
+                { idx: 5, type: 'Autre' }
+              ];
+              for (var c = 0; c < cols.length; c++) {
+                var val = String(rows[r][cols[c].idx] || '').trim();
+                if (val) {
+                  sheetAbs.push({ dateStr: dStr, name: val, type: cols[c].type });
+                }
+              }
+            }
+          }
+        } catch (e) {}
+        return { cloudState: cloudState, sheetAbs: sheetAbs };
+      }
+
+function internesPush_(payload) {
+  if (!payload.incoming || typeof payload.incoming !== "object" || Array.isArray(payload.incoming)) {
+    return { status: "invalid" };
+  }
+  if (JSON.stringify(payload.incoming).length > INTERNES_MAX_BYTES) return { status: "too_large" };
+
+        var lock = LockService.getScriptLock();
+        var gotLock = false;
+        try { gotLock = lock.tryLock(25000); } catch (lockErr) { gotLock = false; }
+        if (!gotLock) return { status: 'busy' };
+        try {
+        var props = PropertiesService.getScriptProperties();
+        var existing = null;
+        try { existing = internesGetState_(); } catch (e) { existing = null; }
+        var incoming = payload.incoming;
+        var syncOpts = (payload.syncOpts && typeof payload.syncOpts === 'object') ? payload.syncOpts : {};
+
+        // Horodatage d'une entrée (validation chef, décision, demande) : la plus récente gagne
+        function stampOf(o) {
+          if (!o || typeof o !== 'object') return '';
+          var best = '';
+          ['validatedAt', 'decidedAt', 'resolvedAt', 'unlockedAt', 'updatedAt', 'createdAt'].forEach(function(f) {
+            var v = o[f] ? String(o[f]) : '';
+            if (v > best) best = v;
+          });
+          return best;
+        }
+        function mergeByStamp(exMap, inMap) {
+          var out = Object.assign({}, exMap || {});
+          Object.keys(inMap || {}).forEach(function(k) {
+            var inc = inMap[k];
+            if (!inc) return;
+            var ex = out[k];
+            if (ex && stampOf(ex) > stampOf(inc)) return;
+            out[k] = inc;
+          });
+          return out;
+        }
+
+        if (existing && typeof existing === 'object') {
+          var isChef = Boolean(syncOpts.isChefValidation);
+
+          // 1. Suppressions d'absences (union)
+          var delSet = {};
+          (existing.deletedAbsenceIds || []).forEach(function(id) { if (id) delSet[id] = true; });
+          (incoming.deletedAbsenceIds || []).forEach(function(id) { if (id) delSet[id] = true; });
+          incoming.deletedAbsenceIds = Object.keys(delSet);
+
+          // 2. Postes modifiés (customVacations) : fusion entrée par entrée, la plus récente gagne.
+          //    Un appareil non à jour ne peut JAMAIS écraser une validation plus récente de l'autre chef.
+          var mergedCustom = Object.assign({}, existing.customVacations || {});
+          var inCustom = incoming.customVacations || {};
+          Object.keys(inCustom).forEach(function(k) {
+            var incV = inCustom[k];
+            var exV = mergedCustom[k];
+            if (!incV) return;
+            if (!exV) { mergedCustom[k] = incV; return; }
+            if (!isChef && exV.status === 'approved' && incV.status !== 'approved') return;
+            if (stampOf(exV) > stampOf(incV)) return;
+            mergedCustom[k] = incV;
+          });
+
+          // Tombstones horodatés : une suppression n'efface que les versions antérieures
+          var delAt = Object.assign({}, existing.deletedCustomAt || {});
+          Object.keys(incoming.deletedCustomAt || {}).forEach(function(k) {
+            var v = String(incoming.deletedCustomAt[k] || '');
+            if (!delAt[k] || v > String(delAt[k])) delAt[k] = v;
+          });
+          var delCustomSet = {};
+          (existing.deletedCustomKeys || []).forEach(function(k) { if (k) delCustomSet[k] = true; });
+          (incoming.deletedCustomKeys || []).forEach(function(k) { if (k) delCustomSet[k] = true; });
+          Object.keys(delCustomSet).forEach(function(k) {
+            var entryV = mergedCustom[k];
+            if (!entryV) return;
+            var keep = delAt[k] ? (stampOf(entryV) > String(delAt[k])) : Boolean(inCustom[k]);
+            if (keep) {
+              delete delCustomSet[k];
+            } else {
+              delete mergedCustom[k];
+            }
+          });
+          incoming.customVacations = mergedCustom;
+          incoming.deletedCustomKeys = Object.keys(delCustomSet);
+          var keptDelAt = {};
+          incoming.deletedCustomKeys.forEach(function(k) { if (delAt[k]) keptDelAt[k] = delAt[k]; });
+          incoming.deletedCustomAt = keptDelAt;
+
+          // 3. Décisions du Chef et semaines fixées : fusion par horodatage
+          if (isChef && syncOpts.replaceChefDecisions) {
+            incoming.chefDecisions = Object.assign({}, incoming.chefDecisions || {});
+          } else {
+            incoming.chefDecisions = mergeByStamp(existing.chefDecisions, isChef ? incoming.chefDecisions : {});
+          }
+          incoming.lockedWeeks = mergeByStamp(existing.lockedWeeks, isChef ? incoming.lockedWeeks : {});
+
+          if (existing.chefValidatedAt && (!incoming.chefValidatedAt || existing.chefValidatedAt > incoming.chefValidatedAt)) {
+            incoming.chefValidatedAt = existing.chefValidatedAt;
+          }
+          if (isChef) {
+            incoming.chefRevision = Math.max((Number(existing.chefRevision) || 0) + 1, Number(incoming.chefRevision) || 1);
+          } else {
+            incoming.chefRevision = Math.max(Number(existing.chefRevision) || 0, Number(incoming.chefRevision) || 0);
+          }
+
+          // 4. Absences : une décision du Chef (approved / rejected) n'est jamais remplacée par une version plus ancienne
+          var absByKey = {};
+          (existing.absences || []).forEach(function(a) {
+            if (!a || !a.date || !a.interneId || delSet[a.id]) return;
+            absByKey[a.date + '__' + a.interneId] = a;
+          });
+          (incoming.absences || []).forEach(function(a) {
+            if (!a || !a.date || !a.interneId || delSet[a.id]) return;
+            var k = a.date + '__' + a.interneId;
+            var ex = absByKey[k];
+            if (!ex) { absByKey[k] = a; return; }
+            var exDecided = (ex.status === 'approved' || ex.status === 'rejected');
+            var inDecided = (a.status === 'approved' || a.status === 'rejected');
+            if (exDecided && !inDecided) return;
+            if (stampOf(ex) > stampOf(a)) return;
+            absByKey[k] = Object.assign({}, ex, a);
+          });
+          incoming.absences = Object.keys(absByKey).sort().map(function(k) { return absByKey[k]; });
+
+          // 5. Présentations (Cas / Biblio / Cours) : conserver les échanges et sujets les plus récents
+          var presById = {};
+          (existing.presentations || []).forEach(function(p) {
+            if (p && p.id) presById[p.id] = p;
+          });
+          (incoming.presentations || []).forEach(function(p) {
+            if (!p || !p.id) return;
+            var exP = presById[p.id];
+            if (!exP) { presById[p.id] = p; return; }
+            var exSt = stampOf(exP);
+            var inSt = stampOf(p);
+            if (exSt && (!inSt || exSt > inSt)) return;
+            if ((exP.userEditedPres || exP.isUserSwap) && !p.userEditedPres && !p.isUserSwap) return;
+            presById[p.id] = Object.assign({}, exP, p);
+          });
+          incoming.presentations = Object.keys(presById).map(function(k) { return presById[k]; }).sort(function(a, b) {
+            return String(a.date || '').localeCompare(String(b.date || '')) || String(a.type || '').localeCompare(String(b.type || ''));
+          });
+        }
+
+        internesSetState_(incoming);
+
+        if (syncOpts.syncAbsenceSheet) {
+          try {
+            var ssInt = SpreadsheetApp.openById(INTERNES_SHEET_ID);
+            var shAbs = ssInt.getSheetByName('Planning Absence');
+            if (shAbs) {
+              var data = shAbs.getDataRange().getDisplayValues();
+              var colMap = { 'Repos de garde': 2, 'CA 1': 3, 'CA 2': 4, 'CF': 5, 'Autre': 6 };
+              var rowByDate = {};
+              for (var r = 1; r < data.length; r++) {
+                var dStr = String(data[r][0] || '').trim();
+                if (dStr) rowByDate[dStr] = r + 1;
+              }
+              function isoToSheetDate(iso) {
+                var p = String(iso || '').split('-');
+                if (p.length !== 3) return '';
+                return p[2] + '/' + p[1] + '/' + p[0].slice(2);
+              }
+              if (Array.isArray(syncOpts.addedDates) && syncOpts.interneName) {
+                var cIdx = colMap[syncOpts.absType] || 3;
+                syncOpts.addedDates.forEach(function(iso) {
+                  var k = isoToSheetDate(iso);
+                  if (rowByDate[k]) {
+                    var cell = shAbs.getRange(rowByDate[k], cIdx);
+                    var curVal = String(cell.getDisplayValue() || '').trim();
+                    if (curVal.indexOf(syncOpts.interneName) === -1) {
+                      cell.setValue(curVal ? (curVal + ' / ' + syncOpts.interneName) : syncOpts.interneName);
+                    }
+                  }
+                });
+              }
+              if (Array.isArray(syncOpts.removedDates) && syncOpts.interneName) {
+                var shortToken = String(syncOpts.interneName).split(' ')[0].toLowerCase();
+                syncOpts.removedDates.forEach(function(iso) {
+                  var k = isoToSheetDate(iso);
+                  var rIdx = rowByDate[k];
+                  if (!rIdx) return;
+                  for (var c = 2; c <= 6; c++) {
+                    var cell = shAbs.getRange(rIdx, c);
+                    var curVal = String(cell.getDisplayValue() || '').trim();
+                    if (!curVal) continue;
+                    var parts = curVal.split('/').map(function(tok) { return String(tok || '').trim(); }).filter(function(tok) {
+                      if (!tok) return false;
+                      var low = tok.toLowerCase();
+                      return low.indexOf(shortToken) === -1 && low !== String(syncOpts.interneName).toLowerCase();
+                    });
+                    var nextVal = parts.join(' / ');
+                    if (nextVal !== curVal) cell.setValue(nextVal);
+                  }
+                });
+              }
+              SpreadsheetApp.flush();
+            }
+          } catch (sheetErr) {}
+        }
+        return {
+          status: 'saved',
+          updatedAt: incoming.updatedAt,
+          chefRevision: incoming.chefRevision,
+          chefValidatedAt: incoming.chefValidatedAt
+        };
+        } finally {
+          try { lock.releaseLock(); } catch (relErr) {}
+        }
+      }
+
+function handleInternesAction_(payload) {
+  var action = String(payload.action || "");
+  try {
+    if (action === "internes_read") return jsonOut_({ status: "ok", evalResult: internesRead_() });
+    if (action === "internes_push") return jsonOut_({ status: "ok", evalResult: internesPush_(payload) });
+  } catch (err) {
+    return jsonOut_({ status: "error", message: String(err && err.message ? err.message : err) });
+  }
+  return null;
 }
 
 /* ==========================================================================

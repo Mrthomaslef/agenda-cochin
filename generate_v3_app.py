@@ -2742,13 +2742,7 @@ html_template = """<!DOCTYPE html>
           var persoStatus = {}, suiviProp = {}, pRdvs = [], pQs = [], pCrs = {};
           try {
             var props = PropertiesService.getScriptProperties();
-            function getBig(key, fallback) {
-              var n = Number(props.getProperty(key + '__chunks') || 0);
-              if (!n) return fallback;
-              var s = '';
-              for (var i = 0; i < n; i++) s += props.getProperty(key + '__' + i) || '';
-              return JSON.parse(s);
-            }
+            function getBig(key, fallback) { return getBigProperty_(key, fallback); }
             var pRaw = props.getProperty('cochin_perso_status_v4');
             if (pRaw) persoStatus = JSON.parse(pRaw);
             var sRaw = props.getProperty('cochin_suivi_bloc_v1');
@@ -2942,7 +2936,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v82"; /*__APP_BUILD_ID:v82__*/
+        const CURRENT_BUILD_ID = "v83"; /*__APP_BUILD_ID:v83__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
