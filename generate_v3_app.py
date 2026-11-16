@@ -2941,7 +2941,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v71"; /*__APP_BUILD_ID:v71__*/
+        const CURRENT_BUILD_ID = "v72"; /*__APP_BUILD_ID:v72__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -5446,6 +5446,8 @@ html_template = """<!DOCTYPE html>
         let koaLoc = "[<localisation à préciser>]";
         let koaTarget = "la lésion kystique";
         if (/cotyle\\s+gauche/i.test(fullCtx)) { koaLoc = "du toit du cotyle gauche"; koaTarget = "le toit du cotyle gauche"; }
+        else if (/branche\\s+ilio[\\s\\-]*pubienne\\s+droite/i.test(fullCtx)) { koaLoc = "de la branche ilio-pubienne droite"; koaTarget = "la branche ilio-pubienne droite"; }
+        else if (/branche\\s+ilio[\\s\\-]*pubienne\\s+gauche/i.test(fullCtx)) { koaLoc = "de la branche ilio-pubienne gauche"; koaTarget = "la branche ilio-pubienne gauche"; }
         else if (/ischion\\s+droit/i.test(fullCtx)) { koaLoc = "de l'ischion droit"; koaTarget = "l'ischion droit"; }
         else if (/iliaque\\s+droit/i.test(fullCtx)) { koaLoc = "iliaque droit"; koaTarget = "l'os iliaque droit"; }
         else if (/hum[ée]rus\\s+droit/i.test(fullCtx)) { koaLoc = "de l'humérus droit"; koaTarget = "l'humérus droit"; }
@@ -5801,8 +5803,8 @@ html_template = """<!DOCTYPE html>
 
     function findPatientInterventionDateAndAnesth(ev, prof) {
       const patNorm = normName(ev.patient);
-      let dateHospit = "";
-      if ((ev.category === "acte" || ev.category === "biopsie") && ev.dateStr && /\\d{2}\\/\\d{2}\\/\\d{4}/.test(ev.dateStr)) {
+      let dateHospit = (prof && prof.dateHospit) ? String(prof.dateHospit).trim() : "";
+      if (!dateHospit && (ev.category === "acte" || ev.category === "biopsie") && ev.dateStr && /\\d{2}\\/\\d{2}\\/\\d{4}/.test(ev.dateStr)) {
         dateHospit = ev.dateStr;
       } else if ((ev.category === "acte" || ev.category === "biopsie") && ev.isoDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(ev.isoDate)) {
         const [y, m, d] = ev.isoDate.split("-");
@@ -6094,6 +6096,9 @@ html_template = """<!DOCTYPE html>
       }
 
       // Mode 2 : Consultation de Suivi (rappel concis, sans détails techniques ni matériel, intégrant complications et recommandations)
+      if (prof.customSuiviBody) {
+        return prof.customSuiviBody;
+      }
       let indicInitSuivi = prof.indicationInitiale || "[indication initiale : douleurs et retentissement fonctionnel pré-opératoire à préciser]";
       if (!isPureDiagBiopsie && !/fonctionnel/i.test(indicInitSuivi) && !indicInitSuivi.includes("À préciser")) {
         indicInitSuivi += /doul/i.test(indicInitSuivi) ? " avec retentissement fonctionnel" : " responsable de douleurs et d'un retentissement fonctionnel";
@@ -6153,6 +6158,9 @@ html_template = """<!DOCTYPE html>
       if (ann.recommandations.length > 0) {
         linesSuivi.push("");
         linesSuivi.push(`Pour la suite de la prise en charge : ${ann.recommandations.join(" ; ")}.`);
+      } else if (prof.suitePriseEnCharge) {
+        linesSuivi.push("");
+        linesSuivi.push(prof.suitePriseEnCharge);
       }
 
       linesSuivi.push(
