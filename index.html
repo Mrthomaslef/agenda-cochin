@@ -8673,7 +8673,12 @@
         .then(async htmlTxt => {
           if (!htmlTxt) return;
           const buildMatch = htmlTxt.match(/\/\*__APP_BUILD_ID:(v\d+)__\*\//);
-          if (buildMatch && buildMatch[1] && buildMatch[1] !== "v70") {
+          // Version de la page en cours lue dans son propre marqueur (jamais de valeur codée en dur → pas de boucle de rechargement)
+          const selfMatch = document.documentElement.innerHTML.match(/\/\*__APP_BUILD_ID:(v\d+)__\*\//);
+          const selfBuild = selfMatch ? selfMatch[1] : null;
+          const lastReload = Number(sessionStorage.getItem("cochin_build_reload_at") || 0);
+          if (buildMatch && buildMatch[1] && selfBuild && buildMatch[1] !== selfBuild && Date.now() - lastReload > 60000) {
+            sessionStorage.setItem("cochin_build_reload_at", String(Date.now()));
             if ("caches" in window) {
               try {
                 const keys = await caches.keys();
