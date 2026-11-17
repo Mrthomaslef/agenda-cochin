@@ -2312,6 +2312,7 @@ html_template = """<!DOCTYPE html>
         <button class="chip active" id="flt-perso-non" onclick="setPersoFilter('Non répondu')">À répondre</button>
         <button class="chip" id="flt-perso-all" onclick="setPersoFilter('all')">Tous</button>
         <button class="chip" id="flt-perso-oui" onclick="setPersoFilter('Répondu')">Répondu</button>
+        <button class="chip" id="flt-perso-rcp" onclick="setPersoFilter('RCP')">🧾 Missions RCP</button>
         <button class="chip" id="flt-perso-whatsapp" onclick="setPersoFilter('WhatsApp')">WhatsApp</button>
         <button class="chip" id="flt-perso-imessage" onclick="setPersoFilter('iMessage')">iMessage</button>
         <button class="chip" id="flt-perso-live" onclick="setPersoFilter('Live.fr')">Live.fr</button>
@@ -7853,6 +7854,8 @@ html_template = """<!DOCTYPE html>
       document.getElementById("flt-perso-oui").classList.toggle("active", flt === "Répondu");
       document.getElementById("flt-perso-live").classList.toggle("active", flt === "Live.fr");
       document.getElementById("flt-perso-aphp").classList.toggle("active", flt === "AP-HP");
+      const btnRcp = document.getElementById("flt-perso-rcp");
+      if (btnRcp) btnRcp.classList.toggle("active", flt === "RCP");
       const btnWa = document.getElementById("flt-perso-whatsapp");
       if (btnWa) btnWa.classList.toggle("active", flt === "WhatsApp");
       const btnIm = document.getElementById("flt-perso-imessage");
@@ -7865,7 +7868,7 @@ html_template = """<!DOCTYPE html>
       let list = appData.Questions_perso || [];
       if (persoFilter === "Non répondu" || persoFilter === "Répondu") {
         list = list.filter(q => String(q["Statut"] || "") === persoFilter);
-      } else if (["Live.fr", "AP-HP", "WhatsApp", "iMessage"].includes(persoFilter)) {
+      } else if (["Live.fr", "AP-HP", "WhatsApp", "iMessage", "RCP"].includes(persoFilter)) {
         list = list.filter(q => String(q["Boîte Mail"] || "") === persoFilter);
       }
       if (list.length === 0) {
@@ -7880,11 +7883,13 @@ html_template = """<!DOCTYPE html>
         const boxPill =
           box === "AP-HP" ? "pill-aphp" :
           box === "WhatsApp" ? "pill-whatsapp" :
-          box === "iMessage" ? "pill-imessage" : "pill-live";
+          box === "iMessage" ? "pill-imessage" :
+          box === "RCP" ? "pill-aphp" : "pill-live";
         const boxLabel =
           box === "AP-HP" ? "🏥 AP-HP" :
           box === "WhatsApp" ? "💬 WhatsApp" :
-          box === "iMessage" ? "💬 iMessage" : "📧 Live.fr";
+          box === "iMessage" ? "💬 iMessage" :
+          box === "RCP" ? "🧾 Mission RCP" : "📧 Live.fr";
         const nextStatus = isRep ? "Non répondu" : "Répondu";
         const emailAddr = q["Email Expéditeur"] || "";
         const subj = encodeURIComponent("RE: " + (q["Sujet / Objet"] || ""));
@@ -7896,7 +7901,7 @@ html_template = """<!DOCTYPE html>
                 <span class="event-time-badge">📅 ${q["Date"] || "-"}</span>
                 <span class="pill ${boxPill}">${boxLabel}</span>
               </div>
-              <span class="pill ${isRep ? "pill-success" : "pill-danger"}">${isRep ? "Répondu" : "À répondre"}</span>
+              <span class="pill ${isRep ? "pill-success" : "pill-danger"}">${isRep ? (box === "RCP" ? "Fait" : "Répondu") : (box === "RCP" ? "À faire" : "À répondre")}</span>
             </div>
             <div class="event-patient">
               <span>${q["Sujet / Objet"] || "-"}</span>
