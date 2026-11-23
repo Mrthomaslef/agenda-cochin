@@ -2463,28 +2463,16 @@
       gardes: DEFAULT_GARDES_HIVER
     };
 
-    const ACCEPTED_CODE_HASHES = new Set([
-      "f938185913af7522c3120fb738a9a6673df73839e0edb8da65fde027df46916c",
-      "dc9bd20dbcd65feba73cbe56b38654f43392671045a21e8d93057f611621c414",
-      "880e662aca87afd64fbf14e04e47dbf9a33dede435a0986f9a249571d5086690"
-    ]);
+    // Le code d'accès est vérifié uniquement par le serveur (aucune empreinte publiée dans la page).
 
     function normalizeAccessCodeClient(code) {
       return String(code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
     }
 
-    async function onPinInputChange(inpEl) {
+    function onPinInputChange(inpEl) {
       if (!inpEl) return;
       const errEl = document.getElementById("lock-error");
       if (errEl && errEl.textContent) errEl.textContent = "";
-      const val = String(inpEl.value || "").trim();
-      const norm = normalizeAccessCodeClient(val);
-      if (norm.length >= 6) {
-        const h = await sha256HexBrowser(norm);
-        if (ACCEPTED_CODE_HASHES.has(h)) {
-          verifyPinAndLoad(val);
-        }
-      }
     }
 
     function submitPinForm(ev) {
@@ -2521,16 +2509,13 @@
         return;
       }
       if (errEl) errEl.textContent = "Vérification…";
-      const hash = await sha256HexBrowser(norm);
-      let pingOk = ACCEPTED_CODE_HASHES.has(hash);
+      let pingOk = false, offline = false;
+      try {
+        const pong = await callApi("ping", {}, norm);
+        pingOk = !!(pong && pong.status === "ok" && pong.role);
+      } catch (_) { offline = true; }
       if (!pingOk) {
-        try {
-          const pong = await callApi("ping", {}, norm);
-          pingOk = !!(pong && pong.status === "ok" && pong.role);
-        } catch (_) {}
-      }
-      if (!pingOk) {
-        if (errEl) errEl.textContent = "Code d'accès incorrect.";
+        if (errEl) errEl.textContent = offline ? "Connexion impossible : vérifiez le réseau puis réessayez." : "Code d'accès incorrect.";
         if (inpEl) {
           inpEl.value = "";
           inpEl.focus();
@@ -2781,11 +2766,6 @@
       const token = tokenOverride || localStorage.getItem(STORAGE_PIN_KEY) || "";
       if (!token) throw new Error("Non authentifié");
       const norm = normalizeAccessCodeClient(token);
-      const hash = await sha256HexBrowser(norm);
-      if (!ACCEPTED_CODE_HASHES.has(hash)) {
-        if (!tokenOverride) lockApp("Code d'accès refusé : saisissez-le à nouveau.");
-        throw new Error("Non authentifié");
-      }
       const resp = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
