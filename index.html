@@ -2834,7 +2834,7 @@
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v84"; /*__APP_BUILD_ID:v84__*/
+        const CURRENT_BUILD_ID = "v85"; /*__APP_BUILD_ID:v85__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
@@ -4126,8 +4126,9 @@
     }
 
     function detectAnticoagAlert(text) {
-      const t = String(text || "");
-      if (/eliquis|apixaban|plavix|clopidogrel|kard[eé]gic|aspirine|r[eé]situne|brilique|ticagrelor|efient|prasugrel|duoplavin|xarelto|rivaroxaban|lixiana|edoxaban|pradaxa|dabigatran|coumadine|warfarine|pr[eé]viscan|fluindione|sintrom|ac[eé]nocoumarol|lovenox|innohep|hbpm|calciparine|h[eé]parine|anticoag|h[eé]mostase|\bavk\b|\baod\b|\baap\b/i.test(t)) {
+      // « hémostase normale », « sans anticoagulant », « ni AAP »… ne sont PAS une prise d'anticoagulant
+      const t = String(text || "").replace(/(?:\bsans|\bpas\s+d[e'’]|\bni|\baucune?)\s+(?:traitement\s+)?(?:anticoag\w*|antiagr\w*|aap|aod|avk)\b/gi, " ");
+      if (/eliquis|apixaban|plavix|clopidogrel|kard[eé]gic|aspirine|r[eé]situne|brilique|ticagrelor|efient|prasugrel|duoplavin|xarelto|rivaroxaban|lixiana|edoxaban|pradaxa|dabigatran|coumadine|warfarine|pr[eé]viscan|fluindione|sintrom|ac[eé]nocoumarol|lovenox|innohep|hbpm|calciparine|h[eé]parine|anticoag|\bavk\b|\baod\b|\baap\b/i.test(t)) {
         return t;
       }
       return null;
@@ -4990,7 +4991,9 @@
         let lesionTitle = isChondro ? "Ablation de Chondroblastome" : "Ablation Ostéome Ostéoïde";
         let lesionDesc = isChondro ? "un chondroblastome" : "un ostéome ostéoïde";
         let siteDesc = "[<localisation à préciser>]";
-        if (/genou/i.test(fullCtx)) siteDesc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        if (/col\s+f[ée]moral/i.test(fullCtx)) siteDesc = `du col fémoral ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/f[ée]mur|f[ée]moral/i.test(fullCtx)) siteDesc = `du fémur ${sideStr ? sideStr : "[<droit / gauche>]"}`;
+        else if (/genou/i.test(fullCtx)) siteDesc = `du genou ${sideStr ? sideStr : "[<droit / gauche>]"}`;
         else if (/coude/i.test(fullCtx)) siteDesc = `du coude ${sideStr ? sideStr : "[<droit / gauche>]"}`;
         else if (/tibia\s+proximal\s+gauche/i.test(fullCtx)) siteDesc = "du tibia proximal gauche";
         else if (/tibia/i.test(fullCtx)) siteDesc = `du tibia ${sideStr ? sideStr : "[<droit / gauche>]"}`;

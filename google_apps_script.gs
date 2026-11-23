@@ -358,6 +358,8 @@ function internesSetState_(obj) {
   var json = JSON.stringify(obj);
   var gz = Utilities.gzip(Utilities.newBlob(json, "application/json"));
   PropertiesService.getScriptProperties().setProperty(INTERNES_PROP_KEY, "gz:" + Utilities.base64Encode(gz.getBytes()));
+  // Sheet « Congés, Formations & Repos de garde » du Dr Monnier (Hippolyte.js) : jamais bloquant
+  try { refreshHippolyteSheet_(obj); } catch (hipErr) { console.warn("refreshHippolyteSheet_: " + hipErr); }
 }
 
 function internesRead_() {
