@@ -4308,6 +4308,59 @@
       }
     }
 
+    function copyToClipboardText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopyText(text));
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    // 💊 Ordonnance d'antalgiques type post-geste (Paracétamol + Kétoprofène + Mopral + Izalgi)
+    function buildOrdonnanceAntalgiquesText(ev) {
+      const today = new Date();
+      const dd = String(today.getDate()).padStart(2, "0");
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const master = findPatientMasterRecord(ev.patient, ev.ipp);
+      const notes = `${ev.remarques || ""} ${master ? (master["Coordonnées / DDN"] || "") + " " + (master["Instructions & Remarques Cliniques"] || "") : ""}`;
+      const anticoag = detectAnticoagAlert(notes);
+      const lines = [
+        "ORDONNANCE",
+        `Paris, le ${dd}/${mm}/${today.getFullYear()}`,
+        `Patient(e) : ${ev.patient || ""}`,
+        "",
+        "1) PARACÉTAMOL 1 g : 1 comprimé toutes les 6 heures si douleur (maximum 4 prises par jour). Pendant 7 jours.",
+        "",
+        "2) KÉTOPROFÈNE LP 100 mg : 1 comprimé matin et soir, au milieu du repas. Pendant 5 jours.",
+        "",
+        "3) MOPRAL (oméprazole) 20 mg : 1 gélule le soir, pendant toute la durée du kétoprofène (5 jours).",
+        "",
+        "4) IZALGI 500 mg/25 mg (paracétamol/opium) : 1 à 2 gélules si douleur non soulagée, en remplacement d'une prise de paracétamol, à 6 heures d'intervalle minimum (maximum 4 prises par jour). Pendant 5 jours.",
+        "",
+        "Ne pas dépasser 4 g de paracétamol par jour au total (Izalgi contient 500 mg de paracétamol par gélule).",
+        "QSP 7 jours. Non renouvelable.",
+        "",
+        "Dr Thomas Lefevre",
+        "Service de Radiologie B — Hôpital Cochin (AP-HP)"
+      ];
+      if (anticoag) {
+        lines.splice(4, 0, `⚠️ À vérifier : traitement anticoagulant/antiagrégant signalé — kétoprofène (AINS) à discuter.`, "");
+      }
+      return lines.join("\n");
+    }
+
+    function copyPatientOrdonnance(encodedEvMeta, btnEl, clickEv) {
+      if (clickEv) clickEv.stopPropagation();
+      let ev = {};
+      try { ev = JSON.parse(decodeURIComponent(encodedEvMeta)); } catch (_) {}
+      copyToClipboardText(buildOrdonnanceAntalgiquesText(ev));
+      if (btnEl) {
+        const orig = btnEl.innerHTML;
+        btnEl.innerHTML = "✅ Ordonnance copiée";
+        setTimeout(() => { btnEl.innerHTML = orig; }, 1500);
+      }
+    }
+
     function formatShortDoc(medStr) {
       const s = String(medStr || "");
       if (!s) return "";
@@ -6258,6 +6311,9 @@
           </button>
           <button type="button" class="bloc-toggle-btn cr-btn ${defMode === "crh" ? "cr-primary" : ""}" onclick="copyPatientCr('${safeEvMeta}', 'crh', this, event, '${prefix}')" title="Copier le Compte Rendu d'Hospitalisation (CRH)">
             <span>📋 CRH</span>
+          </button>
+          <button type="button" class="bloc-toggle-btn cr-btn" style="background:#ECFDF5; color:#047857; border-color:#6EE7B7; font-weight:800;" onclick="copyPatientOrdonnance('${safeEvMeta}', this, event)" title="Copier l'ordonnance d'antalgiques type : Paracétamol, Kétoprofène, Mopral, Izalgi">
+            <span>💊 Ordonnance</span>
           </button>
           ${hasAnticoagAlert ? `<button type="button" class="bloc-toggle-btn cr-btn" style="background:#FEF2F2; color:#B91C1C; border-color:#FCA5A5; font-weight:800;" onclick="copyPatientAnticoag('${safeEvMeta}', this, event)" title="Copier les consignes d'arrêt des anticoagulants"><span>🩸 Anticoag</span></button>` : ""}
         </div>
