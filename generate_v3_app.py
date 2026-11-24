@@ -1386,7 +1386,7 @@ html_template = """<!DOCTYPE html>
       border-radius: 18px;
       box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       padding: 4px;
       gap: 4px;
     }
@@ -1697,6 +1697,7 @@ html_template = """<!DOCTYPE html>
     .btn-sync-arrow.spinning svg {
       animation: ptrSpin 0.7s linear infinite;
     }
+/*__BLOC_CHECKLIST_CSS__*/
     /* DARK THEME */
     html[data-theme="dark"] {
       --bg: #0B1120;
@@ -2335,6 +2336,34 @@ html_template = """<!DOCTYPE html>
       <div id="suivi-list-container"></div>
     </section>
 
+    <!-- TAB 5b : CHECK-LIST MATÉRIEL DE BLOC -->
+    <section id="tab-bloc" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+        <div style="min-width:0;">
+          <div style="font-size:15px; font-weight:800; color:var(--text);">🧰 Check-list matériel de bloc</div>
+          <div style="font-size:11px; color:var(--text-muted);">Par patient · aiguilles d'ablation, chimio (ECT), ciment, biopsies — d'après tes CR</div>
+        </div>
+        <button class="chip bloc-print-btn" style="flex-shrink:0;" onclick="blocPrint()">🖨️ Imprimer</button>
+      </div>
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="bloc-search" placeholder="Rechercher patient, IPP, geste..." oninput="renderBlocTab()" />
+      </div>
+      <div class="chips-row">
+        <button class="chip" id="flt-bloc-h7" onclick="setBlocHorizon(7)">7 j</button>
+        <button class="chip" id="flt-bloc-h14" onclick="setBlocHorizon(14)">2 sem.</button>
+        <button class="chip" id="flt-bloc-h30" onclick="setBlocHorizon(30)">1 mois</button>
+        <button class="chip active" id="flt-bloc-h90" onclick="setBlocHorizon(90)">3 mois</button>
+        <button class="chip" id="flt-bloc-h180" onclick="setBlocHorizon(180)">6 mois</button>
+      </div>
+      <div class="chips-row">
+        <button class="chip active" id="flt-bloc-mine" onclick="setBlocScope('mine')">Mes gestes</button>
+        <button class="chip" id="flt-bloc-all" onclick="setBlocScope('all')">Tout le service</button>
+        <button class="chip" id="flt-bloc-heavy" onclick="toggleBlocHeavy()">Ablations · ECT · ciment</button>
+      </div>
+      <div id="bloc-list-container"></div>
+    </section>
+
     <!-- TAB 6 : DOSSIERS PATIENTS -->
     <section id="tab-patients" style="display:none;">
       <div class="search-box">
@@ -2414,6 +2443,10 @@ html_template = """<!DOCTYPE html>
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Suivi</span>
         <span class="nav-badge" id="badge-suivi-cnt" style="display:none;">0</span>
+      </button>
+      <button class="nav-item" id="nav-bloc" onclick="switchTab('bloc')">
+        <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v3H9z"/><path d="M8.5 11l2 2 4-4"/><line x1="8.5" y1="17" x2="15.5" y2="17"/></svg>
+        <span>Bloc</span>
       </button>
       <button class="nav-item" id="nav-patients" onclick="switchTab('patients')">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -8815,10 +8848,11 @@ html_template = """<!DOCTYPE html>
       syncThemeButtonIcon();
     }
 
+/*__BLOC_CHECKLIST_JS__*/
     function switchTab(tab) {
       if (tab === "avis") tab = "avis-interv";
       currentTab = tab;
-      ["agenda", "activite", "avis-interv", "avis-diag", "perso", "suivi", "patients", "annuaire"].forEach(t => {
+      ["agenda", "activite", "avis-interv", "avis-diag", "perso", "suivi", "bloc", "patients", "annuaire"].forEach(t => {
         const sec = document.getElementById("tab-" + t);
         const nav = document.getElementById("nav-" + t);
         if (sec) sec.style.display = t === tab ? "block" : "none";
@@ -8838,6 +8872,7 @@ html_template = """<!DOCTYPE html>
       else if (currentTab === "suivi") renderSuiviTab();
       else if (currentTab === "patients") renderPatientsTab();
       else if (currentTab === "annuaire") renderAnnuaireTab();
+      else if (currentTab === "bloc") renderBlocTab();
     }
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -8913,6 +8948,8 @@ html_out = (
     .replace("__INTERNES_BY_DAY_JSON__", js_json(internes_by_day))
     .replace("__ANNUAIRE_JSON__", js_json(cochin_phone_directory))
     .replace("__INITIAL_SHEET_DATA_JSON__", "{}")
+    .replace("/*__BLOC_CHECKLIST_JS__*/", open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bloc_checklist.js"), encoding="utf-8").read())
+    .replace("/*__BLOC_CHECKLIST_CSS__*/", open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "bloc_checklist.css"), encoding="utf-8").read())
 )
 
 assert_no_sensitive_data(html_out)
