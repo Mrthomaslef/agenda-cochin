@@ -1654,6 +1654,29 @@
     html[data-theme="dark"] .bloc-opt.on.def { background: #0C4A6E; color: #E0F2FE; }
     html[data-theme="dark"] .bloc-recap-chip { background: #0C4A6E; color: #E0F2FE; }
     html[data-theme="dark"] .bloc-recap-chip.todo, html[data-theme="dark"] .bloc-dday.soon { background: #78350F; color: #FDE68A; }
+    .bloc-sums { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .bloc-sum { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 6px; background: var(--bg-elevated); color: var(--text); border: 1px solid var(--border); }
+    .bloc-sum.ok { background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+    .bloc-legend { font-size: 10.5px; color: var(--text-muted); margin-bottom: 4px; }
+    .bloc-stock { width: 100%; border-collapse: collapse; margin-top: 6px; table-layout: fixed; }
+    .bloc-stock th { font-size: 10px; text-transform: uppercase; color: var(--text-muted); text-align: left; padding: 3px 4px; }
+    .bloc-stock th:nth-child(2), .bloc-stock th:nth-child(3) { width: 52px; }
+    .bloc-stock th:nth-child(4) { width: 78px; }
+    .bloc-stock td { border-top: 1px solid var(--border); padding: 5px 4px; font-size: 12px; vertical-align: middle; }
+    .bloc-stock .num { text-align: center; }
+    .bloc-stock tr.ko td { background: rgba(220, 38, 38, 0.06); }
+    .bloc-ref { font-weight: 700; overflow-wrap: anywhere; }
+    .bloc-ref-sub { font-size: 10px; font-weight: 500; color: var(--text-muted); }
+    .bloc-ref-sub b { color: #B45309; }
+    .bloc-ref-sub b.urg { color: #DC2626; }
+    .bloc-stock-in { width: 44px; font-size: 16px; text-align: center; padding: 3px 2px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card); color: var(--text); }
+    .bloc-st { font-size: 10.5px; font-weight: 800; padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+    .bloc-st.ok { background: #DCFCE7; color: #166534; }
+    .bloc-st.ko { background: #FEE2E2; color: #B91C1C; }
+    .bloc-st.unk { background: var(--bg-elevated); color: var(--text-muted); }
+    .bloc-kpi.ko { background: #FEE2E2; color: #B91C1C; }
+    html[data-theme="dark"] .bloc-sum.ok, html[data-theme="dark"] .bloc-st.ok { background: #14532D; color: #BBF7D0; border-color: #166534; }
+    html[data-theme="dark"] .bloc-st.ko, html[data-theme="dark"] .bloc-kpi.ko { background: #7F1D1D; color: #FECACA; }
     @media print {
       body * { visibility: hidden !important; }
       #tab-bloc, #tab-bloc * { visibility: visible !important; }
@@ -2304,8 +2327,8 @@
     <section id="tab-bloc" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
         <div style="min-width:0;">
-          <div style="font-size:15px; font-weight:800; color:var(--text);">🧰 Check-list matériel de bloc</div>
-          <div style="font-size:11px; color:var(--text-muted);">Par patient · aiguilles d'ablation, chimio (ECT), ciment, biopsies — d'après tes CR</div>
+          <div style="font-size:15px; font-weight:800; color:var(--text);">🧰 Matériel spécifique de bloc</div>
+          <div style="font-size:11px; color:var(--text-muted);">Sondes d'ablation, électrodes + bléomycine, ciment, vis, kits — besoins & stock</div>
         </div>
         <button class="chip bloc-print-btn" style="flex-shrink:0;" onclick="blocPrint()">🖨️ Imprimer</button>
       </div>
@@ -2323,7 +2346,7 @@
       <div class="chips-row">
         <button class="chip active" id="flt-bloc-mine" onclick="setBlocScope('mine')">Mes gestes</button>
         <button class="chip" id="flt-bloc-all" onclick="setBlocScope('all')">Tout le service</button>
-        <button class="chip" id="flt-bloc-heavy" onclick="toggleBlocHeavy()">Ablations · ECT · ciment</button>
+        <button class="chip" id="flt-bloc-heavy" onclick="toggleBlocHeavy()">+ Infiltrations / ponctions</button>
       </div>
       <div id="bloc-list-container"></div>
     </section>
@@ -8820,7 +8843,7 @@
     const BLOC_CK_KEY = "cochin_bloc_checklist_v1";
     let blocHorizon = 90;          // jours
     let blocScope = "mine";        // mine | all
-    let blocHeavyOnly = false;     // ablations / ECT / ciment uniquement
+    let blocShowAll = false;       // false = seulement les gestes à matériel spécifique
     const blocOpenKeys = new Set();
     let blocEvRegistry = [];
     let blocCkState = (() => { try { return JSON.parse(localStorage.getItem(BLOC_CK_KEY) || "{}") || {}; } catch (_) { return {}; } })();
@@ -8925,180 +8948,98 @@
       return { m, sub, anesth, hypnose, sedation, guid, isMinor, isBone, anticoag: Boolean(anticoag), heavy, ctx, g, prof, sEntry };
     }
 
-    // ---------- Construction de la check-list ----------
+    // ---------- Construction de la check-list (matériel SPÉCIFIQUE au geste, pour anticiper les ruptures) ----------
+    // Chaque dispositif = opts (références) + q (quantité par défaut par patient, calée sur les CR).
     function blocBuildSections(ev, A) {
       const { m, ctx, g } = A;
-      const pre = [], inst = [], mat = [], drugs = [], prel = [], vig = [];
+      const abl = [], acc = [], prod = [];
       const add = (arr, id, label, o = {}) => arr.push(Object.assign({ id, label }, o));
+      const noble = /plexus|nerf|sciatique|racine|[ée]pidur|moelle|peau|superficiel|sous[\s\-]*cutan|vaisseau|art[èe]re|pl[èe]vre|creux\s+sus|sus[\s\-]*claviculaire|paroi|cervical|\bc\d\b|articulaire/.test(ctx);
+      const isCryo = m.has("cryo") || m.has("cryo_morton") || m.has("cryo_neuro");
 
-      // — Avant le bloc —
-      add(pre, "consent", "Consentement éclairé signé + fiche d'information remise");
-      add(pre, "imagerie", "Imagerie de référence sur le PACS (IRM / TDM récente) et côté vérifié", /c[ôo]t[ée]\s+[àa]\s+v[ée]rifier/.test(ctx) ? { warn: true, hint: "⚠️ Côté signalé à vérifier dans les remarques" } : {});
-      add(pre, "allergies", "Allergies vérifiées (iode, latex, Bétadine, anesthésiques locaux)");
-      if (A.anesth === "AG") {
-        add(pre, "csanesth", "Consultation d'anesthésie faite + jeûne et horaire de convocation transmis");
-        add(pre, "hospit", "HDJ / hospitalisation réservée (lit, retour à domicile accompagné)");
-      }
-      if (A.heavy || m.has("biopsie_os") || A.anticoag || /h[ée]mophil|h[ée]mostase/.test(ctx)) {
-        add(pre, "bio", "Bilan biologique récent : NFS-plaquettes, TP / TCA" + (m.has("ect") || m.has("cimento") ? ", créatinine" : ""), /h[ée]mophil/.test(ctx) ? { warn: true, hint: "Terrain hémophilie : facteurs et avis hémostase" } : {});
-      }
-      if (A.anticoag) add(pre, "anticoag", "🩸 Consigne d'arrêt / reprise anticoagulant-AAP transmise au patient", { warn: true, anticoagBtn: true });
-      if (A.isMinor) add(pre, "parents", "Autorisation d'opérer signée par les 2 parents (patient mineur)", { warn: true });
-      if (A.hypnose) add(pre, "hypnose", "Hypnose : praticien / IDE formé(e) prévenu(e)");
-      if (/claustro/.test(ctx)) add(pre, "claustro", "Claustrophobie : prémédication anxiolytique à prévoir", { warn: true });
-      if (m.has("ect")) {
-        add(pre, "bleo_presc", "Prescription Bléomycine envoyée à la pharmacie (préparation nominative : poids, taille, SC) — au plus tard J-3", { warn: true });
-        add(pre, "ect_curare", "Anesthésiste prévenu : AG avec curarisation (contractions musculaires à l'électroporation)");
-        add(pre, "bleo_cumul", "Dose cumulée de Bléomycine vérifiée (< 400 mg vie entière, ECT antérieures ?) + EFR / fonction rénale si doute");
-      }
-      if (m.has("cryo") || m.has("cryo_morton") || m.has("cryo_neuro")) add(pre, "cryo_console", "Console de cryothérapie réservée + bouteilles d'argon pleines (± hélium) vérifiées");
-      if (m.has("rf_os") || m.has("rf_genic") || m.has("rf_nerf")) add(pre, "rf_gen", "Générateur de radiofréquence disponible et testé (câbles, plaques)");
-      if (m.has("osteocool")) add(pre, "ocp_kit", "Kit OsteoCool commandé (Medtronic) + générateur OsteoCool disponible");
-      if (m.has("cimento") || m.has("vissage") || (m.has("koa") && /ciment/.test(g))) add(pre, "abp", "Antibioprophylaxie prévue (céfazoline 2 g IV) — matériel / ciment implanté");
-      if (m.has("vissage")) add(pre, "vis_plan", "Planification des vis sur le TDM (diamètre / longueur) + vis disponibles en stock");
-      if (/allura/.test(ctx) || m.has("vissage")) add(pre, "allura", "Salle Allura (scopie 3D) réservée si vissage / cimentoplastie sous scopie");
-      if (m.has("rf_genic")) add(pre, "tests_ok", "Tests anesthésiques positifs notés (≥ 50 % de soulagement)");
-
-      // — Installation & guidage —
-      add(inst, "sterile", "Champ stérile, casaque, gants stériles, cupule, compresses");
-      add(inst, "antisept", "Antiseptique (Bétadine alcoolique / chlorhexidine — protocole 4-5 temps)");
-      add(inst, "seringues", "Seringues 5 / 10 / 20 mL, prolongateur, robinet 3 voies");
-      if (A.guid.has("scanner")) add(inst, "grille", "Scanner : grille de repérage cutanée / marqueur radio-opaque, installation selon voie d'abord");
-      if (A.guid.has("echo")) add(inst, "echo", "Échographie : sonde adaptée + gaine stérile + gel stérile");
-      if (A.guid.has("scopie")) add(inst, "plomb", "Scopie : tabliers plombés, cache-thyroïde, dosimètre");
-      if (A.anesth === "AL" || A.sedation || A.hypnose) add(inst, "al", "Anesthésie locale : Xylocaïne 1 % (20 mL), aiguille 25G sous-cutanée + spinale 22G (plans profonds)");
-      add(inst, "pansement", "Pansement sec + Stéri-Strip");
-
-      // — Matériel spécifique au geste —
+      // — Ablation —
       if (m.has("cryo")) {
-        const def = A.isBone ? ["V-Probe 2.4"] : ["IceRod"];
-        add(mat, "cryo_probe", "Cryosondes (nombre selon la taille : ≥ 2 au-delà de 3 cm)", { opts: ["IceSeed", "IceSeed Cx", "IceSphere", "IceRod", "IceForce", "V-Probe 2.4", "V-Probe 3.8"], cr: true, def, qty: true });
-        if (A.isBone) add(mat, "cryo_coax", "Trocart coaxial 11G (Arrow) ± tréphine 13G pour franchir la corticale", { opts: ["Coaxiale Arrow 11G", "Trocart 13G", "Tréphine 13G"], cr: true });
-        const noble = /plexus|nerf|sciatique|racine|[ée]pidur|moelle|peau|superficiel|sous[\s\-]*cutan|vaisseau|art[èe]re|pl[èe]vre|creux\s+sus|sus[\s\-]*claviculaire|paroi/.test(ctx);
-        add(mat, "thermo", "Thermocouples (ThermoSensor) au contact des structures à protéger", noble ? { warn: true, hint: "Structure noble / peau à proximité signalée" } : {});
-        add(mat, "dissect", "Hydrodissection (sérum physiologique + contraste dilué, spinale 22G) ou carbodissection CO2", { opts: ["Hydrodissection", "Carbodissection CO2"] });
-        add(mat, "skin_warm", "Protection cutanée : sérum chaud / gants remplis d'eau chaude");
-        if (A.sub.cryoBx) { add(prel, "cryo_bx", "Prélèvement per-geste avant congélation : trocart 13-14G + pot de formol", { cr: true }); add(prel, "formol", "Pots de formol (bons d'anapath remplis)"); }
-        add(mat, "cryo_proto", "Protocole : 10 min congélation → 9 min passif + 1 min actif → 2e cycle 6 min (10-10-10 si os)", { note: true });
+        const big = /debulking|volumineu|massive?|[4-9]\d\s*mm|\b\d{3}\s*mm|[4-9]\s*cm/.test(ctx);
+        add(abl, "cryo_probe", "Cryosondes", { opts: ["IceSeed", "IceSphere", "IceRod", "IceForce", "V-Probe 2.4", "V-Probe 3.8"], def: [A.isBone ? "V-Probe 2.4" : "IceRod"], q: big ? 3 : 2, cr: true, hint: "≥ 2 sondes au-delà de 3 cm" });
       }
-      if (m.has("cryo_morton")) {
-        add(mat, "morton_probe", "Cryosonde IceSeed Cx", { opts: ["IceSeed Cx 175", "IceSeed Cx 100"], cr: true, def: ["IceSeed Cx 175"] });
-        add(mat, "morton_warm", "Sérum chaud pour protection cutanée plantaire / dorsale");
-        add(mat, "morton_proto", "Protocole : 30 s à 5 % puis 3 min 30 à 30 % — repos sportif en charge 6 semaines", { note: true });
-      }
-      if (m.has("cryo_neuro")) {
-        add(mat, "neuro_probe", "Cryosonde fine", { opts: ["IceSeed", "IceSeed Cx 100", "IceSeed Cx 175"], cr: true, def: ["IceSeed"] });
-        add(mat, "neuro_target", "Repérage du nerf (écho / TDM) ± test anesthésique préalable confirmé");
-        add(mat, "neuro_warm", "Protection cutanée (sérum chaud) si nerf superficiel");
+      if (m.has("cryo_morton")) add(abl, "morton_probe", "Cryosonde Morton", { opts: ["IceSeed Cx 175", "IceSeed Cx 100"], def: ["IceSeed Cx 175"], q: 1, cr: true });
+      if (m.has("cryo_neuro")) add(abl, "neuro_probe", "Cryosonde cryoneurolyse", { opts: ["IceSeed", "IceSeed Cx 100", "IceSeed Cx 175"], def: ["IceSeed"], q: 1, cr: true });
+      if (isCryo) {
+        add(abl, "cryo_gas", "Gaz de cryothérapie (console réservée)", { opts: ["Bouteille d'argon", "Bouteille d'hélium"], def: ["Bouteille d'argon"], q: 1 });
+        add(abl, "cryo_thermo", "Thermocouples", { opts: ["ThermoSensor"], def: noble ? ["ThermoSensor"] : [], q: 1, warn: noble, hint: noble ? "Structure noble / peau à proximité" : "" });
       }
       if (m.has("rf_os")) {
-        add(mat, "rf_elec", "Électrode RF Covidien Cool-tip (exposition / longueur)", { opts: ["Covidien 7-150", "Covidien 10-150", "Covidien 7-100", "Covidien 7-140", "Covidien 20-150"], cr: true, def: ["Covidien 7-150"] });
-        add(mat, "rf_coax", "Coaxiale + forage osseux", { opts: ["Coaxiale Arrow 11G 6cm", "Coaxiale Arrow 11G 10cm", "Tréphine 13G", "Kit de forage"], cr: true, def: ["Coaxiale Arrow 11G 6cm", "Tréphine 13G"] });
-        add(mat, "rf_plates", "2 plaques de retour sur peau sèche, à distance du site");
-        const rfNoble = /[ée]pidur|moelle|racine|nerf|cervical|\bc\d\b|articulaire|peau|superficiel|cortical/.test(ctx);
-        add(mat, "rf_dissect", "Protection : hydrodissection au G5 % (jamais de sérum salé en RF) ou carbodissection CO2", Object.assign({ opts: ["Hydrodissection G5 %", "Carbodissection CO2"] }, rfNoble ? { warn: true, hint: "Structure noble / articulaire proche" } : {}));
-        add(mat, "rf_thermo", "Thermocouple si structure nerveuse ou peau < 1 cm");
-        add(mat, "rf_proto", "Protocole ostéome ostéoïde : 6 min à 90 °C", { note: true });
+        add(abl, "rf_elec", "Électrode RF Cool-tip", { opts: ["Covidien 7-150", "Covidien 10-150", "Covidien 7-100", "Covidien 7-140", "Covidien 20-150"], def: ["Covidien 7-150"], q: 1, cr: true });
+        add(abl, "rf_plates", "Plaques de retour RF", { opts: ["Plaque de retour"], def: ["Plaque de retour"], q: 2 });
+        add(abl, "rf_thermo", "Thermocouple RF", { opts: ["Thermocouple"], def: noble ? ["Thermocouple"] : [], q: 1, warn: noble, hint: noble ? "Structure noble / articulaire proche" : "" });
       }
-      if (m.has("rf_genic")) {
-        add(mat, "genic_can", "Canules RF Venom 20G ×3 (NGSL, NGSM, NGIM) + électrodes", { opts: ["Venom 20G"], cr: true, def: ["Venom 20G"] });
-        add(mat, "genic_plate", "Plaque de retour + câbles");
-        add(mat, "genic_stim", "Stimulation sensitive 50 Hz / motrice 2 Hz avant lésion");
-        add(mat, "genic_proto", "Protocole : 90 s × 80 °C par cible", { note: true });
+      if (m.has("rf_genic")) add(abl, "genic_can", "Canules RF géniculés (NGSL, NGSM, NGIM)", { opts: ["Venom 20G"], def: ["Venom 20G"], q: 3, cr: true });
+      if (m.has("rf_nerf")) add(abl, "nerf_can", "Canule RF nerf", { opts: ["Venom 20G", "Canule 18G 100mm"], def: ["Venom 20G"], q: 1, cr: true });
+      if (m.has("rf_genic") || m.has("rf_nerf")) add(abl, "rfn_plate", "Plaque de retour RF", { opts: ["Plaque de retour"], def: ["Plaque de retour"], q: 1 });
+      if (m.has("osteocool")) add(abl, "ocp_probe", "Sondes OsteoCool", { opts: ["OCP 10 mm", "OCP 20 mm"], def: ["OCP 20 mm"], q: 2, cr: true });
+      if (m.has("ect")) {
+        add(abl, "ect_elec", "Électrodes-aiguilles IGEA (Cliniporator réservé)", { opts: ["IGEA 18G 20cm 20mm", "IGEA 17G 16cm 40mm", "IGEA 17G 16cm 20mm", "IGEA 17G 12cm 30mm", "IGEA 17G 12cm 20mm", "IGEA 15G 16cm 30mm", "IGEA EPSA"], def: ["IGEA 18G 20cm 20mm"], q: 4, cr: true, hint: "4 à 6 autour de la lésion" });
       }
-      if (m.has("rf_nerf")) {
-        add(mat, "nerf_can", "Canule RF + électrode", { opts: ["Venom 20G", "Canule 18G 100mm"], cr: true, def: ["Venom 20G"] });
-        add(mat, "nerf_plate", "Plaque de retour + stimulation sensitive / motrice");
-        add(mat, "nerf_proto", "Protocole : thermolésion 90 s × 80 °C ou pulsée 120 s × 2 à 42 °C", { note: true });
-      }
-      if (m.has("osteocool")) {
-        add(mat, "ocp_probe", "Sondes OsteoCool (OCP)", { opts: ["OCP 10 mm", "OCP 20 mm"], cr: true, def: ["OCP 20 mm"] });
-        add(mat, "ocp_troc", "Trocarts d'accès 14G ×2 (bipédiculaire)", { cr: true });
-        add(mat, "ocp_proto", "Protocole : 15 min à 70 °C puis cimentoplastie", { note: true });
-      }
-      if (m.has("cimento") || m.has("osteocool")) {
-        const optional = /[±]|\+\/-|\(\s*\+\/-|si\s+besoin/.test(g);
-        add(mat, "cim_troc", "Trocarts de cimentoplastie" + (optional ? " (en option)" : ""), { opts: ["Tam'kit 13G 150mm", "Trocart 11G", "Trocart 10G", "Trocart 13G"], cr: true, def: m.has("osteocool") ? [] : ["Tam'kit 13G 150mm"] });
-        add(mat, "cim_ciment", "Ciment acrylique + système de mélange et d'injection (seringues 1 mL)", { opts: ["Vertaplex", "Ciment Tam'kit"], cr: true, def: ["Vertaplex"] });
-        add(mat, "cim_hammer", "Marteau chirurgical");
-        if (/\bc[1-7]\b|cervical/.test(g)) add(mat, "cim_ant", "Voie antérieure cervicale : aiguille sécable + hydrodissection au contraste dilué", { warn: true });
+
+      // — Accès & accessoires spécifiques —
+      if (m.has("cryo") && A.isBone) add(acc, "cryo_coax", "Accès osseux cryo", { opts: ["Coaxiale Arrow 11G", "Trocart 13G", "Tréphine 13G"], def: ["Coaxiale Arrow 11G"], q: 1, cr: true });
+      if (A.sub.cryoBx) add(acc, "cryo_bx", "Prélèvement per-geste", { opts: ["Trocart 13G", "Trocart 14G"], def: ["Trocart 14G"], q: 1, cr: true });
+      if (m.has("rf_os")) add(acc, "rf_coax", "Accès osseux RF", { opts: ["Coaxiale Arrow 11G 6cm", "Coaxiale Arrow 11G 10cm", "Tréphine 13G", "Kit de forage"], def: ["Coaxiale Arrow 11G 6cm", "Tréphine 13G"], q: 1, cr: true });
+      if (m.has("osteocool")) add(acc, "ocp_troc", "Introducteurs OsteoCool", { opts: ["Trocart 14G"], def: ["Trocart 14G"], q: 2, cr: true });
+      if (m.has("cimento")) {
+        const optional = /[±]|\+\/-|si\s+besoin/.test(g);
+        const cerv = /\bc[1-7]\b|cervical/.test(g);
+        add(acc, "cim_troc", "Trocarts de cimentoplastie" + (optional ? " (en option)" : ""), { opts: ["Tam'kit 13G 150mm", "Trocart 11G", "Trocart 10G", "Trocart 13G"], def: ["Tam'kit 13G 150mm"], q: cerv ? 1 : 2, cr: true });
       }
       if (m.has("vissage")) {
-        add(mat, "vis", "Vis canulées (diamètre / longueur planifiés)", { opts: ["Asnis 6.5 mm", "Asnis 7.3 mm", "Asnis 8 mm"], cr: true, def: ["Asnis 8 mm"], qty: true });
-        add(mat, "kw", "Broches-guides de Kirschner 300 mm");
-        add(mat, "ancillaire", "Ancillaire : mèche canulée, tournevis canulé, jauge de longueur");
-        add(mat, "vis_cim", "Ciment pour vissage cimenté (Vertaplex)");
+        add(acc, "vis", "Vis canulées", { opts: ["Asnis 6.5 mm", "Asnis 7.3 mm", "Asnis 8 mm"], def: ["Asnis 8 mm"], q: 2, cr: true, hint: "Longueurs planifiées sur le TDM" });
+        add(acc, "kw", "Broches-guides", { opts: ["Kirschner 300 mm"], def: ["Kirschner 300 mm"], q: 2 });
       }
-      if (m.has("koa")) {
-        add(mat, "koa_troc", "Trocarts Thiebaud 13G ×2 (pôles supérieur et inférieur)", { cr: true });
-        add(mat, "koa_contrast", "Produit de contraste iodé : opacification (recherche de fuites veineuses)");
-        add(mat, "koa_agent", "Agent sclérosant", { opts: ["Éthanol absolu", "Aetoxisclérol 3 % mousse"], cr: true });
-        add(mat, "koa_cim", "Ciment acrylique en recours (cimentoplastie sclérosante si fuites)");
+      if (m.has("koa")) add(acc, "koa_troc", "Trocarts de sclérothérapie", { opts: ["Thiebaud 13G"], def: ["Thiebaud 13G"], q: 2, cr: true });
+      if (m.has("biopsie_os")) add(acc, "bx_os_kit", "Kit de biopsie osseuse", { opts: ["Kit Arrow 11G", "Bonopty 13G", "Madison 13G", "Laredo 11G"], def: ["Kit Arrow 11G"], q: 1, cr: true });
+      if (m.has("biopsie_pm")) add(acc, "bx_pm", "Aiguille de biopsie", { opts: ["Tru-Cut 14G", "Tru-Cut 16G", "Tru-Cut 18G", "Coaxiale 13G"], def: [/microbiopsie/.test(g) ? "Tru-Cut 16G" : "Tru-Cut 14G"], q: 1, cr: true });
+      if (m.has("infil_rachis") || m.has("infil_art") || m.has("arthro") || m.has("test_anesth") || m.has("ponction")) {
+        add(acc, "aig", "Aiguilles", { opts: ["Spinale 22G 90mm", "Spinale 22G 120mm", "Spinale 20G", "18G", "22G", "25G"], def: [m.has("ponction") ? "18G" : (A.guid.has("echo") && !m.has("infil_rachis") ? "25G" : "Spinale 22G 90mm")], q: m.has("test_anesth") ? 3 : 1, cr: true });
       }
-      if (m.has("ect")) {
-        add(mat, "ect_gen", "Générateur Cliniporator (IGEA) + câbles, test de fonctionnement");
-        add(mat, "ect_elec", "Électrodes-aiguilles IGEA (4 à 6 autour de la lésion, paires ≤ 3 cm)", { opts: ["18G 20cm 20mm", "17G 16cm 40mm", "17G 16cm 20mm", "17G 12cm 30mm", "17G 12cm 20mm", "15G 16cm 30mm", "EPSA"], cr: true, def: ["18G 20cm 20mm"], qty: true });
-        add(mat, "ect_ecg", "Synchronisation ECG si lésion thoracique / proche du cœur");
-        add(mat, "ect_proto", "Électroporation 8 à 28 min après la fin du bolus — 1000 V par paire, pull-back si lésion longue", { note: true });
-        add(drugs, "bleo", "Bléomycine IV 15 mg/m² (bolus)", { bleoCalc: true, warn: true });
-        add(drugs, "cyto", "Gants de protection + conteneur déchets cytotoxiques");
-      }
-      if (m.has("biopsie_os")) {
-        add(mat, "bx_os_kit", "Kit de biopsie osseuse", { opts: ["Kit Arrow 11G", "Bonopty 13G", "Madison 13G", "Laredo 11G", "Trocart 13G + tréphine"], cr: true, def: ["Kit Arrow 11G"] });
-        add(prel, "formol", "Pots de formol ×4-5 (bons d'anapath remplis)");
-        add(prel, "tube_sec", "Tube sec / EDTA pour la ponction-aspiration ostéo-médullaire");
-      }
-      if (m.has("biopsie_pm")) {
-        const micro = /microbiopsie/.test(g);
-        add(mat, "bx_pm", "Aiguille de biopsie semi-automatique", { opts: ["Tru-Cut 14G", "Tru-Cut 16G", "Tru-Cut 18G", "Coaxiale 13G + Tru-Cut 14G"], cr: true, def: [micro ? "Tru-Cut 16G" : "Tru-Cut 14G"] });
-        if (!m.has("biopsie_os")) add(prel, "formol", "Pots de formol ×4-5 (bons d'anapath remplis)");
-      }
-      if (m.has("biopsie_os") || m.has("biopsie_pm") || /pr[ée]l[èe]vement/.test(ctx)) {
-        if (/sarcom|myxo|liposarc|masse|tumeur\s+primitive|rcp|netsarc|desmo/.test(ctx)) {
-          add(prel, "voie", "Voie d'abord validée avec le chirurgien (trajet résécable, un seul compartiment)", /traverser|fascia/.test(ctx) ? { warn: true, hint: "Remarque : ne pas traverser le fascia" } : {});
-          add(prel, "tumoro", "Carotte fraîche pour tumorothèque (congélation) — prévenir l'anapath");
-        }
-        if (/h[ée]mopathie|lymphom|my[ée]lom|leuc/.test(ctx)) add(prel, "frais", "Prélèvement frais (sérum physiologique / RPMI) pour cytométrie — prévenir l'anapath", { warn: true });
-      }
-      if (m.has("ponction") || /bact[ée]rio|infect|spondylo|sepsis/.test(g)) {
-        add(mat, "ponc_aig", "Aiguille de ponction", { opts: ["18G", "Spinale 20G", "Spinale 18G"], cr: true, def: ["18G"] });
-        add(prel, "hemoc", "Flacons d'hémoculture aérobie + anaérobie, pot stérile (± tube EDTA cytologie)");
-        add(prel, "nolido", "Pas de Xylocaïne intra-articulaire avant le prélèvement (bactériostatique)", { warn: true });
-        add(prel, "lavage", "Sérum physiologique stérile pour lavage-réaspiration si ponction blanche");
-      }
-      if (m.has("test_anesth")) {
-        add(mat, "test_aig", "Aiguilles spinales 22G (une par cible)");
-        add(drugs, "test_al", "Anesthésique local", { opts: ["Xylocaïne 1 %", "Naropéine 2 mg/mL"], def: ["Xylocaïne 1 %"] });
-        add(prel, "eva", "Carnet EVA / fiche d'auto-évaluation remis au patient");
-      }
-      if (m.has("infil_rachis")) {
-        add(mat, "ir_aig", "Aiguille spinale", { opts: ["Spinale 22G 90mm", "Spinale 22G 120mm", "Spinale 25G"], cr: true, def: ["Spinale 22G 90mm"] });
-        add(drugs, "ir_contrast", "Produit de contraste iodé (opacification avant injection)");
-        const foram = /foraminal|cervical|\bc\d/.test(g);
-        add(drugs, "ir_cortico", "Corticoïde", Object.assign({ opts: ["Diprostène", "Altim", "Dexaméthasone"] }, foram ? { warn: true, hint: "Cervical / foraminal : corticoïde NON particulaire (dexaméthasone)", def: ["Dexaméthasone"] } : { def: ["Diprostène"] }));
-      }
-      if (m.has("infil_art") || m.has("arthro")) {
-        add(mat, "ia_aig", "Aiguille", { opts: ["22G", "25G", "Spinale 22G 90mm"], cr: true, def: [A.guid.has("echo") ? "25G" : "22G"] });
-        add(drugs, "ia_cortico", "Corticoïde + anesthésique", { opts: ["Diprostène 1 mL", "Altim", "Xylocaïne 1 %"], def: ["Diprostène 1 mL"] });
-        if (m.has("arthro") || A.guid.has("scopie")) add(drugs, "ia_contrast", "Produit de contraste iodé (arthrographie / contrôle de position)");
-      }
-      if (m.has("reperage")) add(mat, "rep", "Repérage : crayon dermographique, ± harpon / marqueur", { opts: ["Crayon dermographique", "Harpon"] });
-      if (m.has("generic")) add(mat, "gen", "Matériel du geste à préciser (champ « Matériel utilisé » ci-dessous)");
 
-      // — Points de vigilance extraits des remarques —
-      const rem = `${ev.remarques || ""}`;
-      const alertBits = rem.split(/[·•|;]|\.\s/).map(s => s.trim()).filter(s => /⚠️|plexus|c[ôo]t[ée]\s+[àa]\s+v[ée]rifier|ne\s+pas\s+traverser|sans\s+traverser|h[ée]mophil|allerg|claustro|enceinte|pacemaker|pace-maker|stimulateur|insuffisance\s+r[ée]nale|diab[èe]t/i.test(s));
-      alertBits.slice(0, 4).forEach((s, i) => add(vig, "vig" + i, s.replace(/^⚠️\s*/, "⚠️ "), { warn: true }));
-      if (/pacemaker|pace-maker|stimulateur|d[ée]fibrillateur/i.test(ctx) && (m.has("rf_os") || m.has("rf_genic") || m.has("rf_nerf") || m.has("ect"))) add(vig, "pm", "Pacemaker / DAI : avis rythmologue avant RF / électroporation", { warn: true });
+      // — Produits spécifiques (chimio, ciment, sclérosant) —
+      if (m.has("ect")) add(prod, "bleo", "Bléomycine IV 15 mg/m² — flacons de 15 mg (prescription pharmacie J-3)", { opts: ["Bléomycine 15 mg"], def: ["Bléomycine 15 mg"], q: 2, bleoCalc: true, warn: true });
+      if (m.has("cimento") || m.has("osteocool") || m.has("vissage")) add(prod, "cim", "Ciment acrylique", { opts: ["Vertaplex", "Ciment Tam'kit"], def: ["Vertaplex"], q: 1, cr: true });
+      if (m.has("koa")) {
+        add(prod, "koa_agent", "Agent sclérosant", { opts: ["Éthanol absolu", "Aetoxisclérol 3 %"], def: ["Éthanol absolu"], q: 1, cr: true });
+        add(prod, "koa_cim", "Ciment en recours (si fuites)", { opts: ["Vertaplex"], def: /ciment/.test(g) ? ["Vertaplex"] : [], q: 1 });
+      }
+      if (m.has("infil_rachis") || m.has("infil_art") || m.has("arthro")) {
+        const foram = /foraminal|cervical|\bc\d/.test(g) && m.has("infil_rachis");
+        add(prod, "cortico", "Corticoïde", { opts: ["Diprostène", "Altim", "Dexaméthasone"], def: [foram ? "Dexaméthasone" : "Diprostène"], q: 1, warn: foram, hint: foram ? "Cervical / foraminal : non particulaire" : "" });
+      }
+
+      // — Repères techniques (pas de stock) —
+      const notes = [];
+      if (m.has("cryo")) notes.push("Cryo : 10 min → 9 min passif + 1 min actif → 6 min (10-10-10 si os)");
+      if (m.has("cryo_morton")) notes.push("Morton : 30 s à 5 % puis 3 min 30 à 30 %");
+      if (m.has("rf_os")) notes.push("OO : 6 min à 90 °C — hydrodissection au G5 % uniquement (ou CO2)");
+      if (m.has("rf_genic")) notes.push("Géniculés : 90 s × 80 °C par cible");
+      if (m.has("osteocool")) notes.push("OsteoCool : 15 min à 70 °C puis cimentoplastie");
+      if (m.has("ect")) notes.push("ECT : AG curarisée — électroporation 8 à 28 min après le bolus, 1000 V par paire");
+      notes.forEach((t, i) => add(prod, "note" + i, t, { note: true }));
 
       return [
-        { t: "Avant le bloc", items: pre },
-        { t: "Installation & guidage", items: inst },
-        { t: "Matériel du geste", items: mat },
-        { t: "Produits & médicaments", items: drugs },
-        { t: "Prélèvements & suites", items: prel },
-        { t: "Points de vigilance", items: vig }
+        { t: "Ablation", items: abl },
+        { t: "Accès & accessoires", items: acc },
+        { t: "Produits & repères", items: prod }
       ].filter(s => s.items.length);
+    }
+
+    // Quantité effective d'une référence pour un patient
+    function blocQtyOf(st, it, o) {
+      const k = it.id + "#" + o;
+      if (st.choices[k]) return st.choices[k];
+      if (it.bleoCalc) { const b = blocBsa(st); if (b) return Math.max(1, Math.ceil(b.dose / 15)); }
+      return it.q || 1;
+    }
+    function blocChosen(st, it) {
+      return st.choices[it.id] ? st.choices[it.id] : (it.def || []);
     }
 
     // ---------- Bléomycine ----------
@@ -9110,6 +9051,7 @@
     }
 
     // ---------- Données ----------
+    const BLOC_SPECIFIC = ["ect", "cryo", "cryo_morton", "cryo_neuro", "rf_os", "rf_genic", "rf_nerf", "osteocool", "cimento", "vissage", "koa", "biopsie_os", "biopsie_pm"];
     function blocGetEvents() {
       const todayIso = dateToIso(new Date());
       const lim = new Date(); lim.setDate(lim.getDate() + blocHorizon);
@@ -9117,11 +9059,12 @@
       const q = ((document.getElementById("bloc-search") || {}).value || "").toLowerCase().trim();
       let evs = getAllTimedEvents().filter(e => (e.category === "acte" || e.category === "biopsie") && e.isoDate && e.isoDate >= todayIso && e.isoDate <= limIso);
       if (blocScope === "mine") evs = evs.filter(e => e.isMine);
-      evs = evs.filter(e => !/annul[ée]/i.test(`${e.title || ""} ${e.statut || ""}`));
+      evs = evs.filter(e => !/annul[ée]/i.test(`${e.title || ""}`));
       const out = [];
       for (const ev of evs) {
         const A = blocAnalyze(ev);
-        if (blocHeavyOnly && !A.heavy) continue;
+        // Par défaut : uniquement les gestes à matériel spécifique (ablation, ECT, ciment, vis, sclérothérapie, kits de biopsie)
+        if (!blocShowAll && !BLOC_SPECIFIC.some(x => A.m.has(x))) continue;
         if (q && !`${ev.patient} ${ev.ipp} ${ev.title} ${ev.remarques} ${ev.lieu}`.toLowerCase().includes(q)) continue;
         out.push({ ev, A });
       }
@@ -9138,66 +9081,98 @@
       test_anesth: ["Test anesth.", "#2563EB"], reperage: ["Repérage", "#0D9488"], generic: ["Geste", "#64748B"]
     };
 
+    function blocStockItems(sections) { return sections.flatMap(s => s.items).filter(it => !it.note); }
     function blocProgress(key, sections) {
       const st = blocSt(key);
-      const ids = [];
-      sections.forEach(s => s.items.forEach(it => { if (!it.note) ids.push(it.id); }));
+      const ids = blocStockItems(sections).filter(it => blocChosen(st, it).length).map(it => it.id);
       st.extra.forEach((x, i) => ids.push("x" + i));
-      const done = ids.filter(id => st.checked[id]).length;
-      return { done, total: ids.length };
+      return { done: ids.filter(id => st.checked[id]).length, total: ids.length };
     }
+    function blocStockCfg() {
+      if (!blocCkState.__stock || typeof blocCkState.__stock !== "object") blocCkState.__stock = {};
+      if (!(blocCkState.__delai > 0)) blocCkState.__delai = 14;
+      return blocCkState.__stock;
+    }
+    const blocFmtD = iso => new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" });
 
     // ---------- Rendu ----------
     function renderBlocTab() {
       const container = document.getElementById("bloc-list-container");
       if (!container) return;
-      [["7", 7], ["14", 14], ["30", 30], ["90", 90], ["180", 180]].forEach(([k, v]) => {
-        const el = document.getElementById("flt-bloc-h" + k); if (el) el.classList.toggle("active", blocHorizon === v);
-      });
+      [7, 14, 30, 90, 180].forEach(v => { const el = document.getElementById("flt-bloc-h" + v); if (el) el.classList.toggle("active", blocHorizon === v); });
       const elMine = document.getElementById("flt-bloc-mine"); if (elMine) elMine.classList.toggle("active", blocScope === "mine");
       const elAll = document.getElementById("flt-bloc-all"); if (elAll) elAll.classList.toggle("active", blocScope === "all");
-      const elHeavy = document.getElementById("flt-bloc-heavy"); if (elHeavy) elHeavy.classList.toggle("active", blocHeavyOnly);
+      const elShow = document.getElementById("flt-bloc-heavy"); if (elShow) elShow.classList.toggle("active", blocShowAll);
 
       const list = blocGetEvents();
       blocEvRegistry = [];
       if (!list.length) {
-        container.innerHTML = `<div class="bloc-empty">Aucun geste à venir sur cette période${blocScope === "mine" ? " (mes gestes)" : ""}.<br><span style="font-size:11px;">Les gestes viennent des onglets « actes » et « Biopsies » du Sheet.</span></div>`;
+        container.innerHTML = `<div class="bloc-empty">Aucun geste à matériel spécifique sur cette période${blocScope === "mine" ? " (mes gestes)" : ""}.</div>`;
         return;
       }
-      // Récapitulatif matériel / commandes sur la période
-      const recap = {};
-      let bleoPts = 0, bleoMg = 0, cimPts = 0, cryoPts = 0;
+      // Besoins par référence (quantité × date) → stock / manque / date limite de commande
+      const need = {};
+      const todayIso = dateToIso(new Date());
       const cards = list.map(({ ev, A }, idx) => {
         const key = blocKeyOf(ev);
         blocEvRegistry[idx] = { ev, key };
         const sections = blocBuildSections(ev, A);
         const st = blocSt(key);
-        sections.forEach(s => s.items.forEach(it => {
-          if (!it.opts || !it.cr) return;
-          const chosen = (st.choices[it.id] && st.choices[it.id].length) ? st.choices[it.id] : (it.def || []);
-          const lbl = it.label.split(" (")[0];
-          recap[lbl] = recap[lbl] || {};
-          if (!chosen.length) recap[lbl]["à choisir"] = (recap[lbl]["à choisir"] || 0) + 1;
-          chosen.forEach(c => { recap[lbl][c] = (recap[lbl][c] || 0) + 1; });
-        }));
-        if (A.m.has("ect")) { bleoPts++; const b = blocBsa(st); if (b) bleoMg += b.dose; }
-        if (A.m.has("cimento") || A.m.has("osteocool") || A.m.has("vissage")) cimPts++;
-        if (A.m.has("cryo") || A.m.has("cryo_morton") || A.m.has("cryo_neuro")) cryoPts++;
+        blocStockItems(sections).forEach(it => {
+          blocChosen(st, it).forEach(o => {
+            const n = blocQtyOf(st, it, o);
+            if (!need[o]) need[o] = { total: 0, soon: 0, first: ev.isoDate, uses: [] };
+            need[o].total += n;
+            need[o].uses.push({ iso: ev.isoDate, n, ok: Boolean(st.checked[it.id]) });
+            if (ev.isoDate < need[o].first) need[o].first = ev.isoDate;
+          });
+        });
         return blocCardHtml(ev, A, key, sections, idx);
       });
-      const recapRows = Object.entries(recap).map(([k, v]) =>
-        `<div class="bloc-recap-row"><span class="bloc-recap-k">${blocEsc(k)}</span><span>${Object.entries(v).map(([o, n]) => `<span class="bloc-recap-chip ${o === "à choisir" ? "todo" : ""}">${blocEsc(o)} <b>×${n}</b></span>`).join("")}</span></div>`).join("");
-      const totals = [
-        `<span class="bloc-kpi"><b>${list.length}</b> geste${list.length > 1 ? "s" : ""}</span>`,
-        cryoPts ? `<span class="bloc-kpi">❄️ <b>${cryoPts}</b> cryo (argon)</span>` : "",
-        bleoPts ? `<span class="bloc-kpi">💉 <b>${bleoPts}</b> Bléomycine${bleoMg ? ` · ${bleoMg.toFixed(1)} mg calculés` : ""}</span>` : "",
-        cimPts ? `<span class="bloc-kpi">🦴 <b>${cimPts}</b> ciment / vis</span>` : ""
-      ].join("");
+      const stock = blocStockCfg();
+      const delai = blocCkState.__delai;
+      const rows = Object.entries(need).map(([ref, v]) => {
+        const s = stock[ref];
+        const hasStock = s !== undefined && s !== "" && !isNaN(+s);
+        let manque = null, orderBy = null, urgent = false;
+        if (hasStock) {
+          manque = Math.max(0, v.total - (+s));
+          if (manque > 0) {
+            // date du 1er geste qui dépasse le stock
+            let cum = 0, breakIso = null;
+            v.uses.slice().sort((a, b) => a.iso.localeCompare(b.iso)).some(u => { cum += u.n; if (cum > +s) { breakIso = u.iso; return true; } return false; });
+            const d = new Date(breakIso + "T12:00:00"); d.setDate(d.getDate() - delai);
+            orderBy = dateToIso(d); urgent = orderBy <= todayIso;
+          }
+        }
+        return { ref, v, s: hasStock ? +s : "", manque, orderBy, urgent };
+      }).sort((a, b) => (b.manque > 0) - (a.manque > 0) || a.v.first.localeCompare(b.v.first));
+      const nManque = rows.filter(r => r.manque > 0).length;
+      const nUnknown = rows.filter(r => r.s === "").length;
+      const tableHtml = rows.map(r => {
+        const safeRef = blocEsc(r.ref).replace(/'/g, "\\'");
+        const status = r.s === "" ? `<span class="bloc-st unk">stock ?</span>`
+          : r.manque > 0 ? `<span class="bloc-st ko">manque ${r.manque}</span>`
+          : `<span class="bloc-st ok">OK</span>`;
+        return `<tr class="${r.manque > 0 ? "ko" : ""}">
+          <td class="bloc-ref">${blocEsc(r.ref)}<div class="bloc-ref-sub">1er besoin ${blocFmtD(r.v.first)}${r.orderBy ? ` · <b class="${r.urgent ? "urg" : ""}">commander ${r.urgent ? "MAINTENANT" : "avant le " + blocFmtD(r.orderBy)}</b>` : ""}</div></td>
+          <td class="num"><b>${r.v.total}</b></td>
+          <td class="num"><input type="text" inputmode="numeric" class="bloc-stock-in" value="${r.s}" placeholder="?" onchange="blocSetStock('${safeRef}', this.value)" /></td>
+          <td>${status}</td>
+        </tr>`;
+      }).join("");
       container.innerHTML = `
-        <details class="bloc-recap" ${list.length ? "" : ""}>
-          <summary>📦 Récapitulatif matériel à prévoir — ${blocHorizon} jours ${totals}</summary>
-          ${recapRows || '<div class="bloc-recap-row">Aucun dispositif spécifique.</div>'}
-          <div class="bloc-recap-foot">Compté d'après les choix cochés sur chaque fiche (ou le matériel par défaut de tes CR). Utile pour la commande IBODE / pharmacie.</div>
+        <details class="bloc-recap" open>
+          <summary>📦 Besoins sur ${blocHorizon} jours <span class="bloc-kpi"><b>${list.length}</b> geste${list.length > 1 ? "s" : ""}</span>${nManque ? `<span class="bloc-kpi ko">⚠️ <b>${nManque}</b> en rupture</span>` : ""}${nUnknown ? `<span class="bloc-kpi">${nUnknown} stock à saisir</span>` : ""}</summary>
+          <table class="bloc-stock">
+            <thead><tr><th>Référence</th><th class="num">Besoin</th><th class="num">Stock</th><th></th></tr></thead>
+            <tbody>${tableHtml}</tbody>
+          </table>
+          <div class="bloc-recap-foot">
+            Délai de livraison : <input type="text" inputmode="numeric" class="bloc-stock-in" value="${delai}" onchange="blocSetDelai(this.value)" /> j ·
+            Saisis le stock réel : l'app calcule le manque et la date limite de commande.
+          </div>
+          <div class="bloc-actions"><button type="button" class="chip" onclick="blocCopyOrder(this)">📋 Copier la liste de commande</button></div>
         </details>
         ${cards.join("")}`;
     }
@@ -9208,12 +9183,15 @@
       const pct = pr.total ? Math.round(100 * pr.done / pr.total) : 0;
       const isOpen = blocOpenKeys.has(key);
       const d = ev.isoDate ? new Date(ev.isoDate + "T12:00:00") : null;
-      const dLbl = d ? d.toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "2-digit" }) : ev.dateStr;
+      const dLbl = d ? blocFmtD(ev.isoDate) : ev.dateStr;
       const daysTo = d ? Math.round((d - new Date(dateToIso(new Date()) + "T12:00:00")) / 86400000) : null;
-      const soon = daysTo !== null && daysTo <= 2 && pct < 100;
+      const soon = daysTo !== null && daysTo <= 7 && pct < 100;
       const mods = [...A.m].map(k => { const [l, c] = BLOC_MOD_LABEL[k] || [k, "#64748B"]; return `<span class="bloc-mod" style="color:${c}; border-color:${c}40; background:${c}12;">${l}</span>`; }).join("");
-      const warnCount = sections.reduce((n, s) => n + s.items.filter(it => it.warn && !st.checked[it.id]).length, 0);
-      const anticoagBadge = A.anticoag ? `<span class="bloc-anticoag" title="Alerte hémostase : anticoagulant / AAP">🩸</span>` : "";
+      // Résumé matériel visible sans ouvrir la fiche
+      const summary = blocStockItems(sections).flatMap(it => blocChosen(st, it).map(o => {
+        const n = blocQtyOf(st, it, o);
+        return `<span class="bloc-sum ${st.checked[it.id] ? "ok" : ""}">${blocEsc(o)}${n > 1 ? ` ×${n}` : ""}</span>`;
+      })).join("");
       let body = "";
       if (isOpen) {
         const secHtml = sections.map(s => `
@@ -9231,21 +9209,21 @@
         try { notesHtml = renderBlocNotesHtml(ev, "blc-"); } catch (_) {}
         body = `
           <div class="bloc-body" onclick="event.stopPropagation()">
+            <div class="bloc-legend">Coche = matériel réservé / sorti pour ce patient. Les références choisies vont dans « Matériel utilisé » du CR opératoire.</div>
             ${secHtml}
             <div class="bloc-sec">
-              <div class="bloc-sec-t">Ajouts personnels</div>
+              <div class="bloc-sec-t">Autre matériel spécifique</div>
               ${extraHtml}
               <div class="bloc-add-row">
-                <input type="text" class="bloc-input" id="bloc-add-${idx}" placeholder="Ajouter un élément (ex : 2e console, aiguille 22G 150 mm…)" onkeydown="if(event.key==='Enter'){blocAddExtra(${idx});}" />
+                <input type="text" class="bloc-input" id="bloc-add-${idx}" placeholder="Ex : 2e console, aiguille 22G 150 mm…" onkeydown="if(event.key==='Enter'){blocAddExtra(${idx});}" />
                 <button type="button" class="bloc-save-btn" onclick="blocAddExtra(${idx})">+</button>
               </div>
             </div>
             <div class="bloc-actions">
-              <button type="button" class="chip" onclick="blocCopy(${idx}, this)">📋 Copier la check-list</button>
-              <button type="button" class="chip" onclick="blocCheckAll(${idx}, true)">✓ Tout cocher</button>
+              <button type="button" class="chip" onclick="blocCopy(${idx}, this)">📋 Copier</button>
+              <button type="button" class="chip" onclick="blocCheckAll(${idx}, true)">✓ Tout réservé</button>
               <button type="button" class="chip" onclick="blocCheckAll(${idx}, false)">↺ Réinitialiser</button>
             </div>
-            <div class="bloc-sec-t" style="margin-top:8px;">Matériel utilisé → CR opératoire</div>
             ${notesHtml}
           </div>`;
       }
@@ -9255,15 +9233,13 @@
             <div class="bloc-head-top">
               <span class="event-time-badge">${blocEsc(dLbl)} · ${blocEsc(ev.horaire || "")}</span>
               ${daysTo !== null ? `<span class="bloc-dday ${soon ? "soon" : ""}">${daysTo === 0 ? "Aujourd'hui" : daysTo === 1 ? "Demain" : "J-" + daysTo}</span>` : ""}
-              <span class="bloc-anesth">${A.anesth}${A.hypnose ? " · hypnose" : ""}</span>
-              ${anticoagBadge}
-              ${warnCount ? `<span class="bloc-warn-badge" title="Points de vigilance non cochés">⚠️ ${warnCount}</span>` : ""}
-              <span class="bloc-chev">${isOpen ? "▾" : "▸"}</span>
+              ${A.anticoag ? `<span class="bloc-anticoag" title="Alerte hémostase : anticoagulant / AAP">🩸</span>` : ""}
+              <span class="bloc-chev">${pr.done}/${pr.total} ${isOpen ? "▾" : "▸"}</span>
             </div>
-            <div class="bloc-patient">${blocEsc(ev.patient)}${ev.ipp && /^80\d{8}$/.test(String(ev.ipp).replace(/\D/g, "")) ? ` <span class="bloc-ipp">${blocEsc(ev.ipp)}</span>` : ""}</div>
+            <div class="bloc-patient">${blocEsc(ev.patient)}</div>
             <div class="bloc-geste">${blocEsc(ev.title)}</div>
             <div class="bloc-mods">${mods}</div>
-            <div class="bloc-prog"><div class="bloc-prog-bar" style="width:${pct}%"></div><span class="bloc-prog-l">${pr.done}/${pr.total}</span></div>
+            ${summary ? `<div class="bloc-sums">${summary}</div>` : ""}
           </div>
           ${body}
         </div>`;
@@ -9273,29 +9249,22 @@
       if (it.note) return `<div class="bloc-note">ℹ️ ${blocEsc(it.label)}</div>`;
       const checked = Boolean(st.checked[it.id]);
       const chosen = st.choices[it.id] || null;
-      const eff = chosen || it.def || [];
-      let extra = "";
-      if (it.opts) {
-        extra += `<div class="bloc-opts">${it.opts.map(o => {
-          const on = eff.includes(o);
-          const qty = st.choices[it.id + "#" + o];
-          return `<button type="button" class="bloc-opt ${on ? "on" : ""} ${on && !chosen ? "def" : ""}" onclick="event.preventDefault(); event.stopPropagation(); blocChoose(${idx}, '${it.id}', '${blocEsc(o).replace(/'/g, "\\'")}')">${blocEsc(o)}${on && it.qty ? ` ×${qty || 1}` : ""}</button>`;
-        }).join("")}</div>`;
-        if (it.qty && eff.length) {
-          extra += `<div class="bloc-qty">${eff.map(o => `<span>${blocEsc(o)} <button type="button" onclick="event.preventDefault(); event.stopPropagation(); blocQty(${idx}, '${it.id}', '${blocEsc(o).replace(/'/g, "\\'")}', -1)">−</button><b>${st.choices[it.id + "#" + o] || 1}</b><button type="button" onclick="event.preventDefault(); event.stopPropagation(); blocQty(${idx}, '${it.id}', '${blocEsc(o).replace(/'/g, "\\'")}', 1)">+</button></span>`).join("")}</div>`;
-        }
+      const eff = blocChosen(st, it);
+      const esc = o => blocEsc(o).replace(/'/g, "\\'");
+      let extra = `<div class="bloc-opts">${it.opts.map(o => {
+        const on = eff.includes(o);
+        return `<button type="button" class="bloc-opt ${on ? "on" : ""} ${on && !chosen ? "def" : ""}" onclick="event.preventDefault(); event.stopPropagation(); blocChoose(${idx}, '${it.id}', '${esc(o)}')">${blocEsc(o)}</button>`;
+      }).join("")}</div>`;
+      if (eff.length) {
+        extra += `<div class="bloc-qty">${eff.map(o => `<span>${blocEsc(o)} <button type="button" onclick="event.preventDefault(); event.stopPropagation(); blocQty(${idx}, '${it.id}', '${esc(o)}', -1)">−</button><b>${blocQtyOf(st, it, o)}</b><button type="button" onclick="event.preventDefault(); event.stopPropagation(); blocQty(${idx}, '${it.id}', '${esc(o)}', 1)">+</button></span>`).join("")}</div>`;
       }
       if (it.bleoCalc) {
         const b = blocBsa(st);
         extra += `<div class="bloc-bleo" onclick="event.preventDefault(); event.stopPropagation();">
           <input type="text" inputmode="decimal" class="bloc-input bloc-num" placeholder="Poids kg" value="${blocEsc(st.bsa.poids || "")}" onchange="blocSetBsa(${idx}, 'poids', this.value)" />
           <input type="text" inputmode="decimal" class="bloc-input bloc-num" placeholder="Taille cm" value="${blocEsc(st.bsa.taille || "")}" onchange="blocSetBsa(${idx}, 'taille', this.value)" />
-          <span class="bloc-bleo-res">${b ? `SC ${b.sc.toFixed(2).replace(".", ",")} m² → <b>${b.dose.toFixed(1).replace(".", ",")} mg</b>` : "SC (Mosteller) → dose"}</span>
+          <span class="bloc-bleo-res">${b ? `SC ${b.sc.toFixed(2).replace(".", ",")} m² → <b>${b.dose.toFixed(1).replace(".", ",")} mg</b> = ${Math.ceil(b.dose / 15)} flacon(s)` : "SC (Mosteller) → dose et nb de flacons"}</span>
         </div>`;
-      }
-      if (it.anticoagBtn) {
-        const meta = encodeURIComponent(JSON.stringify({ patient: blocEvRegistry[idx].ev.patient, ipp: blocEvRegistry[idx].ev.ipp, isoDate: blocEvRegistry[idx].ev.isoDate, dateStr: blocEvRegistry[idx].ev.dateStr, category: blocEvRegistry[idx].ev.category, title: blocEvRegistry[idx].ev.title, remarques: blocEvRegistry[idx].ev.remarques }));
-        extra += `<button type="button" class="bloc-opt" style="color:#B91C1C; border-color:#FCA5A5;" onclick="event.preventDefault(); copyPatientAnticoag('${meta}', this, event)">🩸 Copier la consigne</button>`;
       }
       return `
         <label class="bloc-item ${checked ? "done" : ""} ${it.warn && !checked ? "warn" : ""}">
@@ -9305,11 +9274,8 @@
     }
 
     // ---------- Actions ----------
-    function blocRerenderKeepScroll() {
-      const y = window.scrollY;
-      renderBlocTab();
-      window.scrollTo(0, y);
-    }
+    function blocRerenderKeepScroll() { const y = window.scrollY; renderBlocTab(); window.scrollTo(0, y); }
+    function blocItemById(r, id) { return blocBuildSections(r.ev, blocAnalyze(r.ev)).flatMap(s => s.items).find(x => x.id === id) || {}; }
     function blocToggleOpen(idx) {
       const r = blocEvRegistry[idx]; if (!r) return;
       if (blocOpenKeys.has(r.key)) blocOpenKeys.delete(r.key); else blocOpenKeys.add(r.key);
@@ -9324,40 +9290,57 @@
       if (navigator.vibrate) { try { navigator.vibrate(8); } catch (_) {} }
       blocRerenderKeepScroll();
     }
+    function blocSyncCrMat(r) {
+      // Matériel choisi → champ « Matériel utilisé » (repris dans le CR opératoire)
+      const st = blocSt(r.key);
+      const parts = blocBuildSections(r.ev, blocAnalyze(r.ev)).flatMap(s => s.items).filter(it => it.cr && !it.note)
+        .flatMap(it => blocChosen(st, it).map(o => { const n = blocQtyOf(st, it, o); return n > 1 ? `${n} ${o}` : o; }));
+      const sKey = getSuiviKey(r.ev);
+      const el = document.getElementById(`blc-mat-${sKey}`);
+      if (!el || !parts.length) return;
+      el.value = parts.join(" • ");
+      const safeEvMeta = encodeURIComponent(JSON.stringify({ row: r.ev.row || 0, patient: r.ev.patient, ipp: r.ev.ipp, isoDate: r.ev.isoDate, dateStr: r.ev.dateStr, category: r.ev.category, title: r.ev.title, remarques: r.ev.remarques, catActe: r.ev.catActe }));
+      try { saveSuiviFromDom(sKey, safeEvMeta, "blc-", false); } catch (_) {}
+    }
     function blocChoose(idx, id, opt) {
       const r = blocEvRegistry[idx]; if (!r) return;
       const st = blocSt(r.key);
-      const A = blocAnalyze(r.ev);
-      const it = blocBuildSections(r.ev, A).flatMap(s => s.items).find(x => x.id === id) || {};
-      let cur = st.choices[id] ? [...st.choices[id]] : [...(it.def || [])];
-      const adding = !cur.includes(opt);
-      cur = adding ? [...cur, opt] : cur.filter(x => x !== opt);
+      const it = blocItemById(r, id);
+      let cur = blocChosen(st, it).slice();
+      cur = cur.includes(opt) ? cur.filter(x => x !== opt) : [...cur, opt];
       st.choices[id] = cur;
       saveBlocCk();
-      // Le choix d'un dispositif alimente le champ « Matériel utilisé » (repris dans le CR opératoire)
-      if (adding && it.cr) {
-        const sKey = getSuiviKey(r.ev);
-        const qty = st.choices[id + "#" + opt];
-        const text = qty && qty > 1 ? `${qty} ${opt}` : opt;
-        const inputId = `blc-mat-${sKey}`;
-        if (document.getElementById(inputId)) {
-          const safeEvMeta = encodeURIComponent(JSON.stringify({ row: r.ev.row || 0, patient: r.ev.patient, ipp: r.ev.ipp, isoDate: r.ev.isoDate, dateStr: r.ev.dateStr, category: r.ev.category, title: r.ev.title, remarques: r.ev.remarques, catActe: r.ev.catActe }));
-          try { appendMaterialChoice(inputId, text, sKey, safeEvMeta, "blc-", null); } catch (_) {}
-        }
-      }
+      blocSyncCrMat(r);
       blocRerenderKeepScroll();
     }
     function blocQty(idx, id, opt, delta) {
       const r = blocEvRegistry[idx]; if (!r) return;
       const st = blocSt(r.key);
-      const k = id + "#" + opt;
-      st.choices[k] = Math.max(1, Math.min(12, (st.choices[k] || 1) + delta));
+      const it = blocItemById(r, id);
+      st.choices[id + "#" + opt] = Math.max(1, Math.min(20, blocQtyOf(st, it, opt) + delta));
+      if (!st.choices[id]) st.choices[id] = blocChosen(st, it).slice();
       saveBlocCk();
+      blocSyncCrMat(r);
       blocRerenderKeepScroll();
     }
     function blocSetBsa(idx, field, val) {
       const r = blocEvRegistry[idx]; if (!r) return;
-      blocSt(r.key).bsa[field] = String(val || "").trim();
+      const st = blocSt(r.key);
+      st.bsa[field] = String(val || "").trim();
+      delete st.choices["bleo#Bléomycine 15 mg"]; // le nb de flacons suit la dose calculée
+      saveBlocCk();
+      blocRerenderKeepScroll();
+    }
+    function blocSetStock(ref, val) {
+      const stock = blocStockCfg();
+      const v = String(val || "").trim();
+      if (v === "" || isNaN(+v)) delete stock[ref]; else stock[ref] = Math.max(0, Math.round(+v));
+      saveBlocCk();
+      blocRerenderKeepScroll();
+    }
+    function blocSetDelai(val) {
+      const v = parseInt(val, 10);
+      blocCkState.__delai = v > 0 ? v : 14;
       saveBlocCk();
       blocRerenderKeepScroll();
     }
@@ -9374,23 +9357,22 @@
       const r = blocEvRegistry[idx]; if (!r) return;
       const st = blocSt(r.key);
       st.extra.splice(i, 1);
-      // ré-indexer les coches des ajouts
-      const newChecked = {};
+      const nc = {};
       Object.keys(st.checked).forEach(k => {
-        if (!/^x\d+$/.test(k)) { newChecked[k] = true; return; }
+        if (!/^x\d+$/.test(k)) { nc[k] = true; return; }
         const n = parseInt(k.slice(1), 10);
-        if (n < i) newChecked[k] = true; else if (n > i) newChecked["x" + (n - 1)] = true;
+        if (n < i) nc[k] = true; else if (n > i) nc["x" + (n - 1)] = true;
       });
-      st.checked = newChecked;
+      st.checked = nc;
       saveBlocCk();
       blocRerenderKeepScroll();
     }
     function blocCheckAll(idx, val) {
       const r = blocEvRegistry[idx]; if (!r) return;
       const st = blocSt(r.key);
-      if (!val) { st.checked = {}; }
+      if (!val) st.checked = {};
       else {
-        blocBuildSections(r.ev, blocAnalyze(r.ev)).forEach(s => s.items.forEach(it => { if (!it.note) st.checked[it.id] = true; }));
+        blocStockItems(blocBuildSections(r.ev, blocAnalyze(r.ev))).forEach(it => { st.checked[it.id] = true; });
         st.extra.forEach((_, i) => { st.checked["x" + i] = true; });
       }
       saveBlocCk();
@@ -9398,28 +9380,42 @@
     }
     function blocCopy(idx, btn) {
       const r = blocEvRegistry[idx]; if (!r) return;
-      const A = blocAnalyze(r.ev);
       const st = blocSt(r.key);
-      const lines = [`CHECK-LIST BLOC — ${r.ev.dateStr || ""} ${r.ev.horaire || ""}`.trim(), `${r.ev.title || ""} (${A.anesth})`, `Patient : ${r.ev.patient || ""}`, ""];
-      blocBuildSections(r.ev, A).forEach(s => {
-        lines.push(s.t.toUpperCase());
-        s.items.forEach(it => {
-          if (it.note) { lines.push(`  ℹ️ ${it.label}`); return; }
-          let l = `${st.checked[it.id] ? "☑" : "☐"} ${it.label}`;
-          const eff = st.choices[it.id] || it.def || [];
-          if (it.opts && eff.length) l += ` : ${eff.map(o => { const q = st.choices[it.id + "#" + o]; return q && q > 1 ? `${o} ×${q}` : o; }).join(", ")}`;
-          if (it.bleoCalc) { const b = blocBsa(st); if (b) l += ` → ${b.dose.toFixed(1).replace(".", ",")} mg (SC ${b.sc.toFixed(2).replace(".", ",")} m²)`; }
-          lines.push(l);
-        });
-        lines.push("");
-      });
-      if (st.extra.length) { lines.push("AJOUTS"); st.extra.forEach((x, i) => lines.push(`${st.checked["x" + i] ? "☑" : "☐"} ${x}`)); }
+      const lines = [`Matériel — ${r.ev.dateStr || ""} ${r.ev.horaire || ""}`.trim(), r.ev.title || "", ""];
+      blocBuildSections(r.ev, blocAnalyze(r.ev)).forEach(s => s.items.forEach(it => {
+        if (it.note) return;
+        const eff = blocChosen(st, it);
+        if (!eff.length) return;
+        lines.push(`${st.checked[it.id] ? "☑" : "☐"} ${eff.map(o => { const n = blocQtyOf(st, it, o); return `${o} ×${n}`; }).join(", ")}`);
+      }));
+      st.extra.forEach((x, i) => lines.push(`${st.checked["x" + i] ? "☑" : "☐"} ${x}`));
       copyToClipboardText(lines.join("\n").trim());
+      if (btn) { const o = btn.innerHTML; btn.innerHTML = "✅ Copié !"; setTimeout(() => { btn.innerHTML = o; }, 1500); }
+    }
+    function blocCopyOrder(btn) {
+      // Liste de commande sans identité patient (seulement références, quantités et dates)
+      const need = {};
+      blocGetEvents().forEach(({ ev, A }) => {
+        const st = blocSt(blocKeyOf(ev));
+        blocStockItems(blocBuildSections(ev, A)).forEach(it => blocChosen(st, it).forEach(o => {
+          need[o] = need[o] || { total: 0, first: ev.isoDate };
+          need[o].total += blocQtyOf(st, it, o);
+          if (ev.isoDate < need[o].first) need[o].first = ev.isoDate;
+        }));
+      });
+      const stock = blocStockCfg();
+      const lines = [`Matériel RI Radio B — besoins sur ${blocHorizon} jours (au ${new Date().toLocaleDateString("fr-FR")})`, ""];
+      Object.entries(need).sort((a, b) => a[1].first.localeCompare(b[1].first)).forEach(([ref, v]) => {
+        const s = stock[ref];
+        const manque = s !== undefined ? Math.max(0, v.total - s) : null;
+        lines.push(`• ${ref} : ${v.total} (1er besoin ${blocFmtD(v.first)})${s !== undefined ? ` — stock ${s}${manque ? ` → À COMMANDER : ${manque}` : " — OK"}` : ""}`);
+      });
+      copyToClipboardText(lines.join("\n"));
       if (btn) { const o = btn.innerHTML; btn.innerHTML = "✅ Copié !"; setTimeout(() => { btn.innerHTML = o; }, 1500); }
     }
     function setBlocHorizon(d) { blocHorizon = d; renderBlocTab(); }
     function setBlocScope(s) { blocScope = s; renderBlocTab(); }
-    function toggleBlocHeavy() { blocHeavyOnly = !blocHeavyOnly; renderBlocTab(); }
+    function toggleBlocHeavy() { blocShowAll = !blocShowAll; renderBlocTab(); }
     function blocPrint() {
       blocEvRegistry.forEach(r => r && blocOpenKeys.add(r.key));
       renderBlocTab();

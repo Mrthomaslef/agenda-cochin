@@ -2340,8 +2340,8 @@ html_template = """<!DOCTYPE html>
     <section id="tab-bloc" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
         <div style="min-width:0;">
-          <div style="font-size:15px; font-weight:800; color:var(--text);">🧰 Check-list matériel de bloc</div>
-          <div style="font-size:11px; color:var(--text-muted);">Par patient · aiguilles d'ablation, chimio (ECT), ciment, biopsies — d'après tes CR</div>
+          <div style="font-size:15px; font-weight:800; color:var(--text);">🧰 Matériel spécifique de bloc</div>
+          <div style="font-size:11px; color:var(--text-muted);">Sondes d'ablation, électrodes + bléomycine, ciment, vis, kits — besoins & stock</div>
         </div>
         <button class="chip bloc-print-btn" style="flex-shrink:0;" onclick="blocPrint()">🖨️ Imprimer</button>
       </div>
@@ -2359,7 +2359,7 @@ html_template = """<!DOCTYPE html>
       <div class="chips-row">
         <button class="chip active" id="flt-bloc-mine" onclick="setBlocScope('mine')">Mes gestes</button>
         <button class="chip" id="flt-bloc-all" onclick="setBlocScope('all')">Tout le service</button>
-        <button class="chip" id="flt-bloc-heavy" onclick="toggleBlocHeavy()">Ablations · ECT · ciment</button>
+        <button class="chip" id="flt-bloc-heavy" onclick="toggleBlocHeavy()">+ Infiltrations / ponctions</button>
       </div>
       <div id="bloc-list-container"></div>
     </section>
