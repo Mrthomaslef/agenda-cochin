@@ -2950,7 +2950,7 @@ html_template = """<!DOCTYPE html>
         if (ptrSvg) ptrSvg.style.transform = "";
       }
       try {
-        const CURRENT_BUILD_ID = "v86"; /*__APP_BUILD_ID:v86__*/
+        const CURRENT_BUILD_ID = "v87"; /*__APP_BUILD_ID:v87__*/
         // 1. Vérifier en parallèle si une nouvelle version de l'app est publiée (sans cache)
         const htmlRefreshPromise = fetch("./index.html?_t=" + Date.now(), { cache: "no-store" })
           .then(r => r.ok ? r.text() : null)
