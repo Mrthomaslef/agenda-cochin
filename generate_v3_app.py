@@ -2062,10 +2062,25 @@ html_template = """<!DOCTYPE html>
       border-radius: 12px;
       padding: 10px 12px;
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+      align-items: flex-start;
+      gap: 8px 10px;
       box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      overflow-wrap: anywhere;
+    }
+    .ann-main { flex: 1 1 220px; min-width: 0; }
+    .ann-actions {
+      flex: 0 1 auto; max-width: 100%; min-width: 0;
+      display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+    }
+    .ann-actions-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+    .ann-role-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
+    .ann-role-list li { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
+    .ann-role-list li strong { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+    @media (max-width: 560px) {
+      .ann-actions { flex-basis: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; }
+      .ann-actions-row { justify-content: flex-start; }
     }
     .ann-call-btn {
       text-decoration: none;
@@ -2097,7 +2112,10 @@ html_template = """<!DOCTYPE html>
       padding: 2px 7px;
       border-radius: 6px;
       border: 1px solid var(--border);
+      white-space: normal;
+      max-width: 100%;
     }
+    .ann-call-btn, .ann-dect-badge { touch-action: manipulation; white-space: nowrap; }
     html[data-theme="dark"] .marie-ev-title { color: #F9A8D4; }
     html[data-theme="dark"] .marie-ev-sub { color: #F472B6; }
     html[data-theme="dark"] .marie-ev-meta { color: #FBCFE8; }
@@ -8661,15 +8679,22 @@ html_template = """<!DOCTYPE html>
           const rawTel = String(item.phone || "").replace(/[^0-9+]/g, "");
           const canCall = rawTel.length >= 10;
           const safeId = esc(item.id || "");
+          const roleParts = String(item.role || "").split(/\s+•\s+/).map(s => s.trim()).filter(Boolean);
+          const roleHasNumbers = roleParts.length > 1 && roleParts.filter(p => /:\s*[^:]*\d{4,}/.test(p)).length >= 2;
           const emailList = String(item.email || "").split(/[\/,;]+/).map(s => s.trim()).filter(Boolean);
           html += `
             <div class="ann-card">
-              <div style="min-width:0; flex:1;">
+              <div class="ann-main">
                 <div style="font-size:13px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                   <span>${esc(item.name)}</span>
                   ${item.custom ? `<span class="pill pill-success" style="font-size:9px; padding:1px 6px;">MAJ / Perso</span>` : ``}
                 </div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(item.role || "")}</div>
+                ${roleParts.length > 1
+                  ? `<ul class="ann-role-list">${roleParts.map(p => {
+                      const m = p.match(/^(.*?)\s*:\s*([^:]+)$/);
+                      return m ? `<li>${esc(m[1])} : <strong>${esc(m[2])}</strong></li>` : `<li>${esc(p)}</li>`;
+                    }).join("")}</ul>`
+                  : `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${esc(item.role || "")}</div>`}
                 ${(item.building || item.fax) ? `
                   <div style="font-size:10px; color:var(--text-muted); margin-top:3px; display:flex; gap:8px; flex-wrap:wrap; opacity:0.85;">
                     ${item.building ? `<span>📍 ${esc(item.building)}</span>` : ``}
@@ -8686,13 +8711,13 @@ html_template = """<!DOCTYPE html>
                   </div>
                 ` : ``}
               </div>
-              <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
+              <div class="ann-actions">
                 ${canCall
                   ? `<a href="tel:${rawTel}" class="ann-call-btn">📞 ${esc(displayPhone)}</a>`
                   : `<span class="ann-dect-badge">📟 ${esc(displayPhone)}</span>`
                 }
-                <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
-                  ${posteStr ? `<span class="ann-short-badge">Poste / DECT : <strong>${esc(posteStr)}</strong></span>` : ``}
+                <div class="ann-actions-row">
+                  ${(posteStr && !roleHasNumbers) ? `<span class="ann-short-badge">Poste / DECT : <strong>${esc(posteStr)}</strong></span>` : ``}
                   <button onclick="openEditAnnuaireModal('${safeId}')" title="Modifier / Mettre à jour ce numéro" style="background:var(--bg-elevated); border:1px solid var(--border); border-radius:6px; color:var(--text-muted); font-size:10px; cursor:pointer; padding:2px 6px;">✏️</button>
                   ${item.custom ? `<button onclick="deleteCustomAnnuaireEntry('${safeId}')" title="Réinitialiser / Supprimer" style="background:none; border:none; color:var(--danger); font-size:11px; cursor:pointer; padding:0 4px;">✕</button>` : ``}
                 </div>
