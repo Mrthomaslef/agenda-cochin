@@ -294,9 +294,9 @@ function doPost(e) {
         status: "ok",
         spreadsheetName: ss.getName(),
         Data: readTabRows_(ss.getSheetByName("Data"), 7, 2, 9),
-        Consultations: readTabRows_(ss.getSheetByName("Consultations"), 8, 2, 9),
+        Consultations: readTabRows_(ss.getSheetByName("Consultations"), 8, 2, 10),
         Imagerie_Anesthesie: readTabRows_(ss.getSheetByName(IMG_ANESTH_SHEET_NAME), 8, 2, 9),
-        actes: readTabRows_(ss.getSheetByName("actes"), 8, 2, 10)
+        actes: readTabRows_(ss.getSheetByName("actes"), 8, 2, 12)
       });
     }
 
@@ -747,23 +747,43 @@ function saveSuivi_(ss, raw) {
     return 0;
   }
 
+  function formatSheetSuivi_(text) {
+    var s = String(text || "").trim();
+    if (!s) return "";
+    if (s.indexOf("— CR de consultation") !== -1 || s.indexOf("Cher confrère") !== -1 || s.indexOf("Chère consœur") !== -1 || s.length > 260) {
+      var m = s.match(/dicté le (\d{2}\/\d{2})(?:\/\d{4})?/i);
+      return "CR CS" + (m ? " " + m[1] : "") + " dicté · voir app / Comptes_Rendus";
+    }
+    return s;
+  }
+  var sheetSuivi = formatSheetSuivi_(entry.suivi_cs);
+
   var updated = [];
   var shBio = ss.getSheetByName("Biopsies");
   var rBio = findRowInSheet(shBio, entry.category === "biopsie" ? entry.row : 0);
   if (rBio >= 9) {
-    shBio.getRange(rBio, 11, 1, 4).setValues([[entry.materiel, entry.remarques, entry.anapath, entry.suivi_cs]]);
+    var curBio = shBio.getRange(rBio, 11, 1, 4).getDisplayValues()[0];
+    var bioMat = (entry.category === "biopsie" || entry.materiel) ? entry.materiel : curBio[0];
+    var bioRem = (entry.category === "biopsie" || entry.remarques) ? entry.remarques : curBio[1];
+    var bioAna = (entry.category === "biopsie" || entry.anapath) ? entry.anapath : curBio[2];
+    var bioSuivi = (entry.category === "biopsie") ? sheetSuivi : (curBio[3] || "");
+    shBio.getRange(rBio, 11, 1, 4).setValues([[bioMat, bioRem, bioAna, bioSuivi]]);
     updated.push("Biopsies:" + rBio);
   }
   var shAct = ss.getSheetByName("actes");
   var rAct = findRowInSheet(shAct, entry.category === "acte" ? entry.row : 0);
   if (rAct >= 9) {
-    shAct.getRange(rAct, 11, 1, 3).setValues([[entry.materiel, entry.remarques, entry.suivi_cs]]);
+    var curAct = shAct.getRange(rAct, 11, 1, 3).getDisplayValues()[0];
+    var actMat = (entry.category === "acte" || entry.materiel) ? entry.materiel : curAct[0];
+    var actRem = (entry.category === "acte" || entry.remarques) ? entry.remarques : curAct[1];
+    var actSuivi = (entry.category === "acte") ? sheetSuivi : (curAct[2] || "");
+    shAct.getRange(rAct, 11, 1, 3).setValues([[actMat, actRem, actSuivi]]);
     updated.push("actes:" + rAct);
   }
   var shCs = ss.getSheetByName("Consultations");
   var rCs = findRowInSheet(shCs, entry.category === "cs" ? entry.row : 0);
   if (rCs >= 9) {
-    shCs.getRange(rCs, 11).setValue(entry.suivi_cs);
+    shCs.getRange(rCs, 11).setValue(sheetSuivi);
     updated.push("Consultations:" + rCs);
   }
   try {
@@ -850,8 +870,8 @@ function applyUpdates_(ss, payload) {
   var actesSheet = ss.getSheetByName("actes");
 
   // 1. Lire et dédoublonner Consultations et Imagerie & Anesthésie
-  var csItems = extractCleanChronoItems_(csSheet, false);
-  var imgItems = extractCleanChronoItems_(imgSheet, false);
+  var csItems = extractCleanChronoItems_(csSheet, "cs");
+  var imgItems = extractCleanChronoItems_(imgSheet, "img");
 
   var pureCsList = [];
   var pureImgList = [];
@@ -879,7 +899,7 @@ function applyUpdates_(ss, payload) {
   }
 
   // 2. Lire et dédoublonner actes (évite tout doublon existant ou futur dans actes)
-  var rawActesItems = extractCleanChronoItems_(actesSheet, true);
+  var rawActesItems = extractCleanChronoItems_(actesSheet, "actes");
   var actesItems = [];
   for (var a = 0; a < rawActesItems.length; a++) {
     upsertItemInMemory_(actesItems, rawActesItems[a], "actes");
@@ -977,16 +997,19 @@ function parseHoraireMinutes_(hStr) {
   return 9999;
 }
 
-function extractCleanChronoItems_(sheet, isActes) {
+function extractCleanChronoItems_(sheet, mode) {
   if (!sheet) return [];
+  var isActes = (mode === true || mode === "actes");
+  var isCs = (mode === "cs");
   var headerRow = 8;
   var startRow = 9;
-  var numCols = isActes ? 10 : 9;
+  var wantCols = isActes ? 12 : (isCs ? 10 : 9);
   var lastRow = sheet.getLastRow();
   if (lastRow < startRow) return [];
+  var availCols = Math.max(9, Math.min(wantCols, Math.max(9, sheet.getLastColumn() - 1)));
 
-  var disp = sheet.getRange(startRow, 2, lastRow - headerRow, numCols).getDisplayValues();
-  var raw = sheet.getRange(startRow, 2, lastRow - headerRow, numCols).getValues();
+  var disp = sheet.getRange(startRow, 2, lastRow - headerRow, availCols).getDisplayValues();
+  var raw = sheet.getRange(startRow, 2, lastRow - headerRow, availCols).getValues();
   var list = [];
 
   for (var i = 0; i < disp.length; i++) {
@@ -1007,7 +1030,11 @@ function extractCleanChronoItems_(sheet, isActes) {
       type_acte: String(rDisp[5] || "").trim(),
       lieu: String(rDisp[6] || "").trim(),
       remarques: String(rDisp[7] || "").trim(),
-      materiel: isActes ? String(rDisp[9] || "").trim() : ""
+      materiel: (isActes && availCols >= 10) ? String(rDisp[9] || "").trim() : "",
+      remarques_bloc: (isActes && availCols >= 11) ? String(rDisp[10] || "").trim() : "",
+      suivi_cs: isActes
+        ? (availCols >= 12 ? String(rDisp[11] || "").trim() : "")
+        : (isCs && availCols >= 10 ? String(rDisp[9] || "").trim() : "")
     });
   }
   return list;
@@ -1041,6 +1068,8 @@ function upsertItemInMemory_(list, item, mode) {
         ex.lieu = item.lieu || ex.lieu;
         ex.remarques = item.remarques || ex.remarques;
         if (item.materiel !== undefined && item.materiel !== "") ex.materiel = item.materiel;
+        if (item.remarques_bloc !== undefined && item.remarques_bloc !== "") ex.remarques_bloc = item.remarques_bloc;
+        if (item.suivi_cs !== undefined && item.suivi_cs !== "") ex.suivi_cs = item.suivi_cs;
         return "updated";
       }
     }
@@ -1056,7 +1085,9 @@ function upsertItemInMemory_(list, item, mode) {
     type_acte: item.type_acte || "",
     lieu: item.lieu || "",
     remarques: item.remarques || "",
-    materiel: item.materiel || ""
+    materiel: item.materiel || "",
+    remarques_bloc: item.remarques_bloc || "",
+    suivi_cs: item.suivi_cs || ""
   });
   return "inserted";
 }
@@ -1079,7 +1110,8 @@ function getIsoWeek_(d) {
 
 function renderChronoSheetWithWeeks_(sheet, items, mode) {
   var isActes = (mode === "actes");
-  var numCols = isActes ? 10 : 9;
+  var isCs = (mode === "cs");
+  var numCols = isActes ? 12 : (isCs ? 10 : 9);
   var startRow = 9;
 
   if (sheet.getFilter()) {
@@ -1095,7 +1127,8 @@ function renderChronoSheetWithWeeks_(sheet, items, mode) {
 
   var oldLastRow = sheet.getLastRow();
   if (oldLastRow >= startRow) {
-    var clearRange = sheet.getRange(startRow, 2, oldLastRow - startRow + 1, numCols);
+    var clearCols = Math.max(numCols, Math.max(1, sheet.getLastColumn() - 1));
+    var clearRange = sheet.getRange(startRow, 2, oldLastRow - startRow + 1, clearCols);
     clearRange.breakApart();
     clearRange.clearContent();
     clearRange.clearFormat();
@@ -1170,7 +1203,9 @@ function renderChronoSheetWithWeeks_(sheet, items, mode) {
       cat
     ];
     if (isActes) {
-      rowVals.push(it.materiel || "");
+      rowVals.push(it.materiel || "", it.remarques_bloc || "", it.suivi_cs || "");
+    } else if (isCs) {
+      rowVals.push(it.suivi_cs || "");
     }
 
     var rRange = sheet.getRange(currentRow, 2, 1, numCols);
