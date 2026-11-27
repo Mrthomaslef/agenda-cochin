@@ -743,11 +743,12 @@ BASELINE_ENTRIES = [
     {
         "id": "tel-bio-auto",
         "category": "Laboratoires, Pharmacie & Administration (DAM)",
-        "name": "Diagnostic Biologique Automatisé & Virologie / Parasitologie",
-        "role": "Biochimie-Garde (14146) / Viro-Parasito (11547)",
-        "poste": "14146 / 11547",
-        "phone": "01 58 41 41 46",
+        "name": "Diagnostic Biologique Automatisé & Virologie / Parasitologie (Biochimie Urgence)",
+        "role": "Biochimie-Garde / C. Leroy (14146) • Dr C. Chenevier-Gobeaux (11916) • Biologiste validation (11613) • Viro-Parasito (11547)",
+        "poste": "14146 / 11916 / 11613 / 11547",
+        "phone": "01 58 41 19 16",
         "fax": "",
+        "email": "camille.gobeaux@aphp.fr",
         "building": "Bâtiment Jean Dausset",
     },
     {
