@@ -637,6 +637,17 @@ BASELINE_ENTRIES = [
         "email": "jacques.medioni@aphp.fr / adrien.rochand@aphp.fr / edouard.auclin@aphp.fr / sandy.zion@aphp.fr / jessica.diony@aphp.fr",
         "building": "HEGP — 20 rue Leblanc, 75015 Paris",
     },
+    {
+        "id": "tel-upog-boudali",
+        "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
+        "name": "UPOG — Unité Péri-Opératoire Gériatrique (Dr Yasmina BOUDALI)",
+        "role": "Responsable UPOG Cochin (PH) : 14007 • Secrétariat UPOG : 01 44 08 35 03",
+        "poste": "14007",
+        "phone": "01 58 41 40 07",
+        "fax": "01 58 41 32 72",
+        "email": "yasmina.boudali@aphp.fr",
+        "building": "Hôpital Cochin",
+    },
     # --- RCP & STAFFS MULTIDISCIPLINAIRES COCHIN ---
     {
         "id": "tel-rcp-meta-os",
@@ -846,6 +857,7 @@ CONTACT_MATCH_RULES = [
     ("tel-onco-dig", ["anna.pellat", "pellat"]),
     ("tel-mpr-nguyen", ["christelle.nguyen", "reeducation.hardyb1"]),
     ("tel-dermato-kramkimel", ["nora.kramkimel", "kramkimel", "ideparcours.dermato", "valerie.bruandet"]),
+    ("tel-upog-boudali", ["yasmina.boudali", "boudali"]),
 ]
 
 

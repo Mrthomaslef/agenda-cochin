@@ -613,6 +613,17 @@
     "building": "HEGP — 20 rue Leblanc, 75015 Paris"
   },
   {
+    "id": "tel-upog-boudali",
+    "category": "Services Partenaires (Ortho, Rhumato, Anesth, Anapath)",
+    "name": "UPOG — Unité Péri-Opératoire Gériatrique (Dr Yasmina BOUDALI)",
+    "role": "Responsable UPOG Cochin (PH) : 14007 • Secrétariat UPOG : 01 44 08 35 03",
+    "poste": "14007",
+    "phone": "01 58 41 40 07",
+    "fax": "01 58 41 32 72",
+    "email": "yasmina.boudali@aphp.fr",
+    "building": "Hôpital Cochin"
+  },
+  {
     "id": "tel-rcp-meta-os",
     "category": "RCP & Staffs Multidisciplinaires Cochin",
     "name": "RCP Métastases Osseuses (Méta-Os) — Lundi 12h00 (Visio Teams)",
