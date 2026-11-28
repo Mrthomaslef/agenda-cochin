@@ -4571,9 +4571,12 @@
       const rem = String(master["Instructions & Remarques Cliniques"] || ev.remarques || "");
       const ddnMatchGlobal = (coord + " " + rem).match(/(\d{2})\/(\d{2})\/(\d{4})/);
       const ddnStr = ddnMatchGlobal ? `${ddnMatchGlobal[1]}/${ddnMatchGlobal[2]}/${ddnMatchGlobal[3]}` : "";
-      if (prebuilt) {
+      if (prebuilt && !ev.__noPrebuilt) {
+        // Fiche pré-remplie (ORBIS/PACS ou saisie manuelle) superposée au profil par défaut : un champ absent ne donne jamais « undefined ».
+        const base = inferPatientCrProfile(Object.assign({}, ev, { __noPrebuilt: true }));
         return Object.assign(
           {},
+          base,
           prebuilt,
           ddnStr && !prebuilt.ddn ? { ddn: ddnStr } : {},
           ippStr ? { ipp: ippStr } : {}
