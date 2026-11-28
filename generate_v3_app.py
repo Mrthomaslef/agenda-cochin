@@ -4575,6 +4575,17 @@ html_template = """<!DOCTYPE html>
       return "";
     }
 
+    // « dans un contexte de » + élision (d'un, du, des, d'…)
+    function ctxDe(t) {
+      t = String(t || "").trim();
+      if (/^(un|une)\\b/i.test(t)) return "d'" + t;
+      if (/^le\\b/i.test(t)) return "du" + t.slice(2);
+      if (/^les\\b/i.test(t)) return "des" + t.slice(3);
+      if (/^l'/i.test(t)) return "de " + t;
+      if (/^[aeiouhéèêàâîôûœ]/i.test(t)) return "d'" + t;
+      return "de " + t;
+    }
+
     function inferPatientCrProfile(ev) {
       const pNorm = normName(ev.patient);
       const master = findPatientMasterRecord(ev.patient, ev.ipp) || {};
@@ -6077,7 +6088,7 @@ html_template = """<!DOCTYPE html>
           : `de ${motifClean}`;
         const terrainKnown = prof.terrain && !/à préciser|\\[<.*>\\]/i.test(String(prof.terrain));
         const rappelLine = terrainKnown
-          ? `Pour rappel, ${lePatient} présente ${motifClean}, dans un contexte de ${prof.terrain}${extraClin}.`
+          ? `Pour rappel, ${lePatient} présente ${motifClean}, dans un contexte ${ctxDe(prof.terrain)}${extraClin}.`
           : `Pour rappel, ${lePatient} présente ${motifClean}${extraClin} (${argsEnrichis}).`;
         const { dateHospit: plannedDatePreop } = findPatientInterventionDateAndAnesth(ev, prof);
         const hasRcp = /\\brcp\\b/i.test(`${prof.terrain || ""} ${prof.arguments || ""} ${prof.gesteRetenu || ""}`);
